@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVS Calculator — Adrenal Vein Sampling</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE6;
+    --border: #D8D3C8;
+    --border-strong: #B8B0A0;
+    --text: #1A1714;
+    --text-2: #5C564E;
+    --text-3: #8C867E;
+    --right: #1B4D3E;
+    --right-light: #EAF2EE;
+    --left: #7A1F1F;
+    --left-light: #F5EAEA;
+    --ivc: #2B3A8C;
+    --ivc-light: #EBF0FA;
+    --accent: #C8901A;
+    --success: #1B5E35;
+    --success-bg: #E8F5EE;
+    --warn: #7A4F00;
+    --warn-bg: #FFF8E6;
+    --fail: #8B1A1A;
+    --fail-bg: #FDEAEA;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Libre Baskerville', serif;
+    --sans: 'DM Sans', sans-serif;
+    --radius: 4px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* ── Header ── */
+  header {
+    background: var(--text); color: #fff; padding: 0 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; position: sticky; top: 0; z-index: 100;
+    border-bottom: 3px solid var(--accent); flex-shrink: 0;
+  }
+  .header-left { display: flex; align-items: baseline; gap: 16px; }
+  header h1 { font-family: var(--serif); font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+  header .subtitle { font-family: var(--mono); font-size: 10px; color: #8C8680; letter-spacing: 0.08em; text-transform: uppercase; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .protocol-badge {
+    font-family: var(--mono); font-size: 11px; padding: 4px 12px; border-radius: 2px;
+    border: 1px solid rgba(255,255,255,0.15); color: #fff; cursor: pointer;
+    background: transparent; transition: all 0.2s; letter-spacing: 0.05em;
+  }
+  .protocol-badge:hover { background: rgba(255,255,255,0.08); }
+  .protocol-badge.stimulated { border-color: var(--accent); color: var(--accent); }
+  .print-btn-header {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 11px; padding: 6px 14px; border-radius: 2px;
+    border: 1px solid rgba(255,255,255,0.3); color: #fff; cursor: pointer;
+    background: transparent; transition: all 0.2s; letter-spacing: 0.05em;
+  }
+  .print-btn-header:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); }
+
+  /* ── Layout ── */
+  .app { display: grid; grid-template-columns: 1fr 380px; gap: 0; flex: 1; }
+  .data-panel { padding: 32px 40px; border-right: 1px solid var(--border); overflow-y: auto; }
+  .panel-title {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-3); margin-bottom: 24px; display: flex; align-items: center; gap: 8px;
+  }
+  .panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Protocol Toggle ── */
+  .protocol-toggle {
+    display: flex; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 3px; margin-bottom: 28px; gap: 2px;
+  }
+  .proto-btn {
+    flex: 1; padding: 8px 16px; border: none; background: transparent; cursor: pointer;
+    font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--text-2);
+    border-radius: 2px; transition: all 0.18s; text-align: center;
+  }
+  .proto-btn.active { background: var(--text); color: #fff; }
+  .proto-btn.active.stim { background: var(--accent); }
+
+  /* ── Unit Selectors ── */
+  .units-row { display: flex; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .unit-group { flex: 1; min-width: 160px; }
+  .unit-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); display: block; margin-bottom: 5px; }
+  .unit-toggle { display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 3px; gap: 2px; }
+  .unit-btn { flex: 1; padding: 5px 8px; border: none; background: transparent; cursor: pointer; font-family: var(--mono); font-size: 11px; color: var(--text-2); border-radius: 2px; transition: all 0.15s; text-align: center; white-space: nowrap; }
+  .unit-btn.active { background: var(--text); color: #fff; }
+
+  /* ── Section Cards ── */
+  .section-card { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; box-shadow: var(--shadow); background: var(--surface); }
+  .section-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .section-header.ivc { background: var(--ivc); }
+  .section-header.right { background: var(--right); }
+  .section-header.left { background: var(--left); }
+  .section-title { font-family: var(--serif); font-size: 13px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+  .section-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; color: rgba(255,255,255,0.55); text-transform: uppercase; }
+
+  /* ── Sample Table ── */
+  .sample-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .sample-table thead th {
+    background: var(--surface2); padding: 7px 12px; text-align: left;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; color: var(--text-3);
+    text-transform: uppercase; border-bottom: 1px solid var(--border); font-weight: 500;
+  }
+  .sample-table thead th:nth-child(1) { width: 14%; }
+  .sample-table thead th:nth-child(2) { width: 30%; text-align: right; }
+  .sample-table thead th:nth-child(3) { width: 30%; text-align: right; }
+  .sample-table thead th:nth-child(4) { width: 14%; text-align: right; }
+  .sample-table thead th:nth-child(5) { width: 12%; text-align: center; }
+  .sample-row td { padding: 7px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .sample-row td:nth-child(2), .sample-row td:nth-child(3), .sample-row td:nth-child(4) { text-align: right; }
+  .sample-row td:nth-child(5) { text-align: center; }
+  .sample-row:last-child td { border-bottom: none; }
+  .sample-row.excluded { opacity: 0.45; }
+  .row-label { font-family: var(--mono); font-size: 11px; color: var(--text-2); white-space: nowrap; }
+
+  .num-input {
+    width: 100%; border: 1px solid var(--border); border-radius: 2px; padding: 5px 8px;
+    font-family: var(--mono); font-size: 12px; color: var(--text); background: var(--bg);
+    text-align: right; transition: border-color 0.15s, box-shadow 0.15s; -moz-appearance: textfield;
+  }
+  .num-input::-webkit-outer-spin-button, .num-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .num-input:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 2px rgba(26,23,20,0.08); background: var(--surface); }
+  .num-input.right:focus { border-color: var(--right); box-shadow: 0 0 0 2px rgba(27,77,62,0.1); }
+  .num-input.left:focus { border-color: var(--left); box-shadow: 0 0 0 2px rgba(122,31,31,0.1); }
+  .num-input.ivc:focus { border-color: var(--ivc); box-shadow: 0 0 0 2px rgba(43,58,140,0.1); }
+
+  .ac-ratio { font-family: var(--mono); font-size: 11px; color: var(--text-3); text-align: right; min-width: 70px; display: block; }
+  .ac-ratio.has-value { color: var(--text-2); font-weight: 500; }
+
+  .toggle-include { width: 32px; height: 18px; position: relative; cursor: pointer; flex-shrink: 0; display: inline-block; }
+  .toggle-include input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 9px; transition: background 0.2s; }
+  .toggle-thumb { position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .toggle-include input:checked + .toggle-track { background: var(--right); }
+  .toggle-include input:checked + .toggle-track .toggle-thumb { transform: translateX(14px); }
+  .toggle-include.left-toggle input:checked + .toggle-track { background: var(--left); }
+  .toggle-include.ivc-toggle input:checked + .toggle-track { background: var(--ivc); }
+
+  /* ── Add Row Button ── */
+  .add-row-bar {
+    padding: 8px 12px; border-top: 1px dashed var(--border);
+    background: var(--surface);
+  }
+  .add-row-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--text-3); background: none; border: 1px dashed var(--border); border-radius: 2px;
+    padding: 5px 12px; cursor: pointer; transition: all 0.15s;
+  }
+  .add-row-btn:hover { color: var(--text-2); border-color: var(--border-strong); background: var(--surface2); }
+  .add-row-btn.right-add:hover { color: var(--right); border-color: var(--right); }
+  .add-row-btn.left-add:hover { color: var(--left); border-color: var(--left); }
+  .add-row-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .add-row-btn svg { flex-shrink: 0; }
+
+  /* ── Avg Bar ── */
+  .avg-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--surface2); border-top: 1px solid var(--border); }
+  .avg-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+  .avg-value { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text); }
+  .avg-value.right-val { color: var(--right); }
+  .avg-value.left-val { color: var(--left); }
+  .avg-value.ivc-val { color: var(--ivc); }
+
+  /* ── Results Panel ── */
+  .results-panel { background: var(--surface); padding: 32px 28px; overflow-y: auto; position: sticky; top: 64px; height: calc(100vh - 64px); }
+
+  /* ── Index Cards ── */
+  .index-card { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+  .index-header { padding: 10px 14px; background: var(--surface2); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .index-name { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2); font-weight: 500; }
+  .index-thresh { font-family: var(--mono); font-size: 9px; color: var(--text-3); letter-spacing: 0.04em; }
+  .index-body { padding: 12px 14px; }
+  .index-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .index-row:last-child { margin-bottom: 0; }
+  .index-side-label { font-size: 12px; color: var(--text-2); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot.right { background: var(--right); }
+  .dot.left { background: var(--left); }
+  .dot.ivc { background: var(--ivc); }
+  .index-value-group { display: flex; align-items: center; gap: 10px; }
+  .index-num { font-family: var(--mono); font-size: 15px; font-weight: 500; color: var(--text); min-width: 56px; text-align: right; }
+  .index-num.empty { color: var(--text-3); font-size: 12px; }
+  .status-pill { font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; font-weight: 500; white-space: nowrap; }
+  .status-pill.pass { background: var(--success-bg); color: var(--success); }
+  .status-pill.fail { background: var(--fail-bg); color: var(--fail); }
+  .status-pill.warn { background: var(--warn-bg); color: var(--warn); }
+  .status-pill.na { background: var(--surface2); color: var(--text-3); }
+
+  /* ── Dominant Box ── */
+  .dominant-box { border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; background: var(--surface); }
+  .dominant-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 4px; }
+  .dominant-value { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--text); }
+  .dominant-value.right-dom { color: var(--right); }
+  .dominant-value.left-dom { color: var(--left); }
+  .dominant-value.bilateral { color: var(--text-2); font-size: 15px; }
+  .li-big { font-family: var(--mono); font-size: 28px; font-weight: 500; color: var(--text-3); line-height: 1; }
+  .li-big.has-val { color: var(--text); }
+
+  /* ── Summary Box ── */
+  .summary-box { border-radius: var(--radius); padding: 16px; margin-bottom: 12px; border-left: 4px solid; }
+  .summary-box.incomplete { background: var(--surface2); border-color: var(--border-strong); }
+  .summary-box.success { background: var(--success-bg); border-color: var(--success); }
+  .summary-box.warning { background: var(--warn-bg); border-color: var(--accent); }
+  .summary-box.error { background: var(--fail-bg); border-color: var(--fail); }
+  .summary-icon { font-size: 20px; margin-bottom: 6px; }
+  .summary-text { font-size: 13px; line-height: 1.6; color: var(--text); }
+  .summary-text strong { font-weight: 600; }
+
+  /* ── Ref Table ── */
+  .ref-section { margin-top: 20px; }
+  .ref-title { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .ref-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .ref-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-key { font-size: 12px; color: var(--text-2); }
+  .ref-val { font-family: var(--mono); font-size: 11px; color: var(--text-3); text-align: right; }
+
+  /* ── Bottom Toolbar ── */
+  .bottom-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 40px; background: var(--surface); border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .designer-credit { font-family: var(--mono); font-size: 10px; color: var(--text-3); letter-spacing: 0.04em; }
+  .designer-credit strong { color: var(--text-2); font-weight: 500; }
+  .toolbar-right { display: flex; gap: 10px; align-items: center; }
+  .reset-btn {
+    display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+    background: transparent; border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--text-2); font-family: var(--sans); font-size: 12px; cursor: pointer; transition: all 0.15s;
+  }
+  .reset-btn:hover { border-color: var(--text); color: var(--text); background: var(--surface2); }
+  .print-btn {
+    display: flex; align-items: center; gap: 6px; padding: 7px 16px;
+    background: var(--text); border: 1px solid var(--text); border-radius: var(--radius);
+    color: #fff; font-family: var(--sans); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+  }
+  .print-btn:hover { background: #2e2a26; }
+  .print-btn-patient {
+    display: flex; align-items: center; gap: 6px; padding: 7px 16px;
+    background: #1B4D3E; border: 1px solid #1B4D3E; border-radius: var(--radius);
+    color: #fff; font-family: var(--sans); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+  }
+  .print-btn-patient:hover { background: #163d31; }
+  .print-btn-patient-header {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 11px; padding: 6px 14px; border-radius: 2px;
+    border: 1px solid rgba(255,255,255,0.25); color: #fff; cursor: pointer;
+    background: rgba(27,77,62,0.4); transition: all 0.2s; letter-spacing: 0.05em;
+  }
+  .print-btn-patient-header:hover { background: rgba(27,77,62,0.7); }
+  .patient-fields { display: flex; gap: 16px; margin-bottom: 28px; }
+  .patient-field-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); display: block; margin-bottom: 5px; }
+  .patient-field-input { width: 100%; border: 1px solid var(--border); border-radius: 2px; padding: 6px 10px; color: var(--text); background: var(--bg); transition: border-color 0.15s, box-shadow 0.15s; }
+  .patient-field-input:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 2px rgba(26,23,20,0.08); background: var(--surface); }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .index-card, .summary-box, .dominant-box { animation: fadeIn 0.25s ease both; }
+  .sample-row { animation: fadeIn 0.2s ease both; }
+
+  @media (max-width: 900px) {
+    /* Layout */
+    .app { grid-template-columns: 1fr; }
+    .results-panel { position: static; height: auto; border-top: 2px solid var(--border); overflow: visible; }
+    header, .data-panel, .results-panel, .bottom-toolbar { padding-left: 16px; padding-right: 16px; }
+    .data-panel { padding-top: 20px; padding-bottom: 20px; }
+    .results-panel { padding-top: 24px; padding-bottom: 32px; }
+
+    /* Header */
+    header { padding: 10px 16px; flex-wrap: wrap; gap: 8px; }
+    .header-left h1 { font-size: 15px; }
+    .header-left .subtitle { font-size: 9px; }
+    .header-right { gap: 6px; flex-wrap: wrap; }
+    .print-btn-header, .print-btn-patient-header { font-size: 10px; padding: 5px 10px; }
+    .protocol-badge { font-size: 9px; padding: 4px 8px; }
+
+    /* Patient fields */
+    .patient-fields-row { flex-direction: column; gap: 10px; }
+
+    /* Protocol toggle */
+    .protocol-toggle { width: 100%; }
+    .proto-btn { flex: 1; text-align: center; font-size: 11px; padding: 7px 6px; }
+
+    /* Section headers */
+    .section-header { padding: 10px 14px; }
+    .section-header .sec-title { font-size: 14px; }
+    .section-header .sec-tag { font-size: 8px; }
+
+    /* Sample tables — make them scroll horizontally */
+    .section-body { padding: 10px 12px 12px; overflow-x: auto; }
+    .sample-table { min-width: 360px; font-size: 12px; }
+    .sample-table th, .sample-table td { padding: 6px 8px; }
+    .sample-table input[type=number] { width: 64px; font-size: 12px; padding: 4px 6px; }
+
+    /* Add row button */
+    .add-row-bar { margin: 0 12px 12px; font-size: 11px; padding: 7px; }
+
+    /* Avg AC bar */
+    .avg-ac-bar { margin: 0 12px 10px; font-size: 11px; padding: 6px 10px; }
+
+    /* Results panel */
+    .panel-title { font-size: 10px; margin-bottom: 10px; }
+    .dominant-box { padding: 14px 16px; margin-bottom: 16px; }
+    .dominant-label { font-size: 9px; }
+    .dominant-value { font-size: 22px; }
+    .index-card { padding: 12px 14px; margin-bottom: 12px; }
+    .index-title { font-size: 9px; }
+    .index-row { flex-wrap: wrap; gap: 6px; }
+    .index-val { font-size: 18px; }
+    .index-pill { font-size: 9px; padding: 2px 8px; }
+    .ref-section { margin-top: 16px; }
+    .ref-title { font-size: 9px; margin-bottom: 8px; }
+    .ref-item { font-size: 11px; padding: 5px 0; }
+
+    /* Bottom toolbar */
+    .bottom-toolbar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px 16px; }
+    .toolbar-right { width: 100%; display: flex; gap: 8px; }
+    .toolbar-right .reset-btn, .toolbar-right .print-btn { flex: 1; justify-content: center; font-size: 11px; }
+    .designer-credit { font-size: 9px; }
+  }
+
+  @media (max-width: 480px) {
+    header { padding: 8px 12px; }
+    .header-left h1 { font-size: 14px; }
+    .print-btn-header span, .print-btn-patient-header span { display: none; }
+    .print-btn-header, .print-btn-patient-header { padding: 6px 8px; }
+    .data-panel, .results-panel { padding-left: 12px; padding-right: 12px; }
+    .section-body { padding: 8px 10px 10px; }
+    .sample-table input[type=number] { width: 56px; }
+    .dominant-value { font-size: 20px; }
+  }
+
+  /* ═══════════════════════════════════════
+     PRINT STYLES
+  ═══════════════════════════════════════ */
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background: #fff; font-size: 11pt; }
+    header, .data-panel, .bottom-toolbar, .print-btn, .print-btn-header, .reset-btn, .add-row-bar, .protocol-toggle { display: none !important; }
+    .app { display: block; }
+    .results-panel { position: static; height: auto; overflow: visible; padding: 0; border: none; }
+    #print-report { display: block !important; }
+  }
+
+  /* ── Print Report (hidden on screen) ── */
+  #print-report { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>AVS Calculator</h1>
+    <span class="subtitle">Adrenal Vein Sampling</span>
+  </div>
+  <div class="header-right">
+    <button class="print-btn-patient-header" onclick="openPatientReport()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="4" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Patient Summary
+    </button>
+    <button class="print-btn-header" onclick="openPrintReport()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 4H10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Clinical Report
+    </button>
+    <button class="protocol-badge" id="headerProtocol" onclick="cycleProtocol()">Unstimulated</button>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- LEFT: DATA ENTRY -->
+  <div class="data-panel">
+    <div class="panel-title">Patient</div>
+    <div class="patient-fields">
+      <div style="flex:2">
+        <label class="patient-field-label">Patient Name / Initials</label>
+        <input type="text" id="patient-name" class="patient-field-input" placeholder="—" style="font-family:var(--sans);font-size:13px">
+      </div>
+      <div style="flex:1">
+        <label class="patient-field-label">MRN</label>
+        <input type="text" id="patient-mrn" class="patient-field-input" placeholder="—" style="font-family:var(--mono);font-size:13px">
+      </div>
+    </div>
+    <div class="panel-title">Protocol</div>
+    <div class="protocol-toggle">
+      <button class="proto-btn active" id="btnUnstim" onclick="setProtocol('unstimulated')">Unstimulated</button>
+      <button class="proto-btn" id="btnStim" onclick="setProtocol('stimulated')">Cosyntropin-Stimulated</button>
+    </div>
+    <div class="panel-title">Units</div>
+    <div class="units-row">
+      <div class="unit-group">
+        <span class="unit-label">Aldosterone</span>
+        <div class="unit-toggle" id="aldo-unit-toggle">
+          <button class="unit-btn active" onclick="setUnit('aldo','pg/mL')">pg/mL</button>
+          <button class="unit-btn" onclick="setUnit('aldo','ng/dL')">ng/dL</button>
+          <button class="unit-btn" onclick="setUnit('aldo','pmol/L')">pmol/L</button>
+        </div>
+      </div>
+      <div class="unit-group">
+        <span class="unit-label">Cortisol</span>
+        <div class="unit-toggle" id="cort-unit-toggle">
+          <button class="unit-btn active" onclick="setUnit('cort','µg/dL')">µg/dL</button>
+          <button class="unit-btn" onclick="setUnit('cort','nmol/L')">nmol/L</button>
+          <button class="unit-btn" onclick="setUnit('cort','ng/mL')">ng/mL</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel-title">Data Entry</div>
+
+    <!-- IVC -->
+    <div class="section-card">
+      <div class="section-header ivc">
+        <span class="section-title">Inferior Vena Cava (IVC)</span>
+        <span class="section-tag">Peripheral Reference</span>
+      </div>
+      <table class="sample-table">
+        <thead><tr>
+          <th>Sample</th>
+          <th style="text-align:right" class="th-aldo">Aldo (pg/mL)</th>
+          <th style="text-align:right" class="th-cort">Cortisol (µg/dL)</th>
+          <th style="text-align:right">A/C Ratio</th>
+          <th style="text-align:center">Incl.</th>
+        </tr></thead>
+        <tbody id="ivc-body"></tbody>
+      </table>
+      <div class="avg-bar">
+        <span class="avg-label">Avg A/C (included)</span>
+        <span class="avg-value ivc-val" id="ivc-avg">—</span>
+      </div>
+    </div>
+
+    <!-- RIGHT ADRENAL -->
+    <div class="section-card">
+      <div class="section-header right">
+        <span class="section-title">Right Adrenal Vein</span>
+        <span class="section-tag">Samples</span>
+      </div>
+      <table class="sample-table">
+        <thead><tr>
+          <th>Sample</th>
+          <th style="text-align:right" class="th-aldo">Aldo (pg/mL)</th>
+          <th style="text-align:right" class="th-cort">Cortisol (µg/dL)</th>
+          <th style="text-align:right">A/C Ratio</th>
+          <th style="text-align:center">Incl.</th>
+        </tr></thead>
+        <tbody id="right-body"></tbody>
+      </table>
+      <div class="add-row-bar">
+        <button class="add-row-btn right-add" id="right-add-btn" onclick="addRow('right')">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1v9M1 5.5h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Add Sample
+        </button>
+      </div>
+      <div class="avg-bar">
+        <span class="avg-label">Avg A/C (included)</span>
+        <span class="avg-value right-val" id="right-avg">—</span>
+      </div>
+    </div>
+
+    <!-- LEFT ADRENAL -->
+    <div class="section-card">
+      <div class="section-header left">
+        <span class="section-title">Left Adrenal Vein</span>
+        <span class="section-tag">Samples</span>
+      </div>
+      <table class="sample-table">
+        <thead><tr>
+          <th>Sample</th>
+          <th style="text-align:right" class="th-aldo">Aldo (pg/mL)</th>
+          <th style="text-align:right" class="th-cort">Cortisol (µg/dL)</th>
+          <th style="text-align:right">A/C Ratio</th>
+          <th style="text-align:center">Incl.</th>
+        </tr></thead>
+        <tbody id="left-body"></tbody>
+      </table>
+      <div class="add-row-bar">
+        <button class="add-row-btn left-add" id="left-add-btn" onclick="addRow('left')">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1v9M1 5.5h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Add Sample
+        </button>
+      </div>
+      <div class="avg-bar">
+        <span class="avg-label">Avg A/C (included)</span>
+        <span class="avg-value left-val" id="left-avg">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: RESULTS -->
+  <div class="results-panel">
+    <div class="panel-title">Results</div>
+
+    <div id="summary-box" class="summary-box incomplete">
+      <div class="summary-icon"></div>
+      <div class="summary-text">Enter aldosterone and cortisol values to calculate results.</div>
+    </div>
+
+    <div class="dominant-box">
+      <div>
+        <div class="dominant-label">Dominant Side</div>
+        <div class="dominant-value" id="dominant-side">—</div>
+      </div>
+      <div class="li-big" id="li-big">—</div>
+    </div>
+
+    <div class="index-card">
+      <div class="index-header">
+        <span class="index-name">Selectivity Index (SI)</span>
+        <span class="index-thresh" id="si-thresh-label">Threshold: ≥ 2.0</span>
+      </div>
+      <div class="index-body">
+        <div class="index-row">
+          <span class="index-side-label"><span class="dot right"></span>Right SI</span>
+          <div class="index-value-group">
+            <span class="index-num empty" id="si-right-val">—</span>
+            <span class="status-pill na" id="si-right-status">No data</span>
+          </div>
+        </div>
+        <div class="index-row">
+          <span class="index-side-label"><span class="dot left"></span>Left SI</span>
+          <div class="index-value-group">
+            <span class="index-num empty" id="si-left-val">—</span>
+            <span class="status-pill na" id="si-left-status">No data</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="index-card">
+      <div class="index-header">
+        <span class="index-name">Lateralization Index (LI)</span>
+        <span class="index-thresh">Threshold: ≥ 4.0</span>
+      </div>
+      <div class="index-body">
+        <div class="index-row">
+          <span class="index-side-label">LI (Higher ÷ Lower A/C)</span>
+          <div class="index-value-group">
+            <span class="index-num empty" id="li-val">—</span>
+            <span class="status-pill na" id="li-status">No data</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="index-card">
+      <div class="index-header">
+        <span class="index-name">Contralateral Suppression (CSI)</span>
+        <span class="index-thresh">Threshold: &lt; 1.0</span>
+      </div>
+      <div class="index-body">
+        <div class="index-row">
+          <span class="index-side-label">CSI (Contralateral ÷ IVC A/C)</span>
+          <div class="index-value-group">
+            <span class="index-num empty" id="csi-val">—</span>
+            <span class="status-pill na" id="csi-status">No data</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-title">Reference Thresholds</div>
+      <div class="ref-item"><span class="ref-key">SI (unstimulated)</span><span class="ref-val">≥ 2.0</span></div>
+      <div class="ref-item"><span class="ref-key">SI (cosyntropin-stimulated)</span><span class="ref-val">≥ 3.0</span></div>
+      <div class="ref-item"><span class="ref-key">LI lateralized</span><span class="ref-val">≥ 4.0</span></div>
+      <div class="ref-item"><span class="ref-key">LI borderline</span><span class="ref-val">2.0 – 3.9</span></div>
+      <div class="ref-item"><span class="ref-key">LI bilateral</span><span class="ref-val">&lt; 2.0</span></div>
+      <div class="ref-item"><span class="ref-key">CSI suppression</span><span class="ref-val">&lt; 1.0</span></div>
+    </div>
+
+    <div class="ref-section" style="margin-top:24px">
+      <div class="ref-title">References</div>
+      <ol style="padding-left:16px;margin:0;list-style-position:outside">
+        <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
+          <strong>Funder JW, Carey RM, Mantero F, et al.</strong> The Management of Primary Aldosteronism: Case Detection, Diagnosis, and Treatment: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab.</em> 2016;101(5):1889–1916.
+          <div style="font-size:10px;color:#8C867E;margin-top:2px">Primary source for SI, LI, and CSI thresholds used in this calculator.</div>
+        </li>
+        <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
+          <strong>Adler GK, Stowasser M, Correa RR, et al.</strong> Primary Aldosteronism: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab.</em> 2025;110(9):2453–2495. <a href="https://doi.org/10.1210/clinem/dgaf284" target="_blank" style="color:#2B3A8C">doi:10.1210/clinem/dgaf284</a>
+          <div style="font-size:10px;color:#8C867E;margin-top:2px">Most recent Endocrine Society update reaffirming AVS as gold standard for lateralization.</div>
+        </li>
+        <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
+          <strong>Rossi GP, Auchus RJ, Brown M, et al.</strong> An Expert Consensus Statement on the Use of Adrenal Vein Sampling for the Subtyping of Primary Aldosteronism. <em>Hypertension.</em> 2014;63(1):151–160. <a href="https://doi.org/10.1161/HYPERTENSIONAHA.113.02097" target="_blank" style="color:#2B3A8C">doi:10.1161/HYPERTENSIONAHA.113.02097</a>
+          <div style="font-size:10px;color:#8C867E;margin-top:2px">International expert consensus on AVS protocols and selectivity/lateralization criteria.</div>
+        </li>
+        <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:0;padding-left:4px">
+          <strong>Vonend O, Ockenfels N, Gao X, et al.</strong> Clinical impact of strict criteria for selectivity and lateralization in adrenal vein sampling. <em>Eur J Endocrinol.</em> <a href="https://pubmed.ncbi.nlm.nih.gov/27376419/" target="_blank" style="color:#2B3A8C">PMID: 27376419</a>
+          <div style="font-size:10px;color:#8C867E;margin-top:2px">Retrospective review of 73 AVS procedures validating strict SI and LI cutoffs.</div>
+        </li>
+      </ol>
+    </div>
+
+    <div style="margin-top:20px;padding:12px 14px;background:#F0EDE6;border:1px solid #D8D3C8;border-radius:4px;font-size:11px;color:#5C564E;line-height:1.6">
+      <strong style="color:#1A1714">Disclaimer:</strong> This tool is intended to support — not replace — clinical judgment. Threshold values may vary by institution and protocol; this calculator applies the most widely cited Endocrine Society thresholds. Results must always be interpreted by a qualified clinician in the context of the patient's full clinical picture, including imaging, biochemistry, comorbidities, and surgical candidacy. This calculator does not constitute medical advice and should not be used as the sole basis for clinical decision-making.
+    </div>
+
+  </div>
+</div>
+
+<!-- Bottom Toolbar -->
+<div class="bottom-toolbar">
+  <div class="designer-credit">
+    Designed by <a href="https://www.linkedin.com/in/becky-a-26a0276" target="_blank" style="color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;opacity:0.7"><rect width="24" height="24" rx="4" fill="#0A66C2"/><path d="M7.5 9.5H5V19H7.5V9.5Z" fill="white"/><circle cx="6.25" cy="6.75" r="1.5" fill="white"/><path d="M19 19H16.5V14.25C16.5 13.01 15.49 12 14.25 12C13.01 12 12 13.01 12 14.25V19H9.5V9.5H12V10.76C12.68 9.95 13.76 9.5 14.25 9.5C16.87 9.5 19 11.63 19 14.25V19Z" fill="white"/></svg>
+      <strong>Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong>
+    </a>
+  </div>
+  <div class="toolbar-right">
+    <button class="reset-btn" onclick="resetAll()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6a5 5 0 1 0 1.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M1 2v4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Reset
+    </button>
+    <button class="print-btn" onclick="openPrintReport()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 4H10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Print / Export PDF
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PRINT REPORT WINDOW (opened separately)
+════════════════════════════════════════════════ -->
+<script>
+// ── State ──
+let protocol = 'unstimulated';
+const MAX_ROWS = 8;
+
+// ── Unit State ──
+const units = { aldo: 'pg/mL', cort: 'µg/dL' };
+
+function setUnit(field, unit) {
+  units[field] = unit;
+  // Update toggle buttons
+  const toggle = document.getElementById(field === 'aldo' ? 'aldo-unit-toggle' : 'cort-unit-toggle');
+  toggle.querySelectorAll('.unit-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim() === unit);
+  });
+  // Update all table column headers
+  const cls = field === 'aldo' ? 'th-aldo' : 'th-cort';
+  const label = field === 'aldo' ? 'Aldo' : 'Cortisol';
+  document.querySelectorAll('.' + cls).forEach(th => { th.textContent = `${label} (${unit})`; });
+  // Update print report headers (stored as data)
+  calculate();
+}
+
+const state = {
+  ivc:   Array.from({length: 2}, (_, i) => ({ id: i, aldo: '', cort: '', included: true })),
+  right: Array.from({length: 3}, (_, i) => ({ id: i, aldo: '', cort: '', included: true })),
+  left:  Array.from({length: 3}, (_, i) => ({ id: i, aldo: '', cort: '', included: true })),
+};
+
+// ── Render a single row into a tbody ──
+function renderRow(side, idx) {
+  const colorClass = side === 'ivc' ? 'ivc' : side;
+  const toggleClass = side === 'left' ? 'left-toggle' : (side === 'ivc' ? 'ivc-toggle' : '');
+  const labelPrefix = side === 'ivc' ? 'IVC' : side.charAt(0).toUpperCase() + side.slice(1);
+
+  const tbody = document.getElementById(`${side}-body`);
+  // Remove existing row if re-rendering
+  const existing = document.getElementById(`${side}-row-${idx}`);
+  if (existing) existing.remove();
+
+  const row = document.createElement('tr');
+  row.className = 'sample-row';
+  row.id = `${side}-row-${idx}`;
+  if (!state[side][idx].included) row.classList.add('excluded');
+
+  row.innerHTML = `
+    <td><span class="row-label">${labelPrefix} ${idx + 1}</span></td>
+    <td><input type="number" class="num-input ${colorClass}" id="${side}-aldo-${idx}" placeholder="—" min="0" step="any" value="${state[side][idx].aldo !== '' ? state[side][idx].aldo : ''}" oninput="handleInput('${side}',${idx},'aldo',this.value)"></td>
+    <td><input type="number" class="num-input ${colorClass}" id="${side}-cort-${idx}" placeholder="—" min="0" step="any" value="${state[side][idx].cort !== '' ? state[side][idx].cort : ''}" oninput="handleInput('${side}',${idx},'cort',this.value)"></td>
+    <td><span class="ac-ratio${state[side][idx].aldo !== '' && state[side][idx].cort !== '' && state[side][idx].cort !== 0 ? ' has-value' : ''}" id="${side}-ac-${idx}">${state[side][idx].aldo !== '' && state[side][idx].cort !== '' && state[side][idx].cort !== 0 ? (state[side][idx].aldo / state[side][idx].cort).toFixed(2) : '—'}</span></td>
+    <td style="text-align:center">
+      <label class="toggle-include ${toggleClass}" id="${side}-toggle-${idx}">
+        <input type="checkbox" ${state[side][idx].included ? 'checked' : ''} onchange="handleToggle('${side}',${idx},this.checked)">
+        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+      </label>
+    </td>
+  `;
+  tbody.appendChild(row);
+}
+
+function buildAllRows(side) {
+  document.getElementById(`${side}-body`).innerHTML = '';
+  state[side].forEach((_, i) => renderRow(side, i));
+  updateAddBtn(side);
+}
+
+function updateAddBtn(side) {
+  if (side === 'ivc') return;
+  const btn = document.getElementById(`${side}-add-btn`);
+  if (btn) btn.disabled = state[side].length >= MAX_ROWS;
+}
+
+// ── Add row ──
+function addRow(side) {
+  if (state[side].length >= MAX_ROWS) return;
+  const idx = state[side].length;
+  state[side].push({ id: idx, aldo: '', cort: '', included: true });
+  renderRow(side, idx);
+  updateAddBtn(side);
+  // Focus new aldo input
+  setTimeout(() => { const el = document.getElementById(`${side}-aldo-${idx}`); if (el) el.focus(); }, 50);
+}
+
+// ── Input handlers ──
+function handleInput(side, idx, field, value) {
+  state[side][idx][field] = value === '' ? '' : parseFloat(value);
+  updateRowDisplay(side, idx);
+  calculate();
+}
+
+function handleToggle(side, idx, checked) {
+  state[side][idx].included = checked;
+  document.getElementById(`${side}-row-${idx}`).classList.toggle('excluded', !checked);
+  calculate();
+}
+
+function updateRowDisplay(side, idx) {
+  const s = state[side][idx];
+  const acEl = document.getElementById(`${side}-ac-${idx}`);
+  if (!acEl) return;
+  if (s.aldo !== '' && s.cort !== '' && s.cort !== 0) {
+    acEl.textContent = (s.aldo / s.cort).toFixed(2);
+    acEl.className = 'ac-ratio has-value';
+  } else {
+    acEl.textContent = '—';
+    acEl.className = 'ac-ratio';
+  }
+}
+
+// ── Average ──
+function avgAC(side) {
+  const included = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && s.cort !== 0);
+  if (!included.length) return null;
+  return included.reduce((acc, s) => acc + s.aldo / s.cort, 0) / included.length;
+}
+
+// ── Protocol ──
+function setProtocol(p) {
+  protocol = p;
+  document.getElementById('btnUnstim').classList.toggle('active', p === 'unstimulated');
+  document.getElementById('btnStim').classList.toggle('active', p === 'stimulated');
+  document.getElementById('btnStim').classList.toggle('stim', p === 'stimulated');
+  const hdr = document.getElementById('headerProtocol');
+  hdr.textContent = p === 'stimulated' ? 'Cosyntropin-Stimulated' : 'Unstimulated';
+  hdr.classList.toggle('stimulated', p === 'stimulated');
+  calculate();
+}
+function cycleProtocol() { setProtocol(protocol === 'stimulated' ? 'unstimulated' : 'stimulated'); }
+
+// ── Helpers ──
+function fmt(n, d = 2) { return (n === null || n === undefined || isNaN(n)) ? '—' : n.toFixed(d); }
+
+function renderIndexVal(id, val) {
+  const el = document.getElementById(id);
+  if (val === null) { el.textContent = '—'; el.className = 'index-num empty'; }
+  else { el.textContent = fmt(val); el.className = 'index-num'; }
+}
+function renderPill(id, type, label) {
+  const el = document.getElementById(id);
+  el.textContent = label;
+  el.className = 'status-pill ' + (type || 'na');
+}
+
+// ── Calculate ──
+function calculate() {
+  const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
+  document.getElementById('right-avg').textContent = R !== null ? fmt(R) : '—';
+  document.getElementById('left-avg').textContent  = L !== null ? fmt(L) : '—';
+  document.getElementById('ivc-avg').textContent   = IVC !== null ? fmt(IVC) : '—';
+
+  const siThresh = protocol === 'stimulated' ? 3.0 : 2.0;
+  document.getElementById('si-thresh-label').textContent = `Threshold: ≥ ${siThresh.toFixed(1)}`;
+
+  const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
+  const siL = (L !== null && IVC !== null && IVC !== 0) ? L / IVC : null;
+  renderIndexVal('si-right-val', siR);
+  renderIndexVal('si-left-val', siL);
+  renderPill('si-right-status', siR === null ? null : siR >= siThresh ? 'pass' : 'fail', siR === null ? 'No data' : siR >= siThresh ? 'Cannulated' : 'Not cannulated');
+  renderPill('si-left-status',  siL === null ? null : siL >= siThresh ? 'pass' : 'fail', siL === null ? 'No data' : siL >= siThresh ? 'Cannulated' : 'Not cannulated');
+
+  let li = null;
+  if (R !== null && L !== null && Math.min(R, L) !== 0) li = Math.max(R, L) / Math.min(R, L);
+  renderIndexVal('li-val', li);
+  const liBig = document.getElementById('li-big');
+  liBig.textContent = li !== null ? fmt(li) : '—';
+  liBig.className = 'li-big' + (li !== null ? ' has-val' : '');
+
+  let liStatus = null, liLabel = 'No data';
+  if (li !== null) {
+    if (li >= 4) { liStatus = 'pass'; liLabel = 'Lateralized'; }
+    else if (li >= 2) { liStatus = 'warn'; liLabel = 'Borderline'; }
+    else { liStatus = 'fail'; liLabel = 'Bilateral'; }
+  }
+  renderPill('li-status', liStatus, liLabel);
+
+  const domEl = document.getElementById('dominant-side');
+  if (R !== null && L !== null) {
+    if (R > L) { domEl.textContent = 'Right'; domEl.className = 'dominant-value right-dom'; }
+    else if (L > R) { domEl.textContent = 'Left'; domEl.className = 'dominant-value left-dom'; }
+    else { domEl.textContent = 'Equal'; domEl.className = 'dominant-value bilateral'; }
+  } else { domEl.textContent = '—'; domEl.className = 'dominant-value'; }
+
+  let csi = null;
+  if (R !== null && L !== null && IVC !== null && IVC !== 0) csi = Math.min(R, L) / IVC;
+  renderIndexVal('csi-val', csi);
+  let csiStatus = null, csiLabel = 'No data';
+  if (csi !== null) { csiStatus = csi < 1 ? 'pass' : 'fail'; csiLabel = csi < 1 ? 'Suppressed' : 'Not suppressed'; }
+  renderPill('csi-status', csiStatus, csiLabel);
+
+  renderSummary(siR, siL, siThresh, li, csi, R, L);
+}
+
+function renderSummary(siR, siL, siThresh, li, csi, R, L) {
+  const box = document.getElementById('summary-box');
+  if (siR === null && siL === null) {
+    box.className = 'summary-box incomplete';
+    box.innerHTML = '<div class="summary-icon"></div><div class="summary-text">Enter aldosterone and cortisol values to calculate results.</div>';
+    return;
+  }
+  const rightOK = siR !== null && siR >= siThresh;
+  const leftOK  = siL !== null && siL >= siThresh;
+  if (!rightOK || !leftOK) {
+    const which = !rightOK && !leftOK ? 'Bilateral cannulation' : (!rightOK ? 'Right-side cannulation' : 'Left-side cannulation');
+    box.className = 'summary-box error';
+    box.innerHTML = `<div class="summary-icon">✘</div><div class="summary-text"><strong>Cannulation unsuccessful.</strong> ${which} did not meet SI threshold (≥${siThresh.toFixed(1)}). AVS results are not interpretable.</div>`;
+    return;
+  }
+  if (li === null) {
+    box.className = 'summary-box incomplete';
+    box.innerHTML = '<div class="summary-icon">⚠</div><div class="summary-text">Bilateral cannulation successful. Complete IVC data to calculate lateralization indices.</div>';
+    return;
+  }
+  const domSide = R > L ? 'Right' : 'Left';
+  if (li >= 4) {
+    const csiText = csi !== null ? (csi < 1 ? ' Contralateral suppression is present.' : ' No contralateral suppression detected — consider further evaluation.') : '';
+    box.className = 'summary-box success';
+    box.innerHTML = `<div class="summary-icon">✔</div><div class="summary-text"><strong>Bilateral cannulation successful.</strong> Lateralization confirmed to the <strong>${domSide}</strong> side (LI = ${fmt(li)}).${csiText}</div>`;
+  } else if (li >= 2) {
+    box.className = 'summary-box warning';
+    box.innerHTML = `<div class="summary-icon">⚠</div><div class="summary-text"><strong>Bilateral cannulation successful.</strong> Borderline lateralization detected (LI = ${fmt(li)}), with a trend toward the <strong>${domSide}</strong> side. Clinical correlation is recommended.</div>`;
+  } else {
+    box.className = 'summary-box error';
+    box.innerHTML = `<div class="summary-icon">✘</div><div class="summary-text"><strong>Bilateral cannulation successful.</strong> No significant lateralization detected (LI = ${fmt(li)}). Findings are consistent with <strong>bilateral adrenal hyperplasia</strong>.</div>`;
+  }
+}
+
+// ── Reset ──
+function resetAll() {
+  ['right','left'].forEach(side => {
+    state[side] = Array.from({length: 3}, (_, i) => ({ id: i, aldo: '', cort: '', included: true }));
+    buildAllRows(side);
+  });
+  state.ivc.forEach((s, i) => {
+    s.aldo = ''; s.cort = ''; s.included = true;
+    const aldo = document.getElementById(`ivc-aldo-${i}`); if (aldo) aldo.value = '';
+    const cort = document.getElementById(`ivc-cort-${i}`); if (cort) cort.value = '';
+    updateRowDisplay('ivc', i);
+    const row = document.getElementById(`ivc-row-${i}`); if (row) row.classList.remove('excluded');
+    const chk = document.querySelector(`#ivc-toggle-${i} input`); if (chk) chk.checked = true;
+  });
+  calculate();
+}
+
+// ══════════════════════════════════════════
+// PRINT REPORT
+// ══════════════════════════════════════════
+function buildSampleTableHTML(side, color) {
+  const label = side === 'ivc' ? 'IVC' : side.charAt(0).toUpperCase() + side.slice(1);
+  const rows = state[side].map((s, i) => {
+    const ac = (s.aldo !== '' && s.cort !== '' && s.cort !== 0) ? (s.aldo / s.cort).toFixed(2) : '—';
+    const incl = s.included ? '' : ' style="opacity:0.5;text-decoration:line-through"';
+    const inclLabel = s.included ? '' : ' <em style="color:#999;font-size:9pt">(excluded)</em>';
+    return `<tr${incl}>
+      <td style="padding:5px 10px;border-bottom:1px solid #eee;font-size:10pt">${label} ${i+1}${inclLabel}</td>
+      <td style="padding:5px 10px;border-bottom:1px solid #eee;text-align:right;font-family:monospace;font-size:10pt">${s.aldo !== '' ? s.aldo : '—'}</td>
+      <td style="padding:5px 10px;border-bottom:1px solid #eee;text-align:right;font-family:monospace;font-size:10pt">${s.cort !== '' ? s.cort : '—'}</td>
+      <td style="padding:5px 10px;border-bottom:1px solid #eee;text-align:right;font-family:monospace;font-size:10pt;font-weight:600;color:${color}">${ac}</td>
+    </tr>`;
+  }).join('');
+  const avg = avgAC(side);
+  return `
+    <table style="width:100%;border-collapse:collapse;margin-bottom:6px">
+      <thead>
+        <tr style="background:#f5f5f5">
+          <th style="padding:6px 10px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Sample</th>
+          <th style="padding:6px 10px;text-align:right;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Aldo (${units.aldo})</th>
+          <th style="padding:6px 10px;text-align:right;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Cortisol (${units.cort})</th>
+          <th style="padding:6px 10px;text-align:right;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">A/C Ratio</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="display:flex;justify-content:flex-end;padding:4px 10px;background:#f9f9f9;border-top:1px solid #ddd">
+      <span style="font-size:9pt;color:#666;margin-right:16px">Average A/C (included samples)</span>
+      <span style="font-family:monospace;font-weight:700;font-size:11pt;color:${color}">${avg !== null ? avg.toFixed(2) : '—'}</span>
+    </div>`;
+}
+
+function getInterpretationText(siR, siL, siThresh, li, csi, R, L) {
+  const lines = [];
+  const protLabel = protocol === 'stimulated' ? 'cosyntropin-stimulated' : 'unstimulated';
+  const domSide = (R !== null && L !== null) ? (R > L ? 'right' : 'left') : null;
+
+  // Cannulation
+  const rightOK = siR !== null && siR >= siThresh;
+  const leftOK  = siL !== null && siL >= siThresh;
+
+  if (siR === null && siL === null) {
+    lines.push({ icon: '⚠', color: '#7A4F00', bg: '#FFF8E6', text: 'Insufficient data entered to generate an interpretation. Please ensure aldosterone and cortisol values are entered for all relevant sample sites.' });
+    return lines;
+  }
+
+  // Cannulation assessment
+  if (rightOK && leftOK) {
+    lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Bilateral adrenal vein cannulation was technically successful. Both the right adrenal vein (SI = ${fmt(siR)}) and left adrenal vein (SI = ${fmt(siL)}) exceeded the ${protLabel} selectivity threshold of ≥${siThresh.toFixed(1)}, confirming adequate catheter position and sample validity.` });
+  } else if (!rightOK && !leftOK) {
+    lines.push({ icon: '✘', color: '#8B1A1A', bg: '#FDEAEA', text: `Bilateral cannulation was unsuccessful. Neither the right adrenal vein (SI = ${siR !== null ? fmt(siR) : 'no data'}) nor the left adrenal vein (SI = ${siL !== null ? fmt(siL) : 'no data'}) met the ${protLabel} selectivity threshold of ≥${siThresh.toFixed(1)}. The AVS results cannot be interpreted. Repeat sampling should be considered.` });
+    return lines;
+  } else if (!rightOK) {
+    lines.push({ icon: '✘', color: '#8B1A1A', bg: '#FDEAEA', text: `Right adrenal vein cannulation was unsuccessful (SI = ${siR !== null ? fmt(siR) : 'no data'}), falling below the ${protLabel} threshold of ≥${siThresh.toFixed(1)}. The left adrenal vein was successfully cannulated (SI = ${fmt(siL)}). Lateralization cannot be determined without bilateral successful cannulation.` });
+    return lines;
+  } else {
+    lines.push({ icon: '✘', color: '#8B1A1A', bg: '#FDEAEA', text: `Left adrenal vein cannulation was unsuccessful (SI = ${siL !== null ? fmt(siL) : 'no data'}), falling below the ${protLabel} threshold of ≥${siThresh.toFixed(1)}. The right adrenal vein was successfully cannulated (SI = ${fmt(siR)}). Lateralization cannot be determined without bilateral successful cannulation.` });
+    return lines;
+  }
+
+  // Lateralization
+  if (li === null) {
+    lines.push({ icon: '⚠', color: '#7A4F00', bg: '#FFF8E6', text: 'IVC data is incomplete. Lateralization Index and Contralateral Suppression Index cannot be calculated. Please enter IVC aldosterone and cortisol values.' });
+    return lines;
+  }
+
+  if (li >= 4) {
+    lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Aldosterone hypersecretion is lateralized to the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). A value ≥ 4.0 is the established threshold for confirmed lateralization, supporting a diagnosis of unilateral primary aldosteronism. Unilateral adrenalectomy of the ${domSide} adrenal gland would be expected to result in biochemical cure or significant improvement in hypertension and hypokalemia.` });
+  } else if (li >= 2) {
+    lines.push({ icon: '⚠', color: '#7A4F00', bg: '#FFF8E6', text: `Borderline lateralization was identified, with a trend toward the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). Values between 2.0 and 3.9 are indeterminate. Clinical correlation with patient history, imaging findings, and biochemical data is strongly recommended before proceeding with adrenalectomy. Some centers may use a threshold of ≥ 2.0 in certain clinical contexts — institutional protocol should be followed.` });
+  } else {
+    lines.push({ icon: '✘', color: '#8B1A1A', bg: '#FDEAEA', text: `No significant lateralization of aldosterone excess was identified (Lateralization Index = ${fmt(li)}). A value below 2.0 is consistent with <strong>bilateral adrenal hyperplasia (idiopathic hyperaldosteronism)</strong>. Surgical intervention is unlikely to be beneficial. Medical management with a mineralocorticoid receptor antagonist (e.g., spironolactone or eplerenone) is typically the recommended approach.` });
+  }
+
+  // CSI
+  if (csi !== null) {
+    if (csi < 1) {
+      lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Contralateral suppression is present (CSI = ${fmt(csi)}). The contralateral (${domSide === 'right' ? 'left' : 'right'}) adrenal gland demonstrates suppressed aldosterone production relative to the IVC, with a CSI below 1.0. This further supports unilateral disease and the appropriateness of surgical intervention.` });
+    } else {
+      lines.push({ icon: '⚠', color: '#7A4F00', bg: '#FFF8E6', text: `Contralateral suppression is absent (CSI = ${fmt(csi)}). The contralateral adrenal gland does not demonstrate expected suppression relative to the IVC. In the context of a lateralized LI, this finding should be interpreted cautiously and correlated with other clinical data.` });
+    }
+  }
+
+  return lines;
+}
+
+function openPrintReport() {
+  const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
+  const siThresh = protocol === 'stimulated' ? 3.0 : 2.0;
+  const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
+  const siL = (L !== null && IVC !== null && IVC !== 0) ? L / IVC : null;
+  let li = null;
+  if (R !== null && L !== null && Math.min(R,L) !== 0) li = Math.max(R,L) / Math.min(R,L);
+  let csi = null;
+  if (R !== null && L !== null && IVC !== null && IVC !== 0) csi = Math.min(R,L) / IVC;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  const domSide = (R !== null && L !== null) ? (R > L ? 'Right' : 'Left') : null;
+  const patientName = (document.getElementById('patient-name') || {}).value || '';
+  const patientMRN = (document.getElementById('patient-mrn') || {}).value || '';
+  const patientBar = (patientName.trim() || patientMRN.trim()) ? `<div style="margin-top:10px;padding:8px 12px;background:#F0EDE6;border-radius:3px;display:flex;gap:24px;align-items:center">${patientName.trim() ? `<span style="font-size:10pt;color:#1a1714"><span style="font-family:monospace;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-right:8px">Patient</span><strong>${patientName.trim()}</strong></span>` : ''}${patientMRN.trim() ? `<span style="font-size:10pt;color:#1a1714"><span style="font-family:monospace;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-right:8px">MRN</span><strong>${patientMRN.trim()}</strong></span>` : ''}</div>` : '';
+
+  const interpretLines = getInterpretationText(siR, siL, siThresh, li, csi, R, L);
+  const interpHTML = interpretLines.map(l => `
+    <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:${l.bg};border-left:4px solid ${l.color};border-radius:3px;margin-bottom:10px">
+      <span style="font-size:16px;line-height:1.4;flex-shrink:0">${l.icon}</span>
+      <p style="font-size:10.5pt;line-height:1.7;color:#1a1714;margin:0">${l.text}</p>
+    </div>`).join('');
+
+  const indexRows = [
+    { label: 'Selectivity Index — Right (SI)', value: siR, unit: '', pass: siR !== null && siR >= siThresh, fail: siR !== null && siR < siThresh, thresh: `≥ ${siThresh.toFixed(1)} (${protocol === 'stimulated' ? 'stimulated' : 'unstimulated'})`, interp: siR === null ? '—' : siR >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
+    { label: 'Selectivity Index — Left (SI)',  value: siL, unit: '', pass: siL !== null && siL >= siThresh, fail: siL !== null && siL < siThresh, thresh: `≥ ${siThresh.toFixed(1)} (${protocol === 'stimulated' ? 'stimulated' : 'unstimulated'})`, interp: siL === null ? '—' : siL >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
+    { label: 'Lateralization Index (LI)',       value: li,  unit: '', pass: li !== null && li >= 4, warn: li !== null && li >= 2 && li < 4, fail: li !== null && li < 2, thresh: '≥ 4.0 lateralized | 2–3.9 borderline | < 2.0 bilateral', interp: li === null ? '—' : li >= 4 ? `Lateralized → ${domSide}` : li >= 2 ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
+    { label: 'Contralateral Suppression (CSI)', value: csi, unit: '', pass: csi !== null && csi < 1, fail: csi !== null && csi >= 1, thresh: '< 1.0 = suppression present', interp: csi === null ? '—' : csi < 1 ? 'Contralateral suppression present' : 'No contralateral suppression' },
+  ];
+
+  const indexTableRows = indexRows.map(r => {
+    const statusColor = r.pass ? '#1B5E35' : r.warn ? '#7A4F00' : r.fail ? '#8B1A1A' : '#888';
+    const statusBg    = r.pass ? '#E8F5EE' : r.warn ? '#FFF8E6' : r.fail ? '#FDEAEA' : '#f5f5f5';
+    return `<tr>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:10pt">${r.label}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">${r.value !== null ? fmt(r.value) : '—'}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:9pt;color:#666;text-align:center">${r.thresh}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center">
+        <span style="display:inline-block;padding:3px 10px;border-radius:2px;font-size:9pt;font-weight:600;background:${statusBg};color:${statusColor}">${r.interp}</span>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AVS Report — ${dateStr}</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; background: #fff; padding: 0; }
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .no-print { display: none !important; }
+    body { padding: 0; }
+    .page { padding: 28px 36px; }
+  }
+  @media screen {
+    body { background: #e8e5e0; }
+    .page { max-width: 820px; margin: 24px auto; background: #fff; padding: 36px 48px; box-shadow: 0 2px 20px rgba(0,0,0,0.12); }
+    .no-print { position: fixed; top: 16px; right: 16px; display: flex; gap: 10px; z-index: 99; }
+  }
+  h1 { font-family: 'Libre Baskerville', serif; font-size: 20pt; font-weight: 700; letter-spacing: -0.02em; }
+  h2 { font-family: 'Libre Baskerville', serif; font-size: 13pt; font-weight: 700; color: #1a1714; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #1a1714; }
+  h3 { font-size: 11pt; font-weight: 600; color: #444; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; font-size: 9pt; }
+  .section { margin-bottom: 28px; }
+  .print-btn-r { padding: 9px 18px; background: #1a1714; color: #fff; border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .close-btn-r { padding: 9px 18px; background: #fff; color: #444; border: 1px solid #ccc; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="no-print">
+  <button class="close-btn-r" onclick="window.close()">✕ Close</button>
+  <button class="print-btn-r" onclick="window.print()"> Print / Save as PDF</button>
+</div>
+
+<div class="page">
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid #C8901A">
+    <div>
+      <h1>Adrenal Vein Sampling Report</h1>
+      <p style="font-size:10pt;color:#888;margin-top:4px;font-family:monospace;letter-spacing:0.05em">AVS RESULT SUMMARY — CALCULATED REPORT</p>
+      ${patientBar}
+    </div>
+    <div style="text-align:right">
+      <p style="font-size:9pt;color:#888">${dateStr}</p>
+      <p style="font-size:9pt;color:#aaa">${timeStr}</p>
+      <p style="margin-top:6px;font-size:9pt;padding:3px 10px;background:#FDF3E3;color:#7A4F00;border-radius:2px;display:inline-block;font-family:monospace">
+        ${protocol === 'stimulated' ? 'COSYNTROPIN-STIMULATED' : 'UNSTIMULATED'}
+      </p>
+    </div>
+  </div>
+
+  <!-- RAW DATA -->
+  <div class="section">
+    <h2>Measured Values &amp; A/C Ratios</h2>
+
+    <h3 style="color:#2B3A8C;margin-bottom:6px">Inferior Vena Cava (IVC) — Peripheral Reference</h3>
+    <div style="border:1px solid #dde3f5;border-radius:3px;overflow:hidden;margin-bottom:18px">
+      ${buildSampleTableHTML('ivc', '#2B3A8C')}
+    </div>
+
+    <h3 style="color:#1B4D3E;margin-bottom:6px">Right Adrenal Vein</h3>
+    <div style="border:1px solid #c2ddd3;border-radius:3px;overflow:hidden;margin-bottom:18px">
+      ${buildSampleTableHTML('right', '#1B4D3E')}
+    </div>
+
+    <h3 style="color:#7A1F1F;margin-bottom:6px">Left Adrenal Vein</h3>
+    <div style="border:1px solid #dec4c4;border-radius:3px;overflow:hidden;margin-bottom:0">
+      ${buildSampleTableHTML('left', '#7A1F1F')}
+    </div>
+  </div>
+
+  <!-- CALCULATED INDICES -->
+  <div class="section">
+    <h2>Calculated Indices</h2>
+    <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-radius:3px;overflow:hidden">
+      <thead>
+        <tr style="background:#f5f5f5">
+          <th style="padding:8px 12px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Index</th>
+          <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Value</th>
+          <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Threshold</th>
+          <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Result</th>
+        </tr>
+      </thead>
+      <tbody>${indexTableRows}</tbody>
+    </table>
+  </div>
+
+  <!-- INTERPRETATION -->
+  <div class="section">
+    <h2>Clinical Interpretation</h2>
+    ${interpHTML}
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div style="margin-top:24px;padding:12px 14px;background:#f8f8f8;border:1px solid #e0e0e0;border-radius:3px">
+    <p style="font-size:8.5pt;color:#888;line-height:1.6"><strong style="color:#555">Disclaimer:</strong> This report was generated by the AVS Calculator tool and is intended to assist qualified clinicians in interpreting adrenal vein sampling data. It does not constitute medical advice and should not be used as a substitute for clinical judgment. All results must be interpreted in the context of the patient's clinical presentation, imaging, and biochemical evaluation. Threshold values used are based on published guidelines and may vary by institution.</p>
+  </div>
+
+  <!-- Footer -->
+  <div style="margin-top:20px;padding-top:14px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center">
+    <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator • avs-calculator</p>
+    <p style="font-size:9pt;color:#888">Designed by <strong style="color:#555">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
+  </div>
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=900,height=800,scrollbars=yes');
+  win.document.write(html);
+  win.document.close();
+}
+
+
+// ══════════════════════════════════════════════
+// PATIENT SUMMARY REPORT
+// ══════════════════════════════════════════════
+function openPatientReport() {
+  const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
+  const siThresh = protocol === 'stimulated' ? 3.0 : 2.0;
+  const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
+  const siL = (L !== null && IVC !== null && IVC !== 0) ? L / IVC : null;
+  let li = null;
+  if (R !== null && L !== null && Math.min(R,L) !== 0) li = Math.max(R,L) / Math.min(R,L);
+  let csi = null;
+  if (R !== null && L !== null && IVC !== null && IVC !== 0) csi = Math.min(R,L) / IVC;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const patientName = (document.getElementById('patient-name') || {}).value || '';
+  const patientMRN  = (document.getElementById('patient-mrn')  || {}).value || '';
+  const rightOK = siR !== null && siR >= siThresh;
+  const leftOK  = siL !== null && siL >= siThresh;
+  const domSide = (R !== null && L !== null) ? (R > L ? 'right' : 'left') : null;
+
+  // Build the plain-language content cards
+  let cards = '';
+
+  // ── What is this test? ──
+  cards += `<div style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
+    <h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">What is adrenal vein sampling?</h3>
+    <p style="font-size:11pt;color:#3a3530;line-height:1.8">Adrenal vein sampling (AVS) is a specialized procedure used to find the source of a hormone problem called <strong>primary aldosteronism</strong> — a condition where your body produces too much of a hormone called aldosterone, which can cause high blood pressure and low potassium levels.</p>
+    <p style="font-size:11pt;color:#3a3530;line-height:1.8;margin-top:10px">During this procedure, tiny blood samples were collected from the veins of each adrenal gland (small glands that sit on top of your kidneys) and from a large vein in your body. These samples are compared to figure out whether <strong>one</strong> adrenal gland is overproducing aldosterone, or whether <strong>both</strong> glands are involved.</p>
+  </div>`;
+
+  // ── Were the samples collected successfully? ──
+  let cannulationCard = '';
+  if (siR === null && siL === null) {
+    cannulationCard = `<div style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px">
+      <div style="font-size:24px;margin-bottom:8px">⚠️</div>
+      <h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">No data has been entered yet</h3>
+      <p style="font-size:11pt;color:#5a3e00;line-height:1.8">Your care team has not yet entered the laboratory results from your procedure. This summary will be updated once those values are available.</p>
+    </div>`;
+  } else if (rightOK && leftOK) {
+    cannulationCard = `<div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
+      <div style="font-size:24px;margin-bottom:8px">✅</div>
+      <h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">The procedure was technically successful</h3>
+      <p style="font-size:11pt;color:#1a3d28;line-height:1.8">Blood samples were successfully collected from both the right and left adrenal veins, which means the results can be reliably interpreted by your care team.</p>
+    </div>`;
+  } else {
+    const which = !rightOK && !leftOK ? 'either adrenal vein' : (!rightOK ? 'the right adrenal vein' : 'the left adrenal vein');
+    cannulationCard = `<div style="background:#FDEAEA;border:1px solid #e8b4b4;border-radius:8px;padding:20px 24px;margin-bottom:20px">
+      <div style="font-size:24px;margin-bottom:8px">⚠️</div>
+      <h3 style="font-size:13pt;color:#8B1A1A;margin-bottom:10px;font-family:'Libre Baskerville',serif">The procedure may need to be repeated</h3>
+      <p style="font-size:11pt;color:#5a1010;line-height:1.8">Your care team was not able to obtain a reliable sample from ${which}. This can happen in some cases because these veins are small and can be difficult to access. Your doctor will discuss whether a repeat procedure makes sense for you.</p>
+    </div>`;
+  }
+  cards += cannulationCard;
+
+  // ── What did we find? (only if both cannulations successful) ──
+  if (rightOK && leftOK && li !== null) {
+    let findingCard = '';
+    if (li >= 4) {
+      const sideFull = domSide === 'right' ? 'right' : 'left';
+      const sideOpp  = domSide === 'right' ? 'left'  : 'right';
+      const csiText = csi !== null
+        ? (csi < 1
+          ? `<p style="font-size:11pt;color:#1a3d28;line-height:1.8;margin-top:10px">Additionally, the <strong>${sideOpp} adrenal gland</strong> appears to have reduced activity, which further supports that the problem is coming from one side.</p>`
+          : `<p style="font-size:11pt;color:#5a3e00;line-height:1.8;margin-top:10px">Your care team will also review whether both glands show signs of activity and will factor this into the overall recommendation.</p>`)
+        : '';
+      findingCard = `<div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
+        <div style="font-size:24px;margin-bottom:8px">🎯</div>
+        <h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">One adrenal gland appears to be the source</h3>
+        <p style="font-size:11pt;color:#1a3d28;line-height:1.8">The results show that your <strong>${sideFull} adrenal gland</strong> is producing significantly more aldosterone than the other side. This pattern is called <em>lateralization</em> and suggests that the problem is coming from a single gland.</p>
+        ${csiText}
+      </div>`;
+    } else if (li >= 2) {
+      findingCard = `<div style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px">
+        <div style="font-size:24px;margin-bottom:8px">🔍</div>
+        <h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">The results are not fully clear yet</h3>
+        <p style="font-size:11pt;color:#5a3e00;line-height:1.8">There is a <em>possible</em> tendency for one adrenal gland to be more active than the other, but the difference is not large enough to be certain. Your doctor will review these results carefully along with your other test results, your health history, and any imaging scans before making a recommendation.</p>
+      </div>`;
+    } else {
+      findingCard = `<div style="background:#EBF0FA;border:1px solid #b0c0e8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
+        <div style="font-size:24px;margin-bottom:8px">⚖️</div>
+        <h3 style="font-size:13pt;color:#2B3A8C;margin-bottom:10px;font-family:'Libre Baskerville',serif">Both adrenal glands appear to be involved equally</h3>
+        <p style="font-size:11pt;color:#1a2560;line-height:1.8">The results suggest that <strong>both adrenal glands</strong> are contributing to the overproduction of aldosterone equally. When this is the case, it is called <em>bilateral hyperplasia</em>. Surgery is generally not recommended for this pattern — instead, it is typically managed with medication.</p>
+      </div>`;
+    }
+    cards += findingCard;
+  }
+
+  // ── What happens next? ──
+  let nextSteps = '';
+  if (siR === null && siL === null) {
+    nextSteps = 'Please follow up with your care team to discuss when your results will be available.';
+  } else if (!rightOK || !leftOK) {
+    nextSteps = 'Your doctor will discuss whether additional testing or a repeat procedure is recommended. In some cases, other imaging or tests may be used to help guide decisions.';
+  } else if (li === null) {
+    nextSteps = 'Your care team is reviewing the results and will discuss next steps with you, including treatment options.';
+  } else if (li >= 4) {
+    nextSteps = `Your doctor may discuss the possibility of surgery to remove the overactive ${domSide} adrenal gland. This is called a <strong>unilateral adrenalectomy</strong>. Many patients who have this surgery see significant improvement in their blood pressure and may be able to reduce or stop blood pressure medications. Your care team will help you understand all your options.`;
+  } else if (li >= 2) {
+    nextSteps = 'Your care team will review the full picture — including your scans, lab work, and overall health — before making a recommendation. Additional follow-up or repeat testing may be suggested.';
+  } else {
+    nextSteps = 'Since both glands appear to be involved, your doctor will likely recommend <strong>medication</strong> to manage your aldosterone levels. Common medications used for this condition include spironolactone or eplerenone. These are generally very effective and many patients do well with this approach.';
+  }
+
+  cards += `<div style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
+    <h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">What happens next?</h3>
+    <p style="font-size:11pt;color:#3a3530;line-height:1.8">${nextSteps}</p>
+  </div>`;
+
+  // ── Important reminder ──
+  cards += `<div style="background:#fff;border:2px solid #D8D3C8;border-radius:8px;padding:18px 24px;margin-bottom:20px">
+    <p style="font-size:11pt;color:#5C564E;line-height:1.8;margin:0"><strong style="color:#1A1714">Important:</strong> This summary is meant to help you understand your test results in plain language. Please do not change or stop any of your medications without first speaking with your doctor or care team. Your provider will review all of your results with you and discuss the best plan for your individual situation.</p>
+  </div>`;
+
+  const patientHeader = (patientName.trim() || patientMRN.trim()) ? `
+    <div style="margin-bottom:6px;display:flex;gap:20px;flex-wrap:wrap">
+      ${patientName.trim() ? `<span style="font-size:10pt;color:#1a1714"><span style="font-family:monospace;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-right:6px">Patient</span><strong>${patientName.trim()}</strong></span>` : ''}
+      ${patientMRN.trim()  ? `<span style="font-size:10pt;color:#1a1714"><span style="font-family:monospace;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-right:6px">MRN</span><strong>${patientMRN.trim()}</strong></span>` : ''}
+    </div>` : '';
+
+  const reportHTML = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AVS Patient Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; background: #fff; }
+@media screen { body { background: #e8e5e0; } .page { max-width: 720px; margin: 24px auto; background: #fff; padding: 40px 48px; box-shadow: 0 2px 20px rgba(0,0,0,0.12); } .no-print { position: fixed; top: 16px; right: 16px; display: flex; gap: 10px; z-index: 99; } }
+@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .no-print { display: none !important; } .page { padding: 28px 36px; } }
+.pbtn { padding: 9px 18px; background: #1B4D3E; color: #fff; border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+.cbtn { padding: 9px 18px; background: #fff; color: #444; border: 1px solid #ccc; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="no-print">
+  <button class="cbtn" onclick="window.close()">✕ Close</button>
+  <button class="pbtn" onclick="window.print()">🖨 Print / Save as PDF</button>
+</div>
+<div class="page">
+  <div style="margin-bottom:24px;padding-bottom:18px;border-bottom:3px solid #1B4D3E">
+    <p style="font-family:monospace;font-size:8.5pt;color:#888;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">Patient Summary — Adrenal Vein Sampling</p>
+    <h1 style="font-family:'Libre Baskerville',serif;font-size:22pt;font-weight:700;letter-spacing:-0.02em;color:#1A1714;margin-bottom:10px">Understanding Your AVS Results</h1>
+    ${patientHeader}
+    <p style="font-size:9pt;color:#aaa;margin-top:6px">${dateStr}</p>
+  </div>
+  ${cards}
+  <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+    <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator — Patient Summary</p>
+    <p style="font-size:9pt;color:#888">Prepared by <strong style="color:#555">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
+  </div>
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=820,height=800,scrollbars=yes');
+  win.document.write(reportHTML);
+  win.document.close();
+}
+
+// ── Init ──
+buildAllRows('ivc');
+buildAllRows('right');
+buildAllRows('left');
+calculate();
+</script>
+</body>
+</html>
