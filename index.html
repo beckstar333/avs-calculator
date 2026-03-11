@@ -93,6 +93,15 @@
   .unit-btn { flex: 1; padding: 5px 8px; border: none; background: transparent; cursor: pointer; font-family: var(--mono); font-size: 11px; color: var(--text-2); border-radius: 2px; transition: all 0.15s; text-align: center; white-space: nowrap; }
   .unit-btn.active { background: var(--text); color: #fff; }
 
+  /* ── Inline custom threshold inputs ── */
+  .thresh-custom-input {
+    width: 64px; border: 1px solid var(--border); border-radius: 2px; padding: 3px 6px;
+    font-family: var(--mono); font-size: 11px; color: var(--text); background: var(--bg);
+    text-align: right; -moz-appearance: textfield;
+  }
+  .thresh-custom-input::-webkit-outer-spin-button, .thresh-custom-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .thresh-custom-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(200,144,26,0.12); }
+
   /* ── Section Cards ── */
   .section-card { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; box-shadow: var(--shadow); background: var(--surface); }
   .section-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
@@ -162,8 +171,10 @@
   .add-row-btn svg { flex-shrink: 0; }
 
   /* ── Avg Bar ── */
-  .avg-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--surface2); border-top: 1px solid var(--border); }
+  .avg-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--surface2); border-top: 1px solid var(--border); flex-wrap: wrap; gap: 4px; }
+  .avg-bar-left { display: flex; flex-direction: column; gap: 2px; }
   .avg-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+  .avg-hint { font-family: var(--sans); font-size: 10px; color: var(--text-3); line-height: 1.4; font-style: italic; }
   .avg-value { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text); }
   .avg-value.right-val { color: var(--right); }
   .avg-value.left-val { color: var(--left); }
@@ -238,6 +249,17 @@
     color: var(--text-2); font-family: var(--sans); font-size: 12px; cursor: pointer; transition: all 0.15s;
   }
   .reset-btn:hover { border-color: var(--text); color: var(--text); background: var(--surface2); }
+
+  /* ── Feedback modal ── */
+  #feedback-overlay { display: none; }
+  #feedback-overlay.open { display: flex !important; }
+  .fb-type-btn {
+    padding: 5px 12px; border: 1px solid var(--border); border-radius: 2px;
+    background: var(--surface2); font-family: var(--sans); font-size: 11px;
+    color: var(--text-2); cursor: pointer; transition: all 0.15s;
+  }
+  .fb-type-btn:hover { border-color: var(--border-strong); background: var(--surface); }
+  .fb-type-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
   .print-btn {
     display: flex; align-items: center; gap: 6px; padding: 7px 16px;
     background: var(--text); border: 1px solid var(--text); border-radius: var(--radius);
@@ -289,6 +311,14 @@
     .protocol-toggle { width: 100%; }
     .proto-btn { flex: 1; text-align: center; font-size: 11px; padding: 7px 6px; }
 
+    /* Units row */
+    .units-row { flex-direction: column; gap: 10px; }
+    .unit-group { width: 100%; }
+
+    /* Threshold selector */
+    #threshold-inputs { grid-template-columns: 1fr 1fr; gap: 8px; }
+    #threshold-preset { font-size: 12px; }
+
     /* Section headers */
     .section-header { padding: 10px 14px; }
     .section-header .sec-title { font-size: 14px; }
@@ -322,9 +352,12 @@
 
     /* Bottom toolbar */
     .bottom-toolbar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px 16px; }
-    .toolbar-right { width: 100%; display: flex; gap: 8px; }
-    .toolbar-right .reset-btn, .toolbar-right .print-btn { flex: 1; justify-content: center; font-size: 11px; }
+    .toolbar-right { width: 100%; display: flex; gap: 6px; flex-wrap: wrap; }
+    .toolbar-right .reset-btn, .toolbar-right .print-btn { flex: 1; justify-content: center; font-size: 11px; min-width: 80px; }
     .designer-credit { font-size: 9px; }
+
+    /* Feedback modal */
+    #feedback-overlay > div { margin: 12px; max-width: 100%; }
   }
 
   @media (max-width: 480px) {
@@ -336,6 +369,20 @@
     .section-body { padding: 8px 10px 10px; }
     .sample-table input[type=number] { width: 56px; }
     .dominant-value { font-size: 20px; }
+
+    /* Units — stack unit buttons */
+    .unit-toggle { flex-wrap: wrap; }
+    .unit-btn { flex: 1; min-width: 60px; font-size: 10px; padding: 5px 4px; }
+
+    /* Threshold inputs — single column on very small screens */
+    #threshold-inputs { grid-template-columns: 1fr 1fr; gap: 6px; }
+    #threshold-inputs label { font-size: 8px; }
+    #threshold-inputs .num-input { font-size: 11px; padding: 4px 6px; }
+
+    /* Toolbar — feedback label hidden on tiny screens */
+    .toolbar-right { gap: 5px; }
+    .toolbar-right .reset-btn span.btn-label, 
+    .toolbar-right .feedback-label { display: none; }
   }
 
   /* ═══════════════════════════════════════
@@ -381,12 +428,12 @@
     <div class="panel-title">Patient</div>
     <div class="patient-fields">
       <div style="flex:2">
-        <label class="patient-field-label">Patient Name / Initials</label>
-        <input type="text" id="patient-name" class="patient-field-input" placeholder="—" style="font-family:var(--sans);font-size:13px">
+        <label class="patient-field-label">Patient Name / Initials <em style="font-style:italic;text-transform:none;letter-spacing:0;color:var(--text-3);font-size:9px">(optional)</em></label>
+        <input type="text" id="patient-name" class="patient-field-input" placeholder="—" style="font-family:var(--sans);font-size:13px" autocomplete="off" spellcheck="false">
       </div>
       <div style="flex:1">
-        <label class="patient-field-label">MRN</label>
-        <input type="text" id="patient-mrn" class="patient-field-input" placeholder="—" style="font-family:var(--mono);font-size:13px">
+        <label class="patient-field-label">MRN <em style="font-style:italic;text-transform:none;letter-spacing:0;color:var(--text-3);font-size:9px">(optional)</em></label>
+        <input type="text" id="patient-mrn" class="patient-field-input" placeholder="—" style="font-family:var(--mono);font-size:13px" autocomplete="off" spellcheck="false">
       </div>
     </div>
     <div class="panel-title">Protocol</div>
@@ -432,7 +479,10 @@
         <tbody id="ivc-body"></tbody>
       </table>
       <div class="avg-bar">
-        <span class="avg-label">Avg A/C (included)</span>
+        <div class="avg-bar-left">
+          <span class="avg-label">A/C Ratio Used in Calculation (included samples)</span>
+          <span class="avg-hint">Multiple values are averaged. To use a single value, enter one sample or toggle off the others.</span>
+        </div>
         <span class="avg-value ivc-val" id="ivc-avg">—</span>
       </div>
     </div>
@@ -460,7 +510,10 @@
         </button>
       </div>
       <div class="avg-bar">
-        <span class="avg-label">Avg A/C (included)</span>
+        <div class="avg-bar-left">
+          <span class="avg-label">A/C Ratio Used in Calculation (included samples)</span>
+          <span class="avg-hint">Multiple values are averaged. To use a single value, enter one sample or toggle off the others.</span>
+        </div>
         <span class="avg-value right-val" id="right-avg">—</span>
       </div>
     </div>
@@ -488,7 +541,10 @@
         </button>
       </div>
       <div class="avg-bar">
-        <span class="avg-label">Avg A/C (included)</span>
+        <div class="avg-bar-left">
+          <span class="avg-label">A/C Ratio Used in Calculation (included samples)</span>
+          <span class="avg-hint">Multiple values are averaged. To use a single value, enter one sample or toggle off the others.</span>
+        </div>
         <span class="avg-value left-val" id="left-avg">—</span>
       </div>
     </div>
@@ -500,7 +556,7 @@
 
     <div id="summary-box" class="summary-box incomplete">
       <div class="summary-icon"></div>
-      <div class="summary-text">Enter aldosterone and cortisol values to calculate results.</div>
+      <div class="summary-text">Awaiting sample data — results will appear here once values are entered.</div>
     </div>
 
     <div class="dominant-box">
@@ -537,7 +593,7 @@
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Lateralization Index (LI)</span>
-        <span class="index-thresh">Threshold: ≥ 4.0</span>
+        <span class="index-thresh" id="li-thresh-label">≥ 4.0 lateralized | 2.0–3.9 borderline | < 2.0 bilateral</span>
       </div>
       <div class="index-body">
         <div class="index-row">
@@ -553,7 +609,7 @@
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Contralateral Suppression (CSI)</span>
-        <span class="index-thresh">Threshold: &lt; 1.0</span>
+        <span class="index-thresh" id="csi-thresh-label">< 1.0</span>
       </div>
       <div class="index-body">
         <div class="index-row">
@@ -567,13 +623,56 @@
     </div>
 
     <div class="ref-section">
-      <div class="ref-title">Reference Thresholds</div>
-      <div class="ref-item"><span class="ref-key">SI (unstimulated)</span><span class="ref-val">≥ 2.0</span></div>
-      <div class="ref-item"><span class="ref-key">SI (cosyntropin-stimulated)</span><span class="ref-val">≥ 3.0</span></div>
-      <div class="ref-item"><span class="ref-key">LI lateralized</span><span class="ref-val">≥ 4.0</span></div>
-      <div class="ref-item"><span class="ref-key">LI borderline</span><span class="ref-val">2.0 – 3.9</span></div>
-      <div class="ref-item"><span class="ref-key">LI bilateral</span><span class="ref-val">&lt; 2.0</span></div>
-      <div class="ref-item"><span class="ref-key">CSI suppression</span><span class="ref-val">&lt; 1.0</span></div>
+      <div class="ref-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="display:flex;align-items:center;gap:8px">Reference Thresholds <span style="flex:1;height:1px;background:var(--border);display:inline-block;width:20px"></span></span>
+        <select id="threshold-preset" onchange="applyThresholdPreset(this.value)" style="font-family:var(--mono);font-size:9px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text-2);cursor:pointer;letter-spacing:0.03em">
+          <option value="es2016">Endocrine Society 2016</option>
+          <option value="es2025">Endocrine Society 2025</option>
+          <option value="jsh">Japanese Guidelines (JSH)</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+
+      <!-- Custom warning -->
+      <div id="custom-warning" style="display:none;margin-bottom:8px;padding:7px 10px;background:var(--warn-bg);border:1px solid #e8c97a;border-radius:var(--radius);font-size:10px;color:var(--warn);line-height:1.5">
+        ⚠ Custom thresholds are not based on published guidelines. Use only if directed by your institution's protocol.
+      </div>
+
+      <div class="ref-item">
+        <span class="ref-key">SI (unstimulated)</span>
+        <span class="ref-val" id="ref-si-unstim" style="display:flex;align-items:center;gap:6px">≥ 2.0
+          <input type="number" id="thresh-si-unstim" class="thresh-custom-input" min="1" max="10" step="0.1" value="2.0" oninput="onCustomThreshold()" style="display:none">
+        </span>
+      </div>
+      <div class="ref-item">
+        <span class="ref-key">SI (cosyntropin-stimulated)</span>
+        <span class="ref-val" id="ref-si-stim" style="display:flex;align-items:center;gap:6px">≥ 3.0
+          <input type="number" id="thresh-si-stim" class="thresh-custom-input" min="1" max="10" step="0.1" value="3.0" oninput="onCustomThreshold()" style="display:none">
+        </span>
+      </div>
+      <div class="ref-item">
+        <span class="ref-key">LI lateralized</span>
+        <span class="ref-val" id="ref-li-lat" style="display:flex;align-items:center;gap:6px">≥ 4.0
+          <input type="number" id="thresh-li-lat" class="thresh-custom-input" min="1" max="20" step="0.1" value="4.0" oninput="onCustomThreshold()" style="display:none">
+        </span>
+      </div>
+      <div class="ref-item">
+        <span class="ref-key">LI borderline</span>
+        <span class="ref-val" id="ref-li-border" style="display:flex;align-items:center;gap:6px">≥ 2.0
+          <input type="number" id="thresh-li-border" class="thresh-custom-input" min="1" max="20" step="0.1" value="2.0" oninput="onCustomThreshold()" style="display:none">
+        </span>
+      </div>
+      <div class="ref-item">
+        <span class="ref-key">LI bilateral</span>
+        <span class="ref-val" id="ref-li-bilat">&lt; 2.0</span>
+      </div>
+      <div class="ref-item">
+        <span class="ref-key">CSI suppression</span>
+        <span class="ref-val" id="ref-csi" style="display:flex;align-items:center;gap:6px">&lt; 1.0
+          <input type="number" id="thresh-csi" class="thresh-custom-input" min="0.1" max="5" step="0.1" value="1.0" oninput="onCustomThreshold()" style="display:none">
+        </span>
+      </div>
+      <div style="margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--text-3);text-align:right" id="ref-guideline-label">Endocrine Society 2016</div>
     </div>
 
     <div class="ref-section" style="margin-top:24px">
@@ -598,7 +697,36 @@
       </ol>
     </div>
 
-    <div style="margin-top:20px;padding:12px 14px;background:#F0EDE6;border:1px solid #D8D3C8;border-radius:4px;font-size:11px;color:#5C564E;line-height:1.6">
+    <!-- Privacy & Data Safety -->
+    <div style="margin-top:12px;border:1px solid #D8D3C8;border-radius:4px;overflow:hidden">
+      <div style="background:#F0EDE6;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none" onclick="const b=document.getElementById('privacy-body');const a=document.getElementById('privacy-arrow');b.style.display=b.style.display==='none'?'block':'none';a.style.transform=b.style.display==='none'?'rotate(0deg)':'rotate(180deg)'">
+        <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#8C867E;display:flex;align-items:center;gap:7px">
+          🔒 Privacy &amp; Data Safety
+        </span>
+        <svg id="privacy-arrow" width="10" height="10" viewBox="0 0 10 10" fill="none" style="transition:transform 0.2s;flex-shrink:0"><path d="M2 3.5L5 6.5L8 3.5" stroke="#8C867E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div id="privacy-body" style="display:none;padding:14px;font-size:11px;color:#5C564E;line-height:1.8;background:#fff">
+
+        <p style="margin-bottom:8px"><strong style="color:#1A1714">Why this tool is not a HIPAA-covered application</strong></p>
+        <ul style="margin:0 0 14px 16px;padding:0">
+          <li style="margin-bottom:5px"><strong>No data transmission.</strong> All calculations happen entirely within your browser. No values you enter are ever sent to a server, stored in a database, or transmitted over the internet.</li>
+          <li style="margin-bottom:5px"><strong>No storage.</strong> This tool does not use cookies, local storage, or any form of persistent data retention. Closing the browser tab permanently erases all entered values.</li>
+          <li style="margin-bottom:5px"><strong>No logging.</strong> There are no analytics trackers, error loggers, or third-party scripts that could capture patient identifiers.</li>
+          <li><strong>No backend.</strong> This is a fully static HTML file — there is no server, no database, and no account system of any kind.</li>
+        </ul>
+
+        <p style="margin-bottom:8px"><strong style="color:#1A1714">Technical safeguards built into this tool</strong></p>
+        <ul style="margin:0 0 0 16px;padding:0">
+          <li style="margin-bottom:5px"><strong>Autocomplete disabled.</strong> All input fields have autocomplete turned off so browsers will not save or suggest previously entered patient identifiers.</li>
+          <li style="margin-bottom:5px"><strong>Fields cleared on load.</strong> Every time the page is opened or refreshed, all fields are automatically wiped — no residual data from a prior session is ever displayed.</li>
+          <li style="margin-bottom:5px"><strong>Fields cleared on exit.</strong> When the browser tab is closed or navigated away from, all entered data is immediately cleared.</li>
+          <li><strong>30-minute inactivity timeout.</strong> If the tool is left idle for 30 minutes, all patient data and sample values are automatically erased. A warning appears 2 minutes before this occurs, with the option to extend the session.</li>
+        </ul>
+
+      </div>
+    </div>
+
+    <div style="margin-top:12px;padding:12px 14px;background:#F0EDE6;border:1px solid #D8D3C8;border-radius:4px;font-size:11px;color:#5C564E;line-height:1.6">
       <strong style="color:#1A1714">Disclaimer:</strong> This tool is intended to support — not replace — clinical judgment. Threshold values may vary by institution and protocol; this calculator applies the most widely cited Endocrine Society thresholds. Results must always be interpreted by a qualified clinician in the context of the patient's full clinical picture, including imaging, biochemistry, comorbidities, and surgical candidacy. This calculator does not constitute medical advice and should not be used as the sole basis for clinical decision-making.
     </div>
 
@@ -608,7 +736,7 @@
 <!-- Bottom Toolbar -->
 <div class="bottom-toolbar">
   <div class="designer-credit">
-    Designed by <a href="https://www.linkedin.com/in/becky-a-26a0276" target="_blank" style="color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px">
+    A clinical tool developed by <a href="https://www.linkedin.com/in/becky-a-26a0276" target="_blank" style="color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;opacity:0.7"><rect width="24" height="24" rx="4" fill="#0A66C2"/><path d="M7.5 9.5H5V19H7.5V9.5Z" fill="white"/><circle cx="6.25" cy="6.75" r="1.5" fill="white"/><path d="M19 19H16.5V14.25C16.5 13.01 15.49 12 14.25 12C13.01 12 12 13.01 12 14.25V19H9.5V9.5H12V10.76C12.68 9.95 13.76 9.5 14.25 9.5C16.87 9.5 19 11.63 19 14.25V19Z" fill="white"/></svg>
       <strong>Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong>
     </a>
@@ -618,10 +746,54 @@
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6a5 5 0 1 0 1.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M1 2v4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Reset
     </button>
+    <button class="reset-btn" onclick="openFeedback()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 1H2a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h3l2 2 2-2h1a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      Feedback
+    </button>
     <button class="print-btn" onclick="openPrintReport()">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 4H10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
       Print / Export PDF
     </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     FEEDBACK MODAL
+════════════════════════════════════════════════ -->
+<div id="feedback-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:6px;width:100%;max-width:460px;margin:20px;box-shadow:0 8px 40px rgba(0,0,0,0.2);overflow:hidden">
+    <!-- Modal header -->
+    <div style="background:#1A1714;padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:#fff">Send Feedback</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#8C8680;letter-spacing:0.08em;text-transform:uppercase;margin-top:2px">AVS Calculator</div>
+      </div>
+      <button onclick="closeFeedback()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1">✕</button>
+    </div>
+    <!-- Modal body -->
+    <div style="padding:20px">
+      <div style="margin-bottom:14px">
+        <label style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:#8C867E;display:block;margin-bottom:5px">Type</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="fb-type-btn active" onclick="selectFeedbackType(this,'General feedback')">💬 General</button>
+          <button class="fb-type-btn" onclick="selectFeedbackType(this,'Bug report')">🐛 Bug Report</button>
+          <button class="fb-type-btn" onclick="selectFeedbackType(this,'Feature request')">✨ Feature Request</button>
+          <button class="fb-type-btn" onclick="selectFeedbackType(this,'Clinical question')">🩺 Clinical</button>
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:#8C867E;display:block;margin-bottom:5px">Message</label>
+        <textarea id="feedback-message" placeholder="Share your thoughts, report an issue, or suggest an improvement..." autocomplete="off" style="width:100%;min-height:110px;border:1px solid #D8D3C8;border-radius:4px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:#1A1714;background:#F7F5F0;resize:vertical;line-height:1.6;outline:none" onfocus="this.style.borderColor='#1A1714'" onblur="this.style.borderColor='#D8D3C8'"></textarea>
+      </div>
+      <div style="margin-bottom:18px">
+        <label style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:#8C867E;display:block;margin-bottom:5px">Your email <span style="color:#B8B0A0;font-size:8px">(optional — only if you'd like a reply)</span></label>
+        <input type="email" id="feedback-email" placeholder="—" autocomplete="off" style="width:100%;border:1px solid #D8D3C8;border-radius:4px;padding:8px 12px;font-family:'DM Mono',monospace;font-size:12px;color:#1A1714;background:#F7F5F0;outline:none" onfocus="this.style.borderColor='#1A1714'" onblur="this.style.borderColor='#D8D3C8'">
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px">
+        <button onclick="closeFeedback()" style="padding:8px 16px;background:transparent;border:1px solid #D8D3C8;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;color:#5C564E;cursor:pointer">Cancel</button>
+        <button onclick="submitFeedback()" style="padding:8px 18px;background:#1A1714;border:1px solid #1A1714;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer">Send Feedback</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -635,6 +807,79 @@ const MAX_ROWS = 8;
 
 // ── Unit State ──
 const units = { aldo: 'pg/mL', cort: 'µg/dL' };
+
+// ── Threshold State ──
+const PRESETS = {
+  es2016: { siUnstim: 2.0, siStim: 3.0, liLat: 4.0, liBorder: 2.0, csi: 1.0, label: 'Endocrine Society 2016' },
+  es2025: { siUnstim: 2.0, siStim: 3.0, liLat: 4.0, liBorder: 2.0, csi: 1.0, label: 'Endocrine Society 2025' },
+  jsh:    { siUnstim: 2.0, siStim: 3.0, liLat: 2.0, liBorder: 1.5, csi: 1.0, label: 'Japanese Guidelines (JSH)' },
+};
+
+const thresholds = { siUnstim: 2.0, siStim: 3.0, liLat: 4.0, liBorder: 2.0, csi: 1.0 };
+
+function applyThresholdPreset(value) {
+  const isCustom = value === 'custom';
+  document.getElementById('custom-warning').style.display = isCustom ? 'block' : 'none';
+  document.getElementById('ref-guideline-label').style.display = isCustom ? 'none' : 'block';
+
+  // Show/hide inline custom inputs
+  document.querySelectorAll('.thresh-custom-input').forEach(el => {
+    el.style.display = isCustom ? 'inline-block' : 'none';
+  });
+
+  if (!isCustom) {
+    const p = PRESETS[value];
+    thresholds.siUnstim  = p.siUnstim;
+    thresholds.siStim    = p.siStim;
+    thresholds.liLat     = p.liLat;
+    thresholds.liBorder  = p.liBorder;
+    thresholds.csi       = p.csi;
+    document.getElementById('thresh-si-unstim').value  = p.siUnstim.toFixed(1);
+    document.getElementById('thresh-si-stim').value    = p.siStim.toFixed(1);
+    document.getElementById('thresh-li-lat').value     = p.liLat.toFixed(1);
+    document.getElementById('thresh-li-border').value  = p.liBorder.toFixed(1);
+    document.getElementById('thresh-csi').value        = p.csi.toFixed(1);
+    document.getElementById('ref-guideline-label').textContent = p.label;
+  } else {
+    // seed custom inputs with current values
+    document.getElementById('thresh-si-unstim').value  = thresholds.siUnstim.toFixed(1);
+    document.getElementById('thresh-si-stim').value    = thresholds.siStim.toFixed(1);
+    document.getElementById('thresh-li-lat').value     = thresholds.liLat.toFixed(1);
+    document.getElementById('thresh-li-border').value  = thresholds.liBorder.toFixed(1);
+    document.getElementById('thresh-csi').value        = thresholds.csi.toFixed(1);
+  }
+  updateRefPanel();
+  calculate();
+}
+
+function onCustomThreshold() {
+  thresholds.siUnstim = parseFloat(document.getElementById('thresh-si-unstim').value) || 2.0;
+  thresholds.siStim   = parseFloat(document.getElementById('thresh-si-stim').value)   || 3.0;
+  thresholds.liLat    = parseFloat(document.getElementById('thresh-li-lat').value)    || 4.0;
+  thresholds.liBorder = parseFloat(document.getElementById('thresh-li-border').value) || 2.0;
+  thresholds.csi      = parseFloat(document.getElementById('thresh-csi').value)       || 1.0;
+  updateRefPanel();
+  calculate();
+}
+
+function updateRefPanel() {
+  // Update only the text node portion of each ref-val (leave input elements intact)
+  function setRefText(id, text) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // Replace first text node only
+    for (const node of el.childNodes) {
+      if (node.nodeType === Node.TEXT_NODE) { node.textContent = text; return; }
+    }
+    el.insertBefore(document.createTextNode(text), el.firstChild);
+  }
+  setRefText('ref-si-unstim',  `≥ ${thresholds.siUnstim.toFixed(1)} `);
+  setRefText('ref-si-stim',    `≥ ${thresholds.siStim.toFixed(1)} `);
+  setRefText('ref-li-lat',     `≥ ${thresholds.liLat.toFixed(1)} `);
+  setRefText('ref-li-border',  `≥ ${thresholds.liBorder.toFixed(1)} `);
+  document.getElementById('ref-li-bilat').textContent  = `< ${thresholds.liBorder.toFixed(1)}`;
+  setRefText('ref-csi',        `< ${thresholds.csi.toFixed(1)} `);
+}
 
 function setUnit(field, unit) {
   units[field] = unit;
@@ -778,7 +1023,7 @@ function calculate() {
   document.getElementById('left-avg').textContent  = L !== null ? fmt(L) : '—';
   document.getElementById('ivc-avg').textContent   = IVC !== null ? fmt(IVC) : '—';
 
-  const siThresh = protocol === 'stimulated' ? 3.0 : 2.0;
+  const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
   document.getElementById('si-thresh-label').textContent = `Threshold: ≥ ${siThresh.toFixed(1)}`;
 
   const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
@@ -795,10 +1040,13 @@ function calculate() {
   liBig.textContent = li !== null ? fmt(li) : '—';
   liBig.className = 'li-big' + (li !== null ? ' has-val' : '');
 
+  // Update LI card threshold label dynamically
+  document.getElementById('li-thresh-label').textContent = `≥ ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${(thresholds.liLat - 0.1).toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`;
+
   let liStatus = null, liLabel = 'No data';
   if (li !== null) {
-    if (li >= 4) { liStatus = 'pass'; liLabel = 'Lateralized'; }
-    else if (li >= 2) { liStatus = 'warn'; liLabel = 'Borderline'; }
+    if (li >= thresholds.liLat) { liStatus = 'pass'; liLabel = 'Lateralized'; }
+    else if (li >= thresholds.liBorder) { liStatus = 'warn'; liLabel = 'Borderline'; }
     else { liStatus = 'fail'; liLabel = 'Bilateral'; }
   }
   renderPill('li-status', liStatus, liLabel);
@@ -813,8 +1061,10 @@ function calculate() {
   let csi = null;
   if (R !== null && L !== null && IVC !== null && IVC !== 0) csi = Math.min(R, L) / IVC;
   renderIndexVal('csi-val', csi);
+  // Update CSI card threshold label dynamically
+  document.getElementById('csi-thresh-label').textContent = `< ${thresholds.csi.toFixed(1)}`;
   let csiStatus = null, csiLabel = 'No data';
-  if (csi !== null) { csiStatus = csi < 1 ? 'pass' : 'fail'; csiLabel = csi < 1 ? 'Suppressed' : 'Not suppressed'; }
+  if (csi !== null) { csiStatus = csi < thresholds.csi ? 'pass' : 'fail'; csiLabel = csi < thresholds.csi ? 'Suppressed' : 'Not suppressed'; }
   renderPill('csi-status', csiStatus, csiLabel);
 
   renderSummary(siR, siL, siThresh, li, csi, R, L);
@@ -824,7 +1074,7 @@ function renderSummary(siR, siL, siThresh, li, csi, R, L) {
   const box = document.getElementById('summary-box');
   if (siR === null && siL === null) {
     box.className = 'summary-box incomplete';
-    box.innerHTML = '<div class="summary-icon"></div><div class="summary-text">Enter aldosterone and cortisol values to calculate results.</div>';
+    box.innerHTML = '<div class="summary-icon"></div><div class="summary-text">Awaiting sample data — results will appear here once values are entered.</div>';
     return;
   }
   const rightOK = siR !== null && siR >= siThresh;
@@ -841,11 +1091,11 @@ function renderSummary(siR, siL, siThresh, li, csi, R, L) {
     return;
   }
   const domSide = R > L ? 'Right' : 'Left';
-  if (li >= 4) {
-    const csiText = csi !== null ? (csi < 1 ? ' Contralateral suppression is present.' : ' No contralateral suppression detected — consider further evaluation.') : '';
+  if (li >= thresholds.liLat) {
+    const csiText = csi !== null ? (csi < thresholds.csi ? ' Contralateral suppression is present.' : ' No contralateral suppression detected — consider further evaluation.') : '';
     box.className = 'summary-box success';
     box.innerHTML = `<div class="summary-icon">✔</div><div class="summary-text"><strong>Bilateral cannulation successful.</strong> Lateralization confirmed to the <strong>${domSide}</strong> side (LI = ${fmt(li)}).${csiText}</div>`;
-  } else if (li >= 2) {
+  } else if (li >= thresholds.liBorder) {
     box.className = 'summary-box warning';
     box.innerHTML = `<div class="summary-icon">⚠</div><div class="summary-text"><strong>Bilateral cannulation successful.</strong> Borderline lateralization detected (LI = ${fmt(li)}), with a trend toward the <strong>${domSide}</strong> side. Clinical correlation is recommended.</div>`;
   } else {
@@ -853,6 +1103,47 @@ function renderSummary(siR, siL, siThresh, li, csi, R, L) {
     box.innerHTML = `<div class="summary-icon">✘</div><div class="summary-text"><strong>Bilateral cannulation successful.</strong> No significant lateralization detected (LI = ${fmt(li)}). Findings are consistent with <strong>bilateral adrenal hyperplasia</strong>.</div>`;
   }
 }
+
+// ── Feedback Modal ──
+let feedbackType = 'General feedback';
+
+function openFeedback() {
+  document.getElementById('feedback-overlay').classList.add('open');
+  document.getElementById('feedback-message').value = '';
+  document.getElementById('feedback-email').value = '';
+  feedbackType = 'General feedback';
+  document.querySelectorAll('.fb-type-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+}
+
+function closeFeedback() {
+  document.getElementById('feedback-overlay').classList.remove('open');
+}
+
+function selectFeedbackType(btn, type) {
+  feedbackType = type;
+  document.querySelectorAll('.fb-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function submitFeedback() {
+  const msg = document.getElementById('feedback-message').value.trim();
+  if (!msg) {
+    document.getElementById('feedback-message').style.borderColor = '#8B1A1A';
+    document.getElementById('feedback-message').focus();
+    return;
+  }
+  const replyTo = document.getElementById('feedback-email').value.trim();
+  const p = ['becky', '.allegretto', '@me', '.com'].join('');
+  const subject = encodeURIComponent(`AVS Calculator — ${feedbackType}`);
+  const body = encodeURIComponent(`Type: ${feedbackType}\n${replyTo ? 'Reply to: ' + replyTo + '\n' : ''}\n${msg}`);
+  window.location.href = `mailto:${p}?subject=${subject}&body=${body}`;
+  closeFeedback();
+}
+
+// Close modal on overlay click
+document.getElementById('feedback-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeFeedback();
+});
 
 // ── Reset ──
 function resetAll() {
@@ -940,18 +1231,18 @@ function getInterpretationText(siR, siL, siThresh, li, csi, R, L) {
     return lines;
   }
 
-  if (li >= 4) {
-    lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Aldosterone hypersecretion is lateralized to the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). A value ≥ 4.0 is the established threshold for confirmed lateralization, supporting a diagnosis of unilateral primary aldosteronism. Unilateral adrenalectomy of the ${domSide} adrenal gland would be expected to result in biochemical cure or significant improvement in hypertension and hypokalemia.` });
-  } else if (li >= 2) {
-    lines.push({ icon: '⚠', color: '#7A4F00', bg: '#FFF8E6', text: `Borderline lateralization was identified, with a trend toward the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). Values between 2.0 and 3.9 are indeterminate. Clinical correlation with patient history, imaging findings, and biochemical data is strongly recommended before proceeding with adrenalectomy. Some centers may use a threshold of ≥ 2.0 in certain clinical contexts — institutional protocol should be followed.` });
+  if (li >= thresholds.liLat) {
+    lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Aldosterone hypersecretion is lateralized to the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). A value ≥ ${thresholds.liLat.toFixed(1)} is the threshold for confirmed lateralization per the selected guideline, supporting a diagnosis of unilateral primary aldosteronism. Unilateral adrenalectomy of the ${domSide} adrenal gland would be expected to result in biochemical cure or significant improvement in hypertension and hypokalemia.` });
+  } else if (li >= thresholds.liBorder) {
+    lines.push({ icon: '⚠', color: '#7A4F00', bg: '#FFF8E6', text: `Borderline lateralization was identified, with a trend toward the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). Values between ${thresholds.liBorder.toFixed(1)} and ${(thresholds.liLat - 0.1).toFixed(1)} are indeterminate per the selected guideline. Clinical correlation with patient history, imaging findings, and biochemical data is strongly recommended before proceeding with adrenalectomy.` });
   } else {
-    lines.push({ icon: '✘', color: '#8B1A1A', bg: '#FDEAEA', text: `No significant lateralization of aldosterone excess was identified (Lateralization Index = ${fmt(li)}). A value below 2.0 is consistent with <strong>bilateral adrenal hyperplasia (idiopathic hyperaldosteronism)</strong>. Surgical intervention is unlikely to be beneficial. Medical management with a mineralocorticoid receptor antagonist (e.g., spironolactone or eplerenone) is typically the recommended approach.` });
+    lines.push({ icon: '✘', color: '#8B1A1A', bg: '#FDEAEA', text: `No significant lateralization of aldosterone excess was identified (Lateralization Index = ${fmt(li)}). A value below ${thresholds.liBorder.toFixed(1)} is consistent with <strong>bilateral adrenal hyperplasia (idiopathic hyperaldosteronism)</strong>. Surgical intervention is unlikely to be beneficial. Medical management with a mineralocorticoid receptor antagonist (e.g., spironolactone or eplerenone) is typically the recommended approach.` });
   }
 
   // CSI
   if (csi !== null) {
-    if (csi < 1) {
-      lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Contralateral suppression is present (CSI = ${fmt(csi)}). The contralateral (${domSide === 'right' ? 'left' : 'right'}) adrenal gland demonstrates suppressed aldosterone production relative to the IVC, with a CSI below 1.0. This further supports unilateral disease and the appropriateness of surgical intervention.` });
+    if (csi < thresholds.csi) {
+      lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Contralateral suppression is present (CSI = ${fmt(csi)}). The contralateral (${domSide === 'right' ? 'left' : 'right'}) adrenal gland demonstrates suppressed aldosterone production relative to the IVC, with a CSI below ${thresholds.csi.toFixed(1)}. This further supports unilateral disease and the appropriateness of surgical intervention.` });
     } else {
       lines.push({ icon: '⚠', color: '#7A4F00', bg: '#FFF8E6', text: `Contralateral suppression is absent (CSI = ${fmt(csi)}). The contralateral adrenal gland does not demonstrate expected suppression relative to the IVC. In the context of a lateralized LI, this finding should be interpreted cautiously and correlated with other clinical data.` });
     }
@@ -962,7 +1253,7 @@ function getInterpretationText(siR, siL, siThresh, li, csi, R, L) {
 
 function openPrintReport() {
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
-  const siThresh = protocol === 'stimulated' ? 3.0 : 2.0;
+  const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
   const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
   const siL = (L !== null && IVC !== null && IVC !== 0) ? L / IVC : null;
   let li = null;
@@ -986,10 +1277,10 @@ function openPrintReport() {
     </div>`).join('');
 
   const indexRows = [
-    { label: 'Selectivity Index — Right (SI)', value: siR, unit: '', pass: siR !== null && siR >= siThresh, fail: siR !== null && siR < siThresh, thresh: `≥ ${siThresh.toFixed(1)} (${protocol === 'stimulated' ? 'stimulated' : 'unstimulated'})`, interp: siR === null ? '—' : siR >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
-    { label: 'Selectivity Index — Left (SI)',  value: siL, unit: '', pass: siL !== null && siL >= siThresh, fail: siL !== null && siL < siThresh, thresh: `≥ ${siThresh.toFixed(1)} (${protocol === 'stimulated' ? 'stimulated' : 'unstimulated'})`, interp: siL === null ? '—' : siL >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
-    { label: 'Lateralization Index (LI)',       value: li,  unit: '', pass: li !== null && li >= 4, warn: li !== null && li >= 2 && li < 4, fail: li !== null && li < 2, thresh: '≥ 4.0 lateralized | 2–3.9 borderline | < 2.0 bilateral', interp: li === null ? '—' : li >= 4 ? `Lateralized → ${domSide}` : li >= 2 ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
-    { label: 'Contralateral Suppression (CSI)', value: csi, unit: '', pass: csi !== null && csi < 1, fail: csi !== null && csi >= 1, thresh: '< 1.0 = suppression present', interp: csi === null ? '—' : csi < 1 ? 'Contralateral suppression present' : 'No contralateral suppression' },
+    { label: 'Selectivity Index — Right (SI)', value: siR, pass: siR !== null && siR >= siThresh, fail: siR !== null && siR < siThresh, thresh: `≥ ${siThresh.toFixed(1)} (${protocol === 'stimulated' ? 'stimulated' : 'unstimulated'})`, interp: siR === null ? '—' : siR >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
+    { label: 'Selectivity Index — Left (SI)',  value: siL, pass: siL !== null && siL >= siThresh, fail: siL !== null && siL < siThresh, thresh: `≥ ${siThresh.toFixed(1)} (${protocol === 'stimulated' ? 'stimulated' : 'unstimulated'})`, interp: siL === null ? '—' : siL >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
+    { label: 'Lateralization Index (LI)',       value: li,  pass: li !== null && li >= thresholds.liLat, warn: li !== null && li >= thresholds.liBorder && li < thresholds.liLat, fail: li !== null && li < thresholds.liBorder, thresh: `≥ ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${(thresholds.liLat-0.1).toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`, interp: li === null ? '—' : li >= thresholds.liLat ? `Lateralized → ${domSide}` : li >= thresholds.liBorder ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
+    { label: 'Contralateral Suppression (CSI)', value: csi, pass: csi !== null && csi < thresholds.csi, fail: csi !== null && csi >= thresholds.csi, thresh: `< ${thresholds.csi.toFixed(1)} = suppression present`, interp: csi === null ? '—' : csi < thresholds.csi ? 'Contralateral suppression present' : 'No contralateral suppression' },
   ];
 
   const indexTableRows = indexRows.map(r => {
@@ -1052,6 +1343,9 @@ function openPrintReport() {
       <p style="font-size:9pt;color:#aaa">${timeStr}</p>
       <p style="margin-top:6px;font-size:9pt;padding:3px 10px;background:#FDF3E3;color:#7A4F00;border-radius:2px;display:inline-block;font-family:monospace">
         ${protocol === 'stimulated' ? 'COSYNTROPIN-STIMULATED' : 'UNSTIMULATED'}
+      </p>
+      <p style="margin-top:4px;font-size:9pt;padding:3px 10px;background:#EBF0FA;color:#2B3A8C;border-radius:2px;display:inline-block;font-family:monospace">
+        ${document.getElementById('ref-guideline-label').textContent}
       </p>
     </div>
   </div>
@@ -1284,6 +1578,81 @@ buildAllRows('ivc');
 buildAllRows('right');
 buildAllRows('left');
 calculate();
+// Initialize threshold inputs as locked (preset mode)
+applyThresholdPreset('es2016');
+
+// ── Privacy: clear all fields on load ──
+window.addEventListener('load', () => {
+  document.querySelectorAll('input[type=text], input[type=number]').forEach(el => el.value = '');
+  // Re-sync state after clearing
+  ['ivc','right','left'].forEach(side => {
+    state[side].forEach((s, i) => { s.aldo = ''; s.cort = ''; updateRowDisplay(side, i); });
+  });
+  calculate();
+});
+
+// ── Privacy: clear all fields on tab/window close ──
+window.addEventListener('beforeunload', () => {
+  document.querySelectorAll('input[type=text], input[type=number]').forEach(el => el.value = '');
+});
+
+// ── Privacy: 30-minute inactivity session timeout ──
+const TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+let timeoutHandle;
+let warningHandle;
+const WARN_MS = 2 * 60 * 1000; // warn 2 min before
+
+function clearSessionData() {
+  document.getElementById('patient-name').value = '';
+  document.getElementById('patient-mrn').value = '';
+  ['right','left'].forEach(side => {
+    state[side] = Array.from({length: 3}, (_, i) => ({ id: i, aldo: '', cort: '', included: true }));
+    buildAllRows(side);
+  });
+  state.ivc.forEach((s, i) => {
+    s.aldo = ''; s.cort = ''; s.included = true;
+    const a = document.getElementById(`ivc-aldo-${i}`); if (a) a.value = '';
+    const c = document.getElementById(`ivc-cort-${i}`); if (c) c.value = '';
+    updateRowDisplay('ivc', i);
+    const row = document.getElementById(`ivc-row-${i}`); if (row) row.classList.remove('excluded');
+    const chk = document.querySelector(`#ivc-toggle-${i} input`); if (chk) chk.checked = true;
+  });
+  calculate();
+  // Show cleared notice
+  const notice = document.getElementById('timeout-notice');
+  if (notice) { notice.style.display = 'flex'; setTimeout(() => notice.style.display = 'none', 5000); }
+}
+
+function showTimeoutWarning() {
+  const warning = document.getElementById('timeout-warning');
+  if (warning) warning.style.display = 'flex';
+}
+
+function resetTimer() {
+  clearTimeout(timeoutHandle);
+  clearTimeout(warningHandle);
+  const warning = document.getElementById('timeout-warning');
+  if (warning) warning.style.display = 'none';
+  warningHandle = setTimeout(showTimeoutWarning, TIMEOUT_MS - WARN_MS);
+  timeoutHandle = setTimeout(() => { clearSessionData(); }, TIMEOUT_MS);
+}
+
+['mousemove','keydown','click','scroll','touchstart'].forEach(evt => {
+  document.addEventListener(evt, resetTimer, { passive: true });
+});
+resetTimer();
 </script>
+
+<!-- Session timeout warning banner -->
+<div id="timeout-warning" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:999;background:#7A4F00;color:#fff;padding:12px 24px;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:13px;align-items:center;gap:16px;box-shadow:0 4px 20px rgba(0,0,0,0.25);">
+  <span>⚠ Session will clear in 2 minutes due to inactivity.</span>
+  <button onclick="resetTimer()" style="background:#fff;color:#7A4F00;border:none;border-radius:3px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;">Keep Session</button>
+</div>
+
+<!-- Session cleared notice -->
+<div id="timeout-notice" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:999;background:#1B4D3E;color:#fff;padding:12px 24px;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:13px;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,0.25);">
+  <span>🔒 Session cleared for patient privacy.</span>
+</div>
+
 </body>
 </html>
