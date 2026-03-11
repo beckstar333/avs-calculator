@@ -280,17 +280,20 @@
   .copy-results-btn.copied { border-color: #1B5E35; color: #1B5E35; background: #E8F5EE; border-style: solid; }
 
   /* ── Tooltip ── */
-  .has-tooltip { position: relative; cursor: help; }
-  .tooltip-box {
-    display: none; position: absolute; top: calc(100% + 8px); left: 50%;
-    transform: translateX(-50%); width: 240px;
+  .has-tooltip { cursor: help; }
+  #tooltip-popup {
+    display: none; position: fixed;
     background: #1A1714; color: #E8E4DC;
-    font-family: var(--sans); font-size: 11px; line-height: 1.5;
-    padding: 9px 12px; border-radius: 4px; z-index: 200;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.25); pointer-events: none;
+    font-family: var(--sans); font-size: 11px; line-height: 1.6;
+    padding: 10px 13px; border-radius: 4px; z-index: 9999;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3); pointer-events: none;
+    max-width: 260px;
   }
-  .tooltip-box::after { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-bottom-color: #1A1714; }
-  .has-tooltip:hover .tooltip-box, .has-tooltip:focus .tooltip-box { display: block; }
+  #tooltip-popup::after {
+    content: ''; position: absolute; top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent; border-top-color: #1A1714;
+  }
   #feedback-overlay { display: none; }
   #feedback-overlay.open { display: flex !important; }
   .fb-type-btn {
@@ -610,8 +613,7 @@
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Selectivity Index (SI)</span>
-        <span class="index-thresh has-tooltip" id="si-thresh-label" tabindex="0"><span id="si-thresh-text">Threshold: ≥ 2.0</span>
-          <span class="tooltip-box">The SI confirms adequate catheter placement. A value ≥ threshold means the adrenal vein was successfully cannulated and the sample is valid for interpretation.</span>
+        <span class="index-thresh has-tooltip" id="si-thresh-label" tabindex="0" data-tooltip="The SI confirms adequate catheter placement. A value ≥ threshold means the adrenal vein was successfully cannulated and the sample is valid for interpretation."><span id="si-thresh-text">Threshold: ≥ 2.0</span>
         </span>
       </div>
       <div class="index-body">
@@ -635,8 +637,7 @@
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Lateralization Index (LI)</span>
-        <span class="index-thresh has-tooltip" id="li-thresh-label" tabindex="0"><span id="li-thresh-text">≥ 4.0 lateralized | 2.0–3.9 borderline | < 2.0 bilateral</span>
-          <span class="tooltip-box">The LI indicates which side is producing more aldosterone. ≥ threshold confirms unilateral disease; borderline values require clinical correlation; below threshold suggests bilateral hyperplasia.</span>
+        <span class="index-thresh has-tooltip" id="li-thresh-label" tabindex="0" data-tooltip="The LI indicates which side is producing more aldosterone. ≥ threshold confirms unilateral disease; borderline values require clinical correlation; below threshold suggests bilateral hyperplasia."><span id="li-thresh-text">≥ 4.0 lateralized | 2.0–3.9 borderline | < 2.0 bilateral</span>
         </span>
       </div>
       <div class="index-body">
@@ -653,8 +654,7 @@
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Contralateral Suppression (CSI)</span>
-        <span class="index-thresh has-tooltip" id="csi-thresh-label" tabindex="0"><span id="csi-thresh-text">< 1.0</span>
-          <span class="tooltip-box">The CSI confirms contralateral adrenal suppression. A value below threshold means the non-dominant side is suppressed, further supporting unilateral disease and surgical candidacy.</span>
+        <span class="index-thresh has-tooltip" id="csi-thresh-label" tabindex="0" data-tooltip="The CSI confirms contralateral adrenal suppression. A value below threshold means the non-dominant side is suppressed, further supporting unilateral disease and surgical candidacy."><span id="csi-thresh-text">< 1.0</span>
         </span>
       </div>
       <div class="index-body">
@@ -853,6 +853,9 @@
     </div>
   </div>
 </div>
+
+<!-- Global tooltip -->
+<div id="tooltip-popup"></div>
 
 <!-- ═══════════════════════════════════════════════
      PRINT REPORT WINDOW (opened separately)
@@ -1248,6 +1251,38 @@ document.addEventListener('keydown', function(e) {
 });
 let feedbackType = 'General feedback';
 
+// ── Tooltip system ──
+(function() {
+  const tip = document.getElementById('tooltip-popup');
+
+  function showTip(el) {
+    const text = el.getAttribute('data-tooltip');
+    if (!text) return;
+    tip.textContent = text;
+    tip.style.display = 'block';
+    const rect = el.getBoundingClientRect();
+    const tw = tip.offsetWidth;
+    let left = rect.left + rect.width / 2 - tw / 2;
+    let top  = rect.bottom + 8;
+    if (left < 8) left = 8;
+    if (left + tw > window.innerWidth - 8) left = window.innerWidth - tw - 8;
+    if (top + tip.offsetHeight > window.innerHeight - 8) {
+      top = rect.top - tip.offsetHeight - 10;
+    }
+    tip.style.left = left + 'px';
+    tip.style.top  = top  + 'px';
+  }
+
+  function hideTip() { tip.style.display = 'none'; }
+
+  document.querySelectorAll('.has-tooltip').forEach(el => {
+    el.addEventListener('mouseenter', () => showTip(el));
+    el.addEventListener('mouseleave', hideTip);
+    el.addEventListener('focus',      () => showTip(el));
+    el.addEventListener('blur',       hideTip);
+  });
+})();
+
 function openFeedback() {
   document.getElementById('feedback-overlay').classList.add('open');
   document.getElementById('feedback-message').value = '';
@@ -1552,7 +1587,7 @@ function openPrintReport() {
   <!-- Footer -->
   <div style="margin-top:20px;padding-top:14px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center">
     <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator • avs-calculator</p>
-    <p style="font-size:9pt;color:#888">Designed by <strong style="color:#555">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
+    <p style="font-size:9pt;color:#888">A clinical tool developed by <strong style="color:#555">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
   </div>
 </div>
 </body>
@@ -1732,7 +1767,7 @@ body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; back
   ${cards}
   <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
     <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator — Patient Summary</p>
-    <p style="font-size:9pt;color:#888">Prepared by <strong style="color:#555">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
+    <p style="font-size:9pt;color:#888">A clinical tool developed by <strong style="color:#555">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
   </div>
 </div>
 </body>
