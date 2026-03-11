@@ -184,8 +184,8 @@
   .results-panel { background: var(--surface); padding: 32px 28px; overflow-y: auto; position: sticky; top: 64px; height: calc(100vh - 64px); }
 
   /* ── Index Cards ── */
-  .index-card { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
-  .index-header { padding: 10px 14px; background: var(--surface2); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .index-card { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: visible; }
+  .index-header { padding: 10px 14px; background: var(--surface2); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0; }
   .index-name { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2); font-weight: 500; }
   .index-thresh { font-family: var(--mono); font-size: 9px; color: var(--text-3); letter-spacing: 0.04em; }
   .index-body { padding: 12px 14px; }
@@ -282,14 +282,14 @@
   /* ── Tooltip ── */
   .has-tooltip { position: relative; cursor: help; }
   .tooltip-box {
-    display: none; position: absolute; bottom: calc(100% + 8px); left: 50%;
-    transform: translateX(-50%); width: 220px;
+    display: none; position: absolute; top: calc(100% + 8px); left: 50%;
+    transform: translateX(-50%); width: 240px;
     background: #1A1714; color: #E8E4DC;
     font-family: var(--sans); font-size: 11px; line-height: 1.5;
-    padding: 9px 12px; border-radius: 4px; z-index: 100;
+    padding: 9px 12px; border-radius: 4px; z-index: 200;
     box-shadow: 0 4px 16px rgba(0,0,0,0.25); pointer-events: none;
   }
-  .tooltip-box::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1A1714; }
+  .tooltip-box::after { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-bottom-color: #1A1714; }
   .has-tooltip:hover .tooltip-box, .has-tooltip:focus .tooltip-box { display: block; }
   #feedback-overlay { display: none; }
   #feedback-overlay.open { display: flex !important; }
@@ -1443,11 +1443,22 @@ function openPrintReport() {
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; background: #fff; padding: 0; }
+  @page { size: letter portrait; margin: 0; }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     .no-print { display: none !important; }
+    html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
     body { padding: 0; }
-    .page { padding: 28px 36px; }
+    .page {
+      padding: 24px 32px;
+      width: 100%;
+      transform-origin: top left;
+      transform: scale(1);
+    }
+    .page-scaler {
+      width: 8.5in;
+      transform-origin: top left;
+    }
   }
   @media screen {
     body { background: #e8e5e0; }
@@ -1547,6 +1558,23 @@ function openPrintReport() {
   const win = window.open('', '_blank', 'width=900,height=800,scrollbars=yes');
   win.document.write(html);
   win.document.close();
+  win.addEventListener('load', () => {
+    win.addEventListener('beforeprint', () => {
+      const page = win.document.querySelector('.page');
+      if (!page) return;
+      const pageH = win.innerHeight || 1056;
+      const pageW = win.innerWidth  || 816;
+      page.style.transform = 'none';
+      const scale = Math.min(pageW / page.scrollWidth, pageH / page.scrollHeight, 1);
+      page.style.transformOrigin = 'top left';
+      page.style.transform = `scale(${scale})`;
+      page.style.width = (100 / scale) + '%';
+    });
+    win.addEventListener('afterprint', () => {
+      const page = win.document.querySelector('.page');
+      if (page) { page.style.transform = ''; page.style.width = ''; }
+    });
+  });
 }
 
 
@@ -1680,7 +1708,8 @@ function openPatientReport() {
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; background: #fff; }
 @media screen { body { background: #e8e5e0; } .page { max-width: 720px; margin: 24px auto; background: #fff; padding: 40px 48px; box-shadow: 0 2px 20px rgba(0,0,0,0.12); } .no-print { position: fixed; top: 16px; right: 16px; display: flex; gap: 10px; z-index: 99; } }
-@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .no-print { display: none !important; } .page { padding: 28px 36px; } }
+@page { size: letter portrait; margin: 0; }
+@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .no-print { display: none !important; } html, body { margin: 0; padding: 0; } .page { padding: 24px 32px; } }
 .pbtn { padding: 9px 18px; background: #1B4D3E; color: #fff; border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
 .cbtn { padding: 9px 18px; background: #fff; color: #444; border: 1px solid #ccc; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
 </style>
@@ -1709,6 +1738,23 @@ body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; back
   const win = window.open('', '_blank', 'width=820,height=800,scrollbars=yes');
   win.document.write(reportHTML);
   win.document.close();
+  win.addEventListener('load', () => {
+    win.addEventListener('beforeprint', () => {
+      const page = win.document.querySelector('.page');
+      if (!page) return;
+      const pageH = win.innerHeight || 1056;
+      const pageW = win.innerWidth  || 816;
+      page.style.transform = 'none';
+      const scale = Math.min(pageW / page.scrollWidth, pageH / page.scrollHeight, 1);
+      page.style.transformOrigin = 'top left';
+      page.style.transform = `scale(${scale})`;
+      page.style.width = (100 / scale) + '%';
+    });
+    win.addEventListener('afterprint', () => {
+      const page = win.document.querySelector('.page');
+      if (page) { page.style.transform = ''; page.style.width = ''; }
+    });
+  });
 }
 
 // ── Init ──
