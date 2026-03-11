@@ -250,7 +250,47 @@
   }
   .reset-btn:hover { border-color: var(--text); color: var(--text); background: var(--surface2); }
 
-  /* ── Feedback modal ── */
+  /* ── Sample count badge ── */
+  .sample-badge { font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; background: rgba(255,255,255,0.18); color: rgba(255,255,255,0.85); padding: 2px 8px; border-radius: 10px; }
+
+  /* ── Animated transitions ── */
+  .index-num { transition: color 0.25s ease; }
+  .status-pill { transition: background 0.25s ease, color 0.25s ease; }
+  .index-num.updating { opacity: 0; }
+  .index-num.updated { animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
+  @keyframes popIn { from { opacity:0; transform: scale(0.85); } to { opacity:1; transform: scale(1); } }
+  .dominant-value { transition: color 0.3s ease; }
+  .dominant-value.updated { animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+  /* ── Empty state icons ── */
+  .index-num.empty::before { content: ''; }
+  .index-empty-icon { display: inline-block; opacity: 0.35; font-size: 13px; }
+
+  /* ── Copy results button ── */
+  .copy-results-btn {
+    display: flex; align-items: center; gap: 6px; width: 100%;
+    margin-bottom: 14px; padding: 9px 14px;
+    background: var(--surface2); border: 1px dashed var(--border);
+    border-radius: var(--radius); cursor: pointer;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-3);
+    transition: all 0.2s; justify-content: center;
+  }
+  .copy-results-btn:hover { border-color: var(--text-2); color: var(--text-2); background: var(--surface); }
+  .copy-results-btn.copied { border-color: #1B5E35; color: #1B5E35; background: #E8F5EE; border-style: solid; }
+
+  /* ── Tooltip ── */
+  .has-tooltip { position: relative; cursor: help; }
+  .tooltip-box {
+    display: none; position: absolute; bottom: calc(100% + 8px); left: 50%;
+    transform: translateX(-50%); width: 220px;
+    background: #1A1714; color: #E8E4DC;
+    font-family: var(--sans); font-size: 11px; line-height: 1.5;
+    padding: 9px 12px; border-radius: 4px; z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25); pointer-events: none;
+  }
+  .tooltip-box::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1A1714; }
+  .has-tooltip:hover .tooltip-box, .has-tooltip:focus .tooltip-box { display: block; }
   #feedback-overlay { display: none; }
   #feedback-overlay.open { display: flex !important; }
   .fb-type-btn {
@@ -466,7 +506,7 @@
     <div class="section-card">
       <div class="section-header ivc">
         <span class="section-title">Inferior Vena Cava (IVC)</span>
-        <span class="section-tag">Peripheral Reference</span>
+        <span class="section-tag">Peripheral Reference &nbsp;·&nbsp; <span id="ivc-badge">0 samples</span></span>
       </div>
       <table class="sample-table">
         <thead><tr>
@@ -491,7 +531,7 @@
     <div class="section-card">
       <div class="section-header right">
         <span class="section-title">Right Adrenal Vein</span>
-        <span class="section-tag">Samples</span>
+        <span class="section-tag">Samples &nbsp;·&nbsp; <span id="right-badge">0 included</span></span>
       </div>
       <table class="sample-table">
         <thead><tr>
@@ -522,7 +562,7 @@
     <div class="section-card">
       <div class="section-header left">
         <span class="section-title">Left Adrenal Vein</span>
-        <span class="section-tag">Samples</span>
+        <span class="section-tag">Samples &nbsp;·&nbsp; <span id="left-badge">0 included</span></span>
       </div>
       <table class="sample-table">
         <thead><tr>
@@ -570,20 +610,22 @@
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Selectivity Index (SI)</span>
-        <span class="index-thresh" id="si-thresh-label">Threshold: ≥ 2.0</span>
+        <span class="index-thresh has-tooltip" id="si-thresh-label" tabindex="0"><span id="si-thresh-text">Threshold: ≥ 2.0</span>
+          <span class="tooltip-box">The SI confirms adequate catheter placement. A value ≥ threshold means the adrenal vein was successfully cannulated and the sample is valid for interpretation.</span>
+        </span>
       </div>
       <div class="index-body">
         <div class="index-row">
           <span class="index-side-label"><span class="dot right"></span>Right SI</span>
           <div class="index-value-group">
-            <span class="index-num empty" id="si-right-val">—</span>
+            <span class="index-num empty" id="si-right-val"><span class="index-empty-icon">○</span></span>
             <span class="status-pill na" id="si-right-status">No data</span>
           </div>
         </div>
         <div class="index-row">
           <span class="index-side-label"><span class="dot left"></span>Left SI</span>
           <div class="index-value-group">
-            <span class="index-num empty" id="si-left-val">—</span>
+            <span class="index-num empty" id="si-left-val"><span class="index-empty-icon">○</span></span>
             <span class="status-pill na" id="si-left-status">No data</span>
           </div>
         </div>
@@ -593,13 +635,15 @@
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Lateralization Index (LI)</span>
-        <span class="index-thresh" id="li-thresh-label">≥ 4.0 lateralized | 2.0–3.9 borderline | < 2.0 bilateral</span>
+        <span class="index-thresh has-tooltip" id="li-thresh-label" tabindex="0"><span id="li-thresh-text">≥ 4.0 lateralized | 2.0–3.9 borderline | < 2.0 bilateral</span>
+          <span class="tooltip-box">The LI indicates which side is producing more aldosterone. ≥ threshold confirms unilateral disease; borderline values require clinical correlation; below threshold suggests bilateral hyperplasia.</span>
+        </span>
       </div>
       <div class="index-body">
         <div class="index-row">
           <span class="index-side-label">LI (Higher ÷ Lower A/C)</span>
           <div class="index-value-group">
-            <span class="index-num empty" id="li-val">—</span>
+            <span class="index-num empty" id="li-val"><span class="index-empty-icon">○</span></span>
             <span class="status-pill na" id="li-status">No data</span>
           </div>
         </div>
@@ -609,26 +653,31 @@
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Contralateral Suppression (CSI)</span>
-        <span class="index-thresh" id="csi-thresh-label">< 1.0</span>
+        <span class="index-thresh has-tooltip" id="csi-thresh-label" tabindex="0"><span id="csi-thresh-text">< 1.0</span>
+          <span class="tooltip-box">The CSI confirms contralateral adrenal suppression. A value below threshold means the non-dominant side is suppressed, further supporting unilateral disease and surgical candidacy.</span>
+        </span>
       </div>
       <div class="index-body">
         <div class="index-row">
           <span class="index-side-label">CSI (Contralateral ÷ IVC A/C)</span>
           <div class="index-value-group">
-            <span class="index-num empty" id="csi-val">—</span>
+            <span class="index-num empty" id="csi-val"><span class="index-empty-icon">○</span></span>
             <span class="status-pill na" id="csi-status">No data</span>
           </div>
         </div>
       </div>
     </div>
 
+    <button class="copy-results-btn" id="copy-btn" onclick="copyResults()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M1 8V2a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Copy Results to Clipboard
+    </button>
+
     <div class="ref-section">
       <div class="ref-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <span style="display:flex;align-items:center;gap:8px">Reference Thresholds <span style="flex:1;height:1px;background:var(--border);display:inline-block;width:20px"></span></span>
         <select id="threshold-preset" onchange="applyThresholdPreset(this.value)" style="font-family:var(--mono);font-size:9px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text-2);cursor:pointer;letter-spacing:0.03em">
           <option value="es2016">Endocrine Society 2016</option>
-          <option value="es2025">Endocrine Society 2025</option>
-          <option value="jsh">Japanese Guidelines (JSH)</option>
           <option value="custom">Custom</option>
         </select>
       </div>
@@ -707,27 +756,32 @@
       </div>
       <div id="privacy-body" style="display:none;padding:14px;font-size:11px;color:#5C564E;line-height:1.8;background:#fff">
 
-        <p style="margin-bottom:8px"><strong style="color:#1A1714">Why this tool is not a HIPAA-covered application</strong></p>
+        <p style="margin-bottom:8px"><strong style="color:#1A1714">Why this tool is not subject to HIPAA</strong></p>
+        <p style="margin-bottom:10px;font-size:11px;color:#5C564E;line-height:1.7">HIPAA applies to covered entities and their business associates that <em>create, receive, maintain, or transmit</em> protected health information (PHI). This tool does none of these things. It is a passive calculation aid that operates entirely within the user's own browser — no data ever leaves the device.</p>
         <ul style="margin:0 0 14px 16px;padding:0">
-          <li style="margin-bottom:5px"><strong>No data transmission.</strong> All calculations happen entirely within your browser. No values you enter are ever sent to a server, stored in a database, or transmitted over the internet.</li>
-          <li style="margin-bottom:5px"><strong>No storage.</strong> This tool does not use cookies, local storage, or any form of persistent data retention. Closing the browser tab permanently erases all entered values.</li>
-          <li style="margin-bottom:5px"><strong>No logging.</strong> There are no analytics trackers, error loggers, or third-party scripts that could capture patient identifiers.</li>
-          <li><strong>No backend.</strong> This is a fully static HTML file — there is no server, no database, and no account system of any kind.</li>
+          <li style="margin-bottom:5px"><strong>No transmission.</strong> All calculations are performed locally in your browser. No data is ever sent to any server, third party, or external system — including the developer.</li>
+          <li style="margin-bottom:5px"><strong>No storage or retention.</strong> This tool does not use cookies, local storage, session storage, or any form of persistent data retention. No PHI is written to disk or retained between sessions.</li>
+          <li style="margin-bottom:5px"><strong>No collection.</strong> Patient name and MRN fields are entirely optional and are never required for calculation. If entered, they exist solely within the browser tab for the duration of that session.</li>
+          <li style="margin-bottom:5px"><strong>No logging or tracking.</strong> There are no analytics scripts, error trackers, or third-party integrations of any kind embedded in this tool.</li>
+          <li><strong>No backend infrastructure.</strong> This is a fully self-contained static HTML file. There is no server, no database, no API, and no account system. The developer has no technical capability to access any data entered by users.</li>
         </ul>
 
-        <p style="margin-bottom:8px"><strong style="color:#1A1714">Technical safeguards built into this tool</strong></p>
-        <ul style="margin:0 0 0 16px;padding:0">
-          <li style="margin-bottom:5px"><strong>Autocomplete disabled.</strong> All input fields have autocomplete turned off so browsers will not save or suggest previously entered patient identifiers.</li>
-          <li style="margin-bottom:5px"><strong>Fields cleared on load.</strong> Every time the page is opened or refreshed, all fields are automatically wiped — no residual data from a prior session is ever displayed.</li>
-          <li style="margin-bottom:5px"><strong>Fields cleared on exit.</strong> When the browser tab is closed or navigated away from, all entered data is immediately cleared.</li>
-          <li><strong>30-minute inactivity timeout.</strong> If the tool is left idle for 30 minutes, all patient data and sample values are automatically erased. A warning appears 2 minutes before this occurs, with the option to extend the session.</li>
+        <p style="margin-bottom:8px"><strong style="color:#1A1714">Built-in technical safeguards</strong></p>
+        <p style="margin-bottom:8px;font-size:11px;color:#5C564E;line-height:1.7">Although not legally required, the following safeguards are implemented as a matter of clinical best practice:</p>
+        <ul style="margin:0 0 10px 16px;padding:0">
+          <li style="margin-bottom:5px"><strong>Autocomplete disabled.</strong> All input fields suppress browser autofill and autosuggest to prevent inadvertent exposure of patient identifiers.</li>
+          <li style="margin-bottom:5px"><strong>Fields cleared on load.</strong> All fields are wiped each time the page loads or refreshes, ensuring no residual data persists from a prior session.</li>
+          <li style="margin-bottom:5px"><strong>Fields cleared on exit.</strong> All entered data is cleared when the tab is closed or navigated away from.</li>
+          <li><strong>30-minute inactivity timeout.</strong> All patient data and sample values are automatically erased after 30 minutes of inactivity. A warning is displayed 2 minutes prior, with the option to extend the session.</li>
         </ul>
+
+        <p style="font-size:10px;color:#8C867E;line-height:1.6;font-style:italic">This summary is provided for informational purposes and does not constitute legal advice. Clinicians with specific compliance questions regarding use of this tool within their institution are encouraged to consult their privacy officer or legal counsel.</p>
 
       </div>
     </div>
 
     <div style="margin-top:12px;padding:12px 14px;background:#F0EDE6;border:1px solid #D8D3C8;border-radius:4px;font-size:11px;color:#5C564E;line-height:1.6">
-      <strong style="color:#1A1714">Disclaimer:</strong> This tool is intended to support — not replace — clinical judgment. Threshold values may vary by institution and protocol; this calculator applies the most widely cited Endocrine Society thresholds. Results must always be interpreted by a qualified clinician in the context of the patient's full clinical picture, including imaging, biochemistry, comorbidities, and surgical candidacy. This calculator does not constitute medical advice and should not be used as the sole basis for clinical decision-making.
+      <strong style="color:#1A1714">Disclaimer:</strong> This tool is intended to support — not replace — clinical judgment. Threshold values may vary by institution and protocol; this calculator applies the most widely cited Endocrine Society thresholds (by default). Results must always be interpreted by a qualified clinician in the context of the patient's full clinical picture, including imaging, biochemistry, comorbidities, and surgical candidacy. This calculator does not constitute medical advice and should not be used as the sole basis for clinical decision-making.
     </div>
 
   </div>
@@ -811,8 +865,6 @@ const units = { aldo: 'pg/mL', cort: 'µg/dL' };
 // ── Threshold State ──
 const PRESETS = {
   es2016: { siUnstim: 2.0, siStim: 3.0, liLat: 4.0, liBorder: 2.0, csi: 1.0, label: 'Endocrine Society 2016' },
-  es2025: { siUnstim: 2.0, siStim: 3.0, liLat: 4.0, liBorder: 2.0, csi: 1.0, label: 'Endocrine Society 2025' },
-  jsh:    { siUnstim: 2.0, siStim: 3.0, liLat: 2.0, liBorder: 1.5, csi: 1.0, label: 'Japanese Guidelines (JSH)' },
 };
 
 const thresholds = { siUnstim: 2.0, siStim: 3.0, liLat: 4.0, liBorder: 2.0, csi: 1.0 };
@@ -1005,11 +1057,36 @@ function cycleProtocol() { setProtocol(protocol === 'stimulated' ? 'unstimulated
 // ── Helpers ──
 function fmt(n, d = 2) { return (n === null || n === undefined || isNaN(n)) ? '—' : n.toFixed(d); }
 
-function renderIndexVal(id, val) {
+function animateVal(id, val) {
   const el = document.getElementById(id);
-  if (val === null) { el.textContent = '—'; el.className = 'index-num empty'; }
-  else { el.textContent = fmt(val); el.className = 'index-num'; }
+  if (!el) return;
+  el.classList.remove('updated');
+  void el.offsetWidth; // reflow
+  if (val === null) {
+    el.className = 'index-num empty';
+    el.innerHTML = '<span class="index-empty-icon">○</span>';
+  } else {
+    el.className = 'index-num updated';
+    el.textContent = fmt(val);
+  }
 }
+
+function updateBadges() {
+  ['ivc','right','left'].forEach(side => {
+    const rows = state[side];
+    const total    = rows.length;
+    const included = rows.filter(r => r.included && r.aldo !== '' && r.cort !== '').length;
+    const el = document.getElementById(`${side}-badge`);
+    if (!el) return;
+    if (side === 'ivc') {
+      el.textContent = total === 0 ? '0 samples' : `${included}/${total} included`;
+    } else {
+      el.textContent = total === 0 ? '0 samples' : `${included}/${total} included`;
+    }
+  });
+}
+
+function renderIndexVal(id, val) { animateVal(id, val); }
 function renderPill(id, type, label) {
   const el = document.getElementById(id);
   el.textContent = label;
@@ -1024,7 +1101,7 @@ function calculate() {
   document.getElementById('ivc-avg').textContent   = IVC !== null ? fmt(IVC) : '—';
 
   const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
-  document.getElementById('si-thresh-label').textContent = `Threshold: ≥ ${siThresh.toFixed(1)}`;
+  document.getElementById('si-thresh-text').textContent = `Threshold: ≥ ${siThresh.toFixed(1)}`;
 
   const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
   const siL = (L !== null && IVC !== null && IVC !== 0) ? L / IVC : null;
@@ -1041,7 +1118,7 @@ function calculate() {
   liBig.className = 'li-big' + (li !== null ? ' has-val' : '');
 
   // Update LI card threshold label dynamically
-  document.getElementById('li-thresh-label').textContent = `≥ ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${(thresholds.liLat - 0.1).toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`;
+  document.getElementById('li-thresh-text').textContent = `≥ ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${(thresholds.liLat - 0.1).toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`;
 
   let liStatus = null, liLabel = 'No data';
   if (li !== null) {
@@ -1057,17 +1134,18 @@ function calculate() {
     else if (L > R) { domEl.textContent = 'Left'; domEl.className = 'dominant-value left-dom'; }
     else { domEl.textContent = 'Equal'; domEl.className = 'dominant-value bilateral'; }
   } else { domEl.textContent = '—'; domEl.className = 'dominant-value'; }
+  domEl.classList.remove('updated'); void domEl.offsetWidth; domEl.classList.add('updated');
 
   let csi = null;
   if (R !== null && L !== null && IVC !== null && IVC !== 0) csi = Math.min(R, L) / IVC;
   renderIndexVal('csi-val', csi);
-  // Update CSI card threshold label dynamically
-  document.getElementById('csi-thresh-label').textContent = `< ${thresholds.csi.toFixed(1)}`;
+  document.getElementById('csi-thresh-text').textContent = `< ${thresholds.csi.toFixed(1)}`;
   let csiStatus = null, csiLabel = 'No data';
   if (csi !== null) { csiStatus = csi < thresholds.csi ? 'pass' : 'fail'; csiLabel = csi < thresholds.csi ? 'Suppressed' : 'Not suppressed'; }
   renderPill('csi-status', csiStatus, csiLabel);
 
   renderSummary(siR, siL, siThresh, li, csi, R, L);
+  updateBadges();
 }
 
 function renderSummary(siR, siL, siThresh, li, csi, R, L) {
@@ -1104,7 +1182,67 @@ function renderSummary(siR, siL, siThresh, li, csi, R, L) {
   }
 }
 
-// ── Feedback Modal ──
+// ── Copy Results ──
+function copyResults() {
+  const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
+  const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
+  const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
+  const siL = (L !== null && IVC !== null && IVC !== 0) ? L / IVC : null;
+  const li  = (R !== null && L !== null && Math.min(R,L) !== 0) ? Math.max(R,L) / Math.min(R,L) : null;
+  const csi = (R !== null && L !== null && IVC !== null && IVC !== 0) ? Math.min(R,L) / IVC : null;
+  const domSide = R !== null && L !== null ? (R > L ? 'Right' : L > R ? 'Left' : 'Equal') : '—';
+  const guidelineLabel = document.getElementById('ref-guideline-label').textContent;
+  const protLabel = protocol === 'stimulated' ? 'Cosyntropin-Stimulated' : 'Unstimulated';
+  const patientName = document.getElementById('patient-name').value.trim();
+  const patientMRN  = document.getElementById('patient-mrn').value.trim();
+
+  let lines = ['AVS CALCULATOR RESULTS', '─'.repeat(36)];
+  if (patientName) lines.push(`Patient: ${patientName}`);
+  if (patientMRN)  lines.push(`MRN: ${patientMRN}`);
+  lines.push(`Protocol: ${protLabel}`);
+  lines.push(`Guideline: ${guidelineLabel}`);
+  lines.push('');
+  lines.push(`Dominant Side: ${domSide}`);
+  lines.push('');
+  lines.push(`SI Right:  ${siR !== null ? fmt(siR) : '—'}  (threshold ≥ ${siThresh.toFixed(1)}) — ${siR !== null ? (siR >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}`);
+  lines.push(`SI Left:   ${siL !== null ? fmt(siL) : '—'}  (threshold ≥ ${siThresh.toFixed(1)}) — ${siL !== null ? (siL >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}`);
+  lines.push(`LI:        ${li  !== null ? fmt(li)  : '—'}  — ${li !== null ? (li >= thresholds.liLat ? 'Lateralized' : li >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}`);
+  lines.push(`CSI:       ${csi !== null ? fmt(csi) : '—'}  — ${csi !== null ? (csi < thresholds.csi ? 'Suppressed' : 'Not suppressed') : 'No data'}`);
+  lines.push('');
+  lines.push(`Generated by AVS Calculator — avsresults.com`);
+
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Copied to Clipboard`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M1 8V2a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Copy Results to Clipboard`;
+    }, 2500);
+  });
+}
+
+// ── Keyboard Navigation ──
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter' && e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  const active = document.activeElement;
+  if (!active || active.tagName !== 'INPUT' || active.type !== 'number') return;
+
+  // Enter / ArrowDown → next input; ArrowUp → previous input
+  const allInputs = Array.from(document.querySelectorAll('input[type="number"]:not([disabled])'));
+  const idx = allInputs.indexOf(active);
+  if (idx === -1) return;
+
+  if (e.key === 'Enter' || e.key === 'ArrowDown') {
+    e.preventDefault();
+    const next = allInputs[idx + 1];
+    if (next) { next.focus(); next.select(); }
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    const prev = allInputs[idx - 1];
+    if (prev) { prev.focus(); prev.select(); }
+  }
+});
 let feedbackType = 'General feedback';
 
 function openFeedback() {
