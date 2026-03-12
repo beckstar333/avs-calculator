@@ -308,6 +308,8 @@
   .session-timestamp { font-family:var(--mono); font-size:9px; color:var(--text-3); letter-spacing:0.05em; text-align:right; margin-bottom:10px; }
   #feedback-overlay { display: none; }
   #feedback-overlay.open { display: flex !important; }
+  #print-options-overlay { display: none; }
+  #print-options-overlay.open { display: flex !important; }
   .fb-type-btn {
     padding: 5px 12px; border: 1px solid var(--border); border-radius: 2px;
     background: var(--surface2); font-family: var(--sans); font-size: 11px;
@@ -489,14 +491,12 @@
     <span class="subtitle">Adrenal Vein Sampling</span>
   </div>
   <div class="header-right">
-    <button class="print-btn-patient-header" onclick="openPatientReport()">
-      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="4" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Patient-Friendly Summary
-    </button>
-    <button class="print-btn-header" onclick="openPrintReport()">
-      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 4H10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Clinical Report
-    </button>
+    <div style="position:relative;display:inline-block" id="clinical-btn-wrap">
+      <button class="print-btn-header" onclick="openPrintOptions()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 4H10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Clinical Reports
+      </button>
+    </div>
     <button class="protocol-badge" id="headerProtocol" onclick="cycleProtocol()">Unstimulated</button>
   </div>
 </header>
@@ -820,9 +820,9 @@
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 1H2a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h3l2 2 2-2h1a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
       Feedback
     </button>
-    <button class="print-btn" onclick="openPrintReport()">
+    <button class="print-btn" onclick="openPrintOptions()">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 4H10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Print / Export PDF
+      Clinical Reports
     </button>
   </div>
 </div>
@@ -865,6 +865,52 @@
       <div style="display:flex;justify-content:flex-end;gap:10px">
         <button onclick="closeFeedback()" style="padding:8px 16px;background:transparent;border:1px solid #D8D3C8;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;color:#5C564E;cursor:pointer">Cancel</button>
         <button onclick="submitFeedback()" style="padding:8px 18px;background:#1A1714;border:1px solid #1A1714;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer">Send Feedback</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PRINT OPTIONS MODAL
+════════════════════════════════════════════════ -->
+<div id="print-options-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:6px;width:100%;max-width:400px;margin:20px;box-shadow:0 8px 40px rgba(0,0,0,0.2);overflow:hidden">
+    <div style="background:#1A1714;padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:#fff">Clinical Reports</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#8C8680;letter-spacing:0.08em;text-transform:uppercase;margin-top:2px">Select sections to include</div>
+      </div>
+      <button onclick="closePrintOptions()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1">✕</button>
+    </div>
+    <div style="padding:20px">
+      <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #D8D3C8;border-radius:4px;margin-bottom:10px;cursor:pointer;background:#F7F5F0">
+        <input type="checkbox" id="opt-summary" checked style="margin-top:2px;accent-color:#1A1714;width:15px;height:15px;flex-shrink:0">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#1A1714;margin-bottom:2px">Clinical Summary</div>
+          <div style="font-size:11px;color:#8C867E;line-height:1.5">Calculated indices and clinical interpretation</div>
+        </div>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #D8D3C8;border-radius:4px;margin-bottom:10px;cursor:pointer;background:#F7F5F0">
+        <input type="checkbox" id="opt-worksheet" checked style="margin-top:2px;accent-color:#1A1714;width:15px;height:15px;flex-shrink:0">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#1A1714;margin-bottom:2px">Calculation Worksheet</div>
+          <div style="font-size:11px;color:#8C867E;line-height:1.5">Full A/C ratio workup and step-by-step index derivation</div>
+        </div>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #D8D3C8;border-radius:4px;cursor:pointer;background:#F7F5F0">
+        <input type="checkbox" id="opt-patient" style="margin-top:2px;accent-color:#1A1714;width:15px;height:15px;flex-shrink:0">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#1A1714;margin-bottom:2px">Patient-Friendly Summary</div>
+          <div style="font-size:11px;color:#8C867E;line-height:1.5">Plain-language explanation of results for the patient</div>
+        </div>
+      </label>
+      <p style="font-size:10px;color:#B8B0A0;margin-top:10px;font-style:italic">Selected sections print as a single document with page breaks between them.</p>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
+        <button onclick="closePrintOptions()" style="padding:8px 16px;background:transparent;border:1px solid #D8D3C8;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;color:#5C564E;cursor:pointer">Cancel</button>
+        <button onclick="confirmPrintReport()" style="padding:8px 18px;background:#1A1714;border:1px solid #1A1714;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer">
+          <svg width="12" height="12" viewBox="0 0 13 13" fill="none" style="margin-right:5px;vertical-align:middle"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/></svg>
+          Print / Save PDF
+        </button>
       </div>
     </div>
   </div>
@@ -1342,6 +1388,29 @@ function updateScreenInterp(siR, siL, siThresh, li, csi, R, L) {
     </div>`).join('');
 }
 
+function openPrintOptions() {
+  document.getElementById('print-options-overlay').classList.add('open');
+}
+function closePrintOptions() {
+  document.getElementById('print-options-overlay').classList.remove('open');
+}
+function confirmPrintReport() {
+  const wantSummary   = document.getElementById('opt-summary').checked;
+  const wantWorksheet = document.getElementById('opt-worksheet').checked;
+  const wantPatient   = document.getElementById('opt-patient').checked;
+  if (!wantSummary && !wantWorksheet && !wantPatient) {
+    alert('Please select at least one section to print.');
+    return;
+  }
+  closePrintOptions();
+  openPrintReport(wantSummary, wantWorksheet, wantPatient);
+}
+
+// Close on overlay click
+document.getElementById('print-options-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closePrintOptions();
+});
+
 function openFeedback() {
   document.getElementById('feedback-overlay').classList.add('open');
   document.getElementById('feedback-message').value = '';
@@ -1513,7 +1582,7 @@ function getInterpretationText(siR, siL, siThresh, li, csi, R, L) {
   return lines;
 }
 
-function openPrintReport() {
+function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false) {
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
   const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
   const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
@@ -1626,135 +1695,71 @@ function openPrintReport() {
     </div>
   </div>
 
-  <!-- RAW DATA -->
+  <!-- CALCULATION WORKSHEET -->
+  ${wantWorksheet ? `
   <div class="section">
     <h2>Measured Values &amp; A/C Ratios</h2>
-
     <h3 style="color:#2B3A8C;margin-bottom:6px">Inferior Vena Cava (IVC) — Peripheral Reference</h3>
-    <div style="border:1px solid #dde3f5;border-radius:3px;overflow:hidden;margin-bottom:18px">
-      ${buildSampleTableHTML('ivc', '#2B3A8C')}
-    </div>
-
+    <div style="border:1px solid #dde3f5;border-radius:3px;overflow:hidden;margin-bottom:18px">${buildSampleTableHTML('ivc', '#2B3A8C')}</div>
     <h3 style="color:#1B4D3E;margin-bottom:6px">Right Adrenal Vein</h3>
-    <div style="border:1px solid #c2ddd3;border-radius:3px;overflow:hidden;margin-bottom:18px">
-      ${buildSampleTableHTML('right', '#1B4D3E')}
-    </div>
-
+    <div style="border:1px solid #c2ddd3;border-radius:3px;overflow:hidden;margin-bottom:18px">${buildSampleTableHTML('right', '#1B4D3E')}</div>
     <h3 style="color:#7A1F1F;margin-bottom:6px">Left Adrenal Vein</h3>
-    <div style="border:1px solid #dec4c4;border-radius:3px;overflow:hidden;margin-bottom:0">
-      ${buildSampleTableHTML('left', '#7A1F1F')}
-    </div>
+    <div style="border:1px solid #dec4c4;border-radius:3px;overflow:hidden;margin-bottom:0">${buildSampleTableHTML('left', '#7A1F1F')}</div>
   </div>
-
-  <!-- CALCULATION WORKUP -->
   <div class="section">
     <h2>Calculation Workup</h2>
-    <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">
-      A/C ratios are calculated per sample (Aldosterone ÷ Cortisol, in reported units). When multiple samples are included, the A/C ratios are averaged. All indices are derived from these averaged values.
-    </p>
-
+    <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">A/C ratios are calculated per sample (Aldosterone ÷ Cortisol, in reported units). When multiple samples are included, the A/C ratios are averaged. All indices are derived from these averaged values.</p>
     ${(() => {
       const aldoUnit = document.querySelector('#aldo-unit-toggle .unit-btn.active')?.textContent || 'pg/mL';
       const cortUnit = document.querySelector('#cort-unit-toggle .unit-btn.active')?.textContent || 'µg/dL';
-
       function sectionWorkup(side, label, color) {
         const samples = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
         if (!samples.length) return `<p style="color:#aaa;font-size:9pt;font-style:italic">No included samples for ${label}.</p>`;
-        const rows = samples.map((s, i) => {
-          const ac = parseFloat(s.aldo) / parseFloat(s.cort);
-          return `<tr>
-            <td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee">Sample ${i + 1}</td>
-            <td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.aldo).toFixed(1)} ${aldoUnit}</td>
-            <td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.cort).toFixed(2)} ${cortUnit}</td>
-            <td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.aldo).toFixed(1)} ÷ ${parseFloat(s.cort).toFixed(2)}</td>
-            <td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700;color:${color}">${fmt(ac)}</td>
-          </tr>`;
-        }).join('');
-        const avg = samples.reduce((sum, s) => sum + parseFloat(s.aldo) / parseFloat(s.cort), 0) / samples.length;
-        const avgRow = samples.length > 1
-          ? `<tr style="background:#fafafa">
-              <td colspan="4" style="padding:6px 10px;font-size:9pt;color:#666;border-top:2px solid #ddd;text-align:right;font-style:italic">Average A/C (${samples.length} samples):</td>
-              <td style="padding:6px 10px;font-family:monospace;font-weight:700;font-size:10pt;color:${color};border-top:2px solid #ddd;text-align:center">${fmt(avg)}</td>
-            </tr>` : '';
-        return `
-          <p style="font-family:monospace;font-size:8pt;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${label}</p>
-          <table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px">
-            <thead><tr style="background:#f5f5f5">
-              <th style="padding:6px 10px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Sample</th>
-              <th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Aldosterone</th>
-              <th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Cortisol</th>
-              <th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Calculation</th>
-              <th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">A/C Ratio</th>
-            </tr></thead>
-            <tbody>${rows}${avgRow}</tbody>
-          </table>`;
+        const rows = samples.map((s, i) => { const ac = parseFloat(s.aldo) / parseFloat(s.cort); return `<tr><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee">Sample ${i+1}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.aldo).toFixed(1)} ${aldoUnit}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.cort).toFixed(2)} ${cortUnit}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.aldo).toFixed(1)} ÷ ${parseFloat(s.cort).toFixed(2)}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700;color:${color}">${fmt(ac)}</td></tr>`; }).join('');
+        const avg = samples.reduce((sum, s) => sum + parseFloat(s.aldo)/parseFloat(s.cort), 0) / samples.length;
+        const avgRow = samples.length > 1 ? `<tr style="background:#fafafa"><td colspan="4" style="padding:6px 10px;font-size:9pt;color:#666;border-top:2px solid #ddd;text-align:right;font-style:italic">Average A/C (${samples.length} samples):</td><td style="padding:6px 10px;font-family:monospace;font-weight:700;font-size:10pt;color:${color};border-top:2px solid #ddd;text-align:center">${fmt(avg)}</td></tr>` : '';
+        return `<p style="font-family:monospace;font-size:8pt;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${label}</p><table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px"><thead><tr style="background:#f5f5f5"><th style="padding:6px 10px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Sample</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Aldosterone</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Cortisol</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Calculation</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">A/C Ratio</th></tr></thead><tbody>${rows}${avgRow}</tbody></table>`;
       }
-
-      const ivcAC  = avgAC('ivc'),  rightAC = avgAC('right'), leftAC = avgAC('left');
+      const ivcAC = avgAC('ivc'), rightAC = avgAC('right'), leftAC = avgAC('left');
       const domSideLabel = (rightAC !== null && leftAC !== null) ? (rightAC > leftAC ? 'Right' : 'Left') : '—';
       const contraAC = (rightAC !== null && leftAC !== null) ? Math.min(rightAC, leftAC) : null;
       const higherAC = (rightAC !== null && leftAC !== null) ? Math.max(rightAC, leftAC) : null;
-
-      const siThreshLocal = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
-      const siRval = (rightAC !== null && ivcAC !== null && ivcAC !== 0) ? rightAC / ivcAC : null;
-      const siLval = (leftAC  !== null && ivcAC !== null && ivcAC !== 0) ? leftAC  / ivcAC : null;
-      const liVal  = (rightAC !== null && leftAC !== null && Math.min(rightAC, leftAC) !== 0) ? higherAC / contraAC : null;
-      const csiVal = (contraAC !== null && ivcAC !== null && ivcAC !== 0) ? contraAC / ivcAC : null;
-
-      function indexWorkupRow(label, numeratorLabel, numeratorVal, denominatorLabel, denominatorVal, result, formula) {
-        if (result === null) return `<tr><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee">${label}</td><td colspan="4" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`;
-        return `<tr>
-          <td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-weight:600">${label}</td>
-          <td style="padding:8px 12px;font-size:9pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;color:#555">${numeratorLabel}<br><span style="font-size:8pt;color:#aaa">${fmt(numeratorVal)}</span></td>
-          <td style="padding:8px 12px;font-size:12pt;border-bottom:1px solid #eee;text-align:center;color:#bbb">÷</td>
-          <td style="padding:8px 12px;font-size:9pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;color:#555">${denominatorLabel}<br><span style="font-size:8pt;color:#aaa">${fmt(denominatorVal)}</span></td>
-          <td style="padding:8px 12px;font-size:10pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700">= ${fmt(result)}</td>
-        </tr>`;
-      }
-
-      return `
-        ${sectionWorkup('ivc',   'Inferior Vena Cava (IVC)',  '#2B3A8C')}
-        ${sectionWorkup('right', 'Right Adrenal Vein',         '#1B4D3E')}
-        ${sectionWorkup('left',  'Left Adrenal Vein',          '#7A1F1F')}
-
-        <p style="font-family:monospace;font-size:8pt;font-weight:600;color:#444;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Index Derivation</p>
-        <table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden">
-          <thead><tr style="background:#f5f5f5">
-            <th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:18%">Index</th>
-            <th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Formula &amp; Values</th>
-            <th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:14%">Result</th>
-          </tr></thead>
-          <tbody>
-            ${siRval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Right A/C ÷ IVC A/C &nbsp;=&nbsp; ${fmt(rightAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siRval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
-            ${siLval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Left A/C ÷ IVC A/C &nbsp;=&nbsp; ${fmt(leftAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siLval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
-            ${liVal !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">LI</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">${domSideLabel} A/C ÷ Contralateral A/C &nbsp;=&nbsp; ${fmt(higherAC)} ÷ ${fmt(contraAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(liVal)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">LI</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
-            ${csiVal !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600">CSI</td><td style="padding:8px 12px;font-size:9.5pt;font-family:monospace;color:#555">Contralateral A/C ÷ IVC A/C &nbsp;=&nbsp; ${fmt(contraAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;text-align:center;font-family:monospace">${fmt(csiVal)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600">CSI</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;font-style:italic">Insufficient data</td></tr>`}
-          </tbody>
-        </table>`;
+      const siRval = (rightAC !== null && ivcAC !== null && ivcAC !== 0) ? rightAC/ivcAC : null;
+      const siLval = (leftAC  !== null && ivcAC !== null && ivcAC !== 0) ? leftAC/ivcAC  : null;
+      const liVal  = (higherAC !== null && contraAC !== null && contraAC !== 0) ? higherAC/contraAC : null;
+      const csiVal = (contraAC !== null && ivcAC !== null && ivcAC !== 0) ? contraAC/ivcAC : null;
+      return `${sectionWorkup('ivc','Inferior Vena Cava (IVC)','#2B3A8C')}${sectionWorkup('right','Right Adrenal Vein','#1B4D3E')}${sectionWorkup('left','Left Adrenal Vein','#7A1F1F')}
+      <p style="font-family:monospace;font-size:8pt;font-weight:600;color:#444;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Index Derivation</p>
+      <table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden"><thead><tr style="background:#f5f5f5"><th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:18%">Index</th><th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Formula &amp; Values</th><th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:14%">Result</th></tr></thead><tbody>
+        ${siRval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Right A/C ÷ IVC A/C = ${fmt(rightAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siRval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
+        ${siLval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Left A/C ÷ IVC A/C = ${fmt(leftAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siLval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
+        ${liVal  !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">LI</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">${domSideLabel} A/C ÷ Contralateral A/C = ${fmt(higherAC)} ÷ ${fmt(contraAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(liVal)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">LI</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
+        ${csiVal !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600">CSI</td><td style="padding:8px 12px;font-size:9.5pt;font-family:monospace;color:#555">Contralateral A/C ÷ IVC A/C = ${fmt(contraAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;text-align:center;font-family:monospace">${fmt(csiVal)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600">CSI</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;font-style:italic">Insufficient data</td></tr>`}
+      </tbody></table>`;
     })()}
   </div>
+  ${wantSummary ? `<div style="page-break-before:always"></div>` : ''}
+  ` : ''}
 
-  <!-- CALCULATED INDICES -->
+  <!-- CLINICAL SUMMARY -->
+  ${wantSummary ? `
   <div class="section">
     <h2>Calculated Indices</h2>
     <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-radius:3px;overflow:hidden">
-      <thead>
-        <tr style="background:#f5f5f5">
-          <th style="padding:8px 12px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Index</th>
-          <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Value</th>
-          <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Threshold</th>
-          <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Result</th>
-        </tr>
-      </thead>
+      <thead><tr style="background:#f5f5f5">
+        <th style="padding:8px 12px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Index</th>
+        <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Value</th>
+        <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Threshold</th>
+        <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Result</th>
+      </tr></thead>
       <tbody>${indexTableRows}</tbody>
     </table>
   </div>
-
-  <!-- INTERPRETATION -->
   <div class="section">
     <h2>Clinical Interpretation</h2>
     ${interpHTML}
   </div>
+  ` : ''}
 
   <!-- DISCLAIMER -->
   <div style="margin-top:24px;padding:12px 14px;background:#f8f8f8;border:1px solid #e0e0e0;border-radius:3px">
@@ -1766,6 +1771,9 @@ function openPrintReport() {
     <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator</p>
     <p style="font-size:8pt;color:#aaa">A clinical tool developed by <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
   </div>
+  <!-- PATIENT SUMMARY -->
+  ${wantPatient ? `<div style="page-break-before:always"></div><div class="page" style="font-family:'DM Sans',sans-serif;font-size:11pt;color:#1a1714">${buildPatientSectionHTML(dateStr)}</div>` : ''}
+
 </div>
 </body>
 </html>`;
@@ -1792,8 +1800,8 @@ function openPrintReport() {
 }
 
 // ══════════════════════════════════════════════
-// PATIENT SUMMARY REPORT
-function openPatientReport() {
+// PATIENT SUMMARY — shared helper
+function buildPatientSectionHTML(dateStr) {
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
   const siThresh = protocol === 'stimulated' ? 3.0 : 2.0;
   const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
@@ -1802,129 +1810,55 @@ function openPatientReport() {
   if (R !== null && L !== null && Math.min(R,L) !== 0) li = Math.max(R,L) / Math.min(R,L);
   let csi = null;
   if (R !== null && L !== null && IVC !== null && IVC !== 0) csi = Math.min(R,L) / IVC;
-
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  const patientHeader = '';
   const rightOK = siR !== null && siR >= siThresh;
   const leftOK  = siL !== null && siL >= siThresh;
   const domSide = (R !== null && L !== null) ? (R > L ? 'right' : 'left') : null;
 
-  // Build the plain-language content cards
   let cards = '';
-
-  // ── What is this test? ──
   cards += `<div style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
     <h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">What is adrenal vein sampling?</h3>
     <p style="font-size:11pt;color:#3a3530;line-height:1.8">Adrenal vein sampling (AVS) is a specialized procedure used to find the source of a hormone problem called <strong>primary aldosteronism</strong> — a condition where your body produces too much of a hormone called aldosterone, which can cause high blood pressure and low potassium levels.</p>
     <p style="font-size:11pt;color:#3a3530;line-height:1.8;margin-top:10px">During this procedure, tiny blood samples were collected from the veins of each adrenal gland (small glands that sit on top of your kidneys) and from a large vein in your body. These samples are compared to figure out whether <strong>one</strong> adrenal gland is overproducing aldosterone, or whether <strong>both</strong> glands are involved.</p>
   </div>`;
 
-  // ── Were the samples collected successfully? ──
   let cannulationCard = '';
   if (siR === null && siL === null) {
-    cannulationCard = `<div style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px">
-      <div style="font-size:24px;margin-bottom:8px">⚠️</div>
-      <h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">No data has been entered yet</h3>
-      <p style="font-size:11pt;color:#5a3e00;line-height:1.8">Your care team has not yet entered the laboratory results from your procedure. This summary will be updated once those values are available.</p>
-    </div>`;
+    cannulationCard = `<div style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">No data has been entered yet</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">Your care team has not yet entered the laboratory results from your procedure. This summary will be updated once those values are available.</p></div>`;
   } else if (rightOK && leftOK) {
-    cannulationCard = `<div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
-      <div style="font-size:24px;margin-bottom:8px">✅</div>
-      <h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">The procedure was technically successful</h3>
-      <p style="font-size:11pt;color:#1a3d28;line-height:1.8">Blood samples were successfully collected from both the right and left adrenal veins, which means the results can be reliably interpreted by your care team.</p>
-    </div>`;
+    cannulationCard = `<div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">✅</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">The procedure was technically successful</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">Blood samples were successfully collected from both the right and left adrenal veins, which means the results can be reliably interpreted by your care team.</p></div>`;
   } else {
     const which = !rightOK && !leftOK ? 'either adrenal vein' : (!rightOK ? 'the right adrenal vein' : 'the left adrenal vein');
-    cannulationCard = `<div style="background:#FDEAEA;border:1px solid #e8b4b4;border-radius:8px;padding:20px 24px;margin-bottom:20px">
-      <div style="font-size:24px;margin-bottom:8px">⚠️</div>
-      <h3 style="font-size:13pt;color:#8B1A1A;margin-bottom:10px;font-family:'Libre Baskerville',serif">The procedure may need to be repeated</h3>
-      <p style="font-size:11pt;color:#5a1010;line-height:1.8">Your care team was not able to obtain a reliable sample from ${which}. This can happen in some cases because these veins are small and can be difficult to access. Your doctor will discuss whether a repeat procedure makes sense for you.</p>
-    </div>`;
+    cannulationCard = `<div style="background:#FDEAEA;border:1px solid #e8b4b4;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#8B1A1A;margin-bottom:10px;font-family:'Libre Baskerville',serif">The procedure may need to be repeated</h3><p style="font-size:11pt;color:#5a1010;line-height:1.8">Your care team was not able to obtain a reliable sample from ${which}. This can happen in some cases because these veins are small and can be difficult to access. Your doctor will discuss whether a repeat procedure makes sense for you.</p></div>`;
   }
   cards += cannulationCard;
 
-  // ── What did we find? (only if both cannulations successful) ──
   if (rightOK && leftOK && li !== null) {
     let findingCard = '';
     if (li >= 4) {
       const sideFull = domSide === 'right' ? 'right' : 'left';
       const sideOpp  = domSide === 'right' ? 'left'  : 'right';
-      const csiText = csi !== null
-        ? (csi < 1
-          ? `<p style="font-size:11pt;color:#1a3d28;line-height:1.8;margin-top:10px">Additionally, the <strong>${sideOpp} adrenal gland</strong> appears to have reduced activity, which further supports that the problem is coming from one side.</p>`
-          : `<p style="font-size:11pt;color:#5a3e00;line-height:1.8;margin-top:10px">Your care team will also review whether both glands show signs of activity and will factor this into the overall recommendation.</p>`)
-        : '';
-      findingCard = `<div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
-        <div style="font-size:24px;margin-bottom:8px">🎯</div>
-        <h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">One adrenal gland appears to be the source</h3>
-        <p style="font-size:11pt;color:#1a3d28;line-height:1.8">The results show that your <strong>${sideFull} adrenal gland</strong> is producing significantly more aldosterone than the other side. This pattern is called <em>lateralization</em> and suggests that the problem is coming from a single gland.</p>
-        ${csiText}
-      </div>`;
+      const csiText = csi !== null ? (csi < 1 ? `<p style="font-size:11pt;color:#1a3d28;line-height:1.8;margin-top:10px">Additionally, the <strong>${sideOpp} adrenal gland</strong> appears to have reduced activity, which further supports that the problem is coming from one side.</p>` : `<p style="font-size:11pt;color:#5a3e00;line-height:1.8;margin-top:10px">Your care team will also review whether both glands show signs of activity and will factor this into the overall recommendation.</p>`) : '';
+      findingCard = `<div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🎯</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">One adrenal gland appears to be the source</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">The results show that your <strong>${sideFull} adrenal gland</strong> is producing significantly more aldosterone than the other side. This pattern is called <em>lateralization</em> and suggests that the problem is coming from a single gland.</p>${csiText}</div>`;
     } else if (li >= 2) {
-      findingCard = `<div style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px">
-        <div style="font-size:24px;margin-bottom:8px">🔍</div>
-        <h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">The results are not fully clear yet</h3>
-        <p style="font-size:11pt;color:#5a3e00;line-height:1.8">There is a <em>possible</em> tendency for one adrenal gland to be more active than the other, but the difference is not large enough to be certain. Your doctor will review these results carefully along with your other test results, your health history, and any imaging scans before making a recommendation.</p>
-      </div>`;
+      findingCard = `<div style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🔍</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">The results are not fully clear yet</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">There is a <em>possible</em> tendency for one adrenal gland to be more active than the other, but the difference is not large enough to be certain. Your doctor will review these results carefully along with your other test results, your health history, and any imaging scans before making a recommendation.</p></div>`;
     } else {
-      findingCard = `<div style="background:#EBF0FA;border:1px solid #b0c0e8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
-        <div style="font-size:24px;margin-bottom:8px">⚖️</div>
-        <h3 style="font-size:13pt;color:#2B3A8C;margin-bottom:10px;font-family:'Libre Baskerville',serif">Both adrenal glands appear to be involved equally</h3>
-        <p style="font-size:11pt;color:#1a2560;line-height:1.8">The results suggest that <strong>both adrenal glands</strong> are contributing to the overproduction of aldosterone equally. When this is the case, it is called <em>bilateral hyperplasia</em>. Surgery is generally not recommended for this pattern — instead, it is typically managed with medication.</p>
-      </div>`;
+      findingCard = `<div style="background:#EBF0FA;border:1px solid #b0c0e8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚖️</div><h3 style="font-size:13pt;color:#2B3A8C;margin-bottom:10px;font-family:'Libre Baskerville',serif">Both adrenal glands appear to be involved equally</h3><p style="font-size:11pt;color:#1a2560;line-height:1.8">The results suggest that <strong>both adrenal glands</strong> are contributing to the overproduction of aldosterone equally. When this is the case, it is called <em>bilateral hyperplasia</em>. Surgery is generally not recommended for this pattern — instead, it is typically managed with medication.</p></div>`;
     }
     cards += findingCard;
   }
 
-  // ── What happens next? ──
   let nextSteps = '';
-  if (siR === null && siL === null) {
-    nextSteps = 'Please follow up with your care team to discuss when your results will be available.';
-  } else if (!rightOK || !leftOK) {
-    nextSteps = 'Your doctor will discuss whether additional testing or a repeat procedure is recommended. In some cases, other imaging or tests may be used to help guide decisions.';
-  } else if (li === null) {
-    nextSteps = 'Your care team is reviewing the results and will discuss next steps with you, including treatment options.';
-  } else if (li >= 4) {
-    nextSteps = `Your doctor may discuss the possibility of surgery to remove the overactive ${domSide} adrenal gland. This is called a <strong>unilateral adrenalectomy</strong>. Many patients who have this surgery see significant improvement in their blood pressure and may be able to reduce or stop blood pressure medications. Your care team will help you understand all your options.`;
-  } else if (li >= 2) {
-    nextSteps = 'Your care team will review the full picture — including your scans, lab work, and overall health — before making a recommendation. Additional follow-up or repeat testing may be suggested.';
-  } else {
-    nextSteps = 'Since both glands appear to be involved, your doctor will likely recommend <strong>medication</strong> to manage your aldosterone levels. Common medications used for this condition include spironolactone or eplerenone. These are generally very effective and many patients do well with this approach.';
-  }
+  if (siR === null && siL === null) nextSteps = 'Please follow up with your care team to discuss when your results will be available.';
+  else if (!rightOK || !leftOK) nextSteps = 'Your doctor will discuss whether additional testing or a repeat procedure is recommended. In some cases, other imaging or tests may be used to help guide decisions.';
+  else if (li === null) nextSteps = 'Your care team is reviewing the results and will discuss next steps with you, including treatment options.';
+  else if (li >= 4) nextSteps = `Your doctor may discuss the possibility of surgery to remove the overactive ${domSide} adrenal gland. This is called a <strong>unilateral adrenalectomy</strong>. Many patients who have this surgery see significant improvement in their blood pressure and may be able to reduce or stop blood pressure medications. Your care team will help you understand all your options.`;
+  else if (li >= 2) nextSteps = 'Your care team will review the full picture — including your scans, lab work, and overall health — before making a recommendation. Additional follow-up or repeat testing may be suggested.';
+  else nextSteps = 'Since both glands appear to be involved, your doctor will likely recommend <strong>medication</strong> to manage your aldosterone levels. Common medications used for this condition include spironolactone or eplerenone. These are generally very effective and many patients do well with this approach.';
 
-  cards += `<div style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
-    <h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">What happens next?</h3>
-    <p style="font-size:11pt;color:#3a3530;line-height:1.8">${nextSteps}</p>
-  </div>`;
+  cards += `<div style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">What happens next?</h3><p style="font-size:11pt;color:#3a3530;line-height:1.8">${nextSteps}</p></div>`;
+  cards += `<div style="background:#fff;border:2px solid #D8D3C8;border-radius:8px;padding:18px 24px;margin-bottom:20px"><p style="font-size:11pt;color:#5C564E;line-height:1.8;margin:0"><strong style="color:#1A1714">Important:</strong> This summary is meant to help you understand your test results in plain language. Please do not change or stop any of your medications without first speaking with your doctor or care team. Your provider will review all of your results with you and discuss the best plan for your individual situation.</p></div>`;
 
-  // ── Important reminder ──
-  cards += `<div style="background:#fff;border:2px solid #D8D3C8;border-radius:8px;padding:18px 24px;margin-bottom:20px">
-    <p style="font-size:11pt;color:#5C564E;line-height:1.8;margin:0"><strong style="color:#1A1714">Important:</strong> This summary is meant to help you understand your test results in plain language. Please do not change or stop any of your medications without first speaking with your doctor or care team. Your provider will review all of your results with you and discuss the best plan for your individual situation.</p>
-  </div>`;
-
-  const reportHTML = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>AVS Patient-Friendly Summary</title>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; background: #fff; }
-@media screen { body { background: #e8e5e0; } .page { max-width: 720px; margin: 24px auto; background: #fff; padding: 40px 48px; box-shadow: 0 2px 20px rgba(0,0,0,0.12); } .no-print { position: fixed; top: 16px; right: 16px; display: flex; gap: 10px; z-index: 99; } }
-@page { size: letter portrait; margin: 0; }
-@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .no-print { display: none !important; } html, body { margin: 0; padding: 0; } .page { padding: 24px 32px; } }
-.pbtn { padding: 9px 18px; background: #1B4D3E; color: #fff; border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
-.cbtn { padding: 9px 18px; background: #fff; color: #444; border: 1px solid #ccc; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
-</style>
-</head>
-<body>
-<div class="no-print">
-  <button class="cbtn" onclick="window.close()">✕ Close</button>
-  <button class="pbtn" onclick="window.print()">🖨 Print / Save as PDF</button>
-</div>
-<div class="page">
+  return `
   <div style="margin-bottom:24px;padding-bottom:18px;border-bottom:3px solid #1B4D3E">
     <p style="font-family:monospace;font-size:8.5pt;color:#888;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">Patient-Friendly Summary — Adrenal Vein Sampling</p>
     <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;border-bottom:1.5px solid #D8D3C8;padding-bottom:6px">
@@ -1938,31 +1872,26 @@ body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; back
   <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
     <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator — Patient-Friendly Summary</p>
     <p style="font-size:8pt;color:#aaa">A clinical tool developed by <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
-  </div>
-</div>
-</body>
-</html>`;
+  </div>`;
+}
 
+function openPatientReport() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const reportHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>AVS Patient-Friendly Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; background: #fff; }
+@media screen { body { background: #e8e5e0; } .page { max-width: 720px; margin: 24px auto; background: #fff; padding: 40px 48px; box-shadow: 0 2px 20px rgba(0,0,0,0.12); } .no-print { position: fixed; top: 16px; right: 16px; display: flex; gap: 10px; z-index: 99; } }
+@page { size: letter portrait; margin: 0; }
+@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .no-print { display: none !important; } html, body { margin: 0; padding: 0; } .page { padding: 24px 32px; } }
+.pbtn { padding: 9px 18px; background: #1B4D3E; color: #fff; border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+.cbtn { padding: 9px 18px; background: #fff; color: #444; border: 1px solid #ccc; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
+</style></head><body>
+<div class="no-print"><button class="cbtn" onclick="window.close()">✕ Close</button><button class="pbtn" onclick="window.print()">🖨 Print / Save as PDF</button></div>
+<div class="page">${buildPatientSectionHTML(dateStr)}</div></body></html>`;
   const win = window.open('', '_blank', 'width=820,height=800,scrollbars=yes');
   win.document.write(reportHTML);
   win.document.close();
-  win.addEventListener('load', () => {
-    win.addEventListener('beforeprint', () => {
-      const page = win.document.querySelector('.page');
-      if (!page) return;
-      const pageH = win.innerHeight || 1056;
-      const pageW = win.innerWidth  || 816;
-      page.style.transform = 'none';
-      const scale = Math.min(pageW / page.scrollWidth, pageH / page.scrollHeight, 1);
-      page.style.transformOrigin = 'top left';
-      page.style.transform = `scale(${scale})`;
-      page.style.width = (100 / scale) + '%';
-    });
-    win.addEventListener('afterprint', () => {
-      const page = win.document.querySelector('.page');
-      if (page) { page.style.transform = ''; page.style.width = ''; }
-    });
-  });
 }
 
 // ── Init ──
