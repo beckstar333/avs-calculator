@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AVS Calculator — Adrenal Vein Sampling</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%232B3A8C'/><text y='72' x='50' text-anchor='middle' font-size='58' font-family='serif' font-weight='bold' fill='white'>A</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -279,7 +280,32 @@
   .copy-results-btn:hover { border-color: var(--text-2); color: var(--text-2); background: var(--surface); }
   .copy-results-btn.copied { border-color: #1B5E35; color: #1B5E35; background: #E8F5EE; border-style: solid; }
 
-  /* ── (tooltips removed) ── */
+  /* ── Clear section button ── */
+  .clear-section-btn { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.45); font-size: 14px; padding: 0 0 0 8px; line-height: 1; transition: color 0.15s; }
+  .clear-section-btn:hover { color: rgba(255,255,255,0.85); }
+
+  /* ── Input validation ── */
+  .num-input.input-error { border-color: #8B1A1A !important; background: #FFF0F0; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
+  .num-input.shaking { animation: shake 0.35s ease; }
+
+  /* ── Outlier warning ── */
+  .outlier-flag { display:inline-block; margin-left:4px; font-size:10px; color: #C8901A; cursor:default; }
+  .outlier-bar { margin: 0 12px 10px; padding: 7px 12px; background:#FFF8E6; border:1px solid #e8c97a; border-radius:var(--radius); font-size:11px; color:#7A4F00; line-height:1.5; display:none; }
+
+  /* ── Colored dominant box ── */
+  .dominant-box { transition: background 0.4s ease, border-color 0.4s ease; }
+  .dominant-box.dom-right { background: #EBF3EE; border-color: var(--right); }
+  .dominant-box.dom-left  { background: #F5EAEA; border-color: var(--left); }
+  .dominant-box.dom-bilateral { background: var(--surface2); border-color: var(--border); }
+
+  /* ── On-screen interpretation ── */
+  .interp-section { margin-bottom: 14px; }
+  .interp-line { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:var(--radius); margin-bottom:8px; font-size:11px; line-height:1.6; color: var(--text); }
+  .interp-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
+
+  /* ── Timestamp ── */
+  .session-timestamp { font-family:var(--mono); font-size:9px; color:var(--text-3); letter-spacing:0.05em; text-align:right; margin-bottom:10px; }
   #feedback-overlay { display: none; }
   #feedback-overlay.open { display: flex !important; }
   .fb-type-btn {
@@ -435,12 +461,12 @@
 <header>
   <div class="header-left">
     <h1>AVS Calculator</h1>
-    <span class="subtitle">Adrenal Vein Sampling</span>
+    <span class="subtitle">Adrenal Vein Sampling Calculator</span>
   </div>
   <div class="header-right">
     <button class="print-btn-patient-header" onclick="openPatientReport()">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="4" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Patient Summary
+      Patient-Friendly Summary
     </button>
     <button class="print-btn-header" onclick="openPrintReport()">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 4H10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
@@ -495,7 +521,9 @@
     <div class="section-card">
       <div class="section-header ivc">
         <span class="section-title">Inferior Vena Cava (IVC)</span>
-        <span class="section-tag">Peripheral Reference &nbsp;·&nbsp; <span id="ivc-badge">0 samples</span></span>
+        <span class="section-tag" style="display:flex;align-items:center;gap:6px">Peripheral Reference &nbsp;·&nbsp; <span id="ivc-badge">0 samples</span>
+          <button class="clear-section-btn" onclick="clearSection('ivc')" title="Clear section">✕</button>
+        </span>
       </div>
       <table class="sample-table">
         <thead><tr>
@@ -514,13 +542,16 @@
         </div>
         <span class="avg-value ivc-val" id="ivc-avg">—</span>
       </div>
+      <div class="outlier-bar" id="ivc-outlier"></div>
     </div>
 
     <!-- RIGHT ADRENAL -->
     <div class="section-card">
       <div class="section-header right">
         <span class="section-title">Right Adrenal Vein</span>
-        <span class="section-tag">Samples &nbsp;·&nbsp; <span id="right-badge">0 included</span></span>
+        <span class="section-tag" style="display:flex;align-items:center;gap:6px">Samples &nbsp;·&nbsp; <span id="right-badge">0 included</span>
+          <button class="clear-section-btn" onclick="clearSection('right')" title="Clear section">✕</button>
+        </span>
       </div>
       <table class="sample-table">
         <thead><tr>
@@ -545,13 +576,16 @@
         </div>
         <span class="avg-value right-val" id="right-avg">—</span>
       </div>
+      <div class="outlier-bar" id="right-outlier"></div>
     </div>
 
     <!-- LEFT ADRENAL -->
     <div class="section-card">
       <div class="section-header left">
         <span class="section-title">Left Adrenal Vein</span>
-        <span class="section-tag">Samples &nbsp;·&nbsp; <span id="left-badge">0 included</span></span>
+        <span class="section-tag" style="display:flex;align-items:center;gap:6px">Samples &nbsp;·&nbsp; <span id="left-badge">0 included</span>
+          <button class="clear-section-btn" onclick="clearSection('left')" title="Clear section">✕</button>
+        </span>
       </div>
       <table class="sample-table">
         <thead><tr>
@@ -576,12 +610,15 @@
         </div>
         <span class="avg-value left-val" id="left-avg">—</span>
       </div>
+      <div class="outlier-bar" id="left-outlier"></div>
     </div>
   </div>
 
   <!-- RIGHT: RESULTS -->
   <div class="results-panel">
     <div class="panel-title">Results</div>
+
+    <div class="session-timestamp" id="session-timestamp"></div>
 
     <div id="summary-box" class="summary-box incomplete">
       <div class="summary-icon"></div>
@@ -650,6 +687,8 @@
         </div>
       </div>
     </div>
+
+    <div id="screen-interp" class="interp-section" style="display:none"></div>
 
     <button class="copy-results-btn" id="copy-btn" onclick="copyResults()">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M1 8V2a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
@@ -996,8 +1035,11 @@ function addRow(side) {
 
 // ── Input handlers ──
 function handleInput(side, idx, field, value) {
+  const el = document.getElementById(`${side}-${field}-${idx}`);
+  if (el) validateInput(el, value);
   state[side][idx][field] = value === '' ? '' : parseFloat(value);
   updateRowDisplay(side, idx);
+  checkOutliers(side);
   calculate();
 }
 
@@ -1132,6 +1174,8 @@ function calculate() {
 
   renderSummary(siR, siL, siThresh, li, csi, R, L);
   updateBadges();
+  updateDomBox(R, L);
+  updateScreenInterp(siR, siL, siThresh, li, csi, R, L);
 }
 
 function renderSummary(siR, siL, siThresh, li, csi, R, L) {
@@ -1230,6 +1274,81 @@ document.addEventListener('keydown', function(e) {
   }
 });
 let feedbackType = 'General feedback';
+
+// ── Timestamp ──
+function initTimestamp() {
+  const el = document.getElementById('session-timestamp');
+  if (!el) return;
+  const now = new Date();
+  el.textContent = 'Session started ' + now.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) + ' · ' + now.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+}
+
+// ── Clear section ──
+function clearSection(side) {
+  const defaultCount = side === 'ivc' ? 2 : 3;
+  state[side] = Array.from({length: defaultCount}, (_, i) => ({ id: i, aldo: '', cort: '', included: true }));
+  buildAllRows(side);
+  calculate();
+}
+
+// ── Input validation ──
+function validateInput(el, value) {
+  const num = parseFloat(value);
+  if (value !== '' && (isNaN(num) || num < 0)) {
+    el.classList.add('input-error');
+    el.classList.remove('shaking');
+    void el.offsetWidth;
+    el.classList.add('shaking');
+    setTimeout(() => el.classList.remove('shaking'), 400);
+    return false;
+  } else {
+    el.classList.remove('input-error');
+    return true;
+  }
+}
+
+// ── Outlier detection ──
+function checkOutliers(side) {
+  const included = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
+  const bar = document.getElementById(`${side}-outlier`);
+  if (!bar) return;
+  if (included.length < 2) { bar.style.display = 'none'; return; }
+  const ratios = included.map(s => parseFloat(s.aldo) / parseFloat(s.cort));
+  const avg = ratios.reduce((a,b) => a+b, 0) / ratios.length;
+  const outliers = ratios.filter(r => Math.abs(r - avg) / avg > 0.5);
+  if (outliers.length > 0) {
+    bar.style.display = 'block';
+    bar.innerHTML = `⚠ <strong>Possible outlier detected.</strong> One or more included samples has an A/C ratio that differs from the section average by more than 50%. Consider reviewing your values or toggling off the outlying sample before calculating.`;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+// ── Colored dominant box ──
+function updateDomBox(R, L) {
+  const box = document.getElementById('dominant-box') || document.querySelector('.dominant-box');
+  if (!box) return;
+  box.classList.remove('dom-right','dom-left','dom-bilateral');
+  if (R === null || L === null) return;
+  if (R > L) box.classList.add('dom-right');
+  else if (L > R) box.classList.add('dom-left');
+  else box.classList.add('dom-bilateral');
+}
+
+// ── On-screen interpretation ──
+function updateScreenInterp(siR, siL, siThresh, li, csi, R, L) {
+  const el = document.getElementById('screen-interp');
+  if (!el) return;
+  if (siR === null && siL === null) { el.style.display = 'none'; return; }
+  const lines = getInterpretationText(siR, siL, siThresh, li, csi, R, L);
+  if (!lines.length) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = lines.map(l => `
+    <div class="interp-line" style="background:${l.bg};border-left:3px solid ${l.color}">
+      <span class="interp-icon">${l.icon}</span>
+      <span style="font-size:11px;line-height:1.6;color:#1A1714">${l.text}</span>
+    </div>`).join('');
+}
 
 function openFeedback() {
   document.getElementById('feedback-overlay').classList.add('open');
@@ -1534,8 +1653,8 @@ function openPrintReport() {
 
   <!-- Footer -->
   <div style="margin-top:20px;padding-top:14px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center">
-    <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator • avs-calculator</p>
-    <p style="font-size:9pt;color:#888">A clinical tool developed by <strong style="color:#555">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
+    <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator</p>
+    <p style="font-size:8pt;color:#aaa">A clinical tool developed by <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
   </div>
 </div>
 </body>
@@ -1688,7 +1807,7 @@ function openPatientReport() {
 <html>
 <head>
 <meta charset="UTF-8">
-<title>AVS Patient Summary</title>
+<title>AVS Patient-Friendly Summary</title>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1707,15 +1826,15 @@ body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; back
 </div>
 <div class="page">
   <div style="margin-bottom:24px;padding-bottom:18px;border-bottom:3px solid #1B4D3E">
-    <p style="font-family:monospace;font-size:8.5pt;color:#888;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">Patient Summary — Adrenal Vein Sampling</p>
+    <p style="font-family:monospace;font-size:8.5pt;color:#888;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">Patient-Friendly Summary — Adrenal Vein Sampling</p>
     <h1 style="font-family:'Libre Baskerville',serif;font-size:22pt;font-weight:700;letter-spacing:-0.02em;color:#1A1714;margin-bottom:10px">Understanding Your AVS Results</h1>
     ${patientHeader}
     <p style="font-size:9pt;color:#aaa;margin-top:6px">${dateStr}</p>
   </div>
   ${cards}
   <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-    <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator — Patient Summary</p>
-    <p style="font-size:9pt;color:#888">A clinical tool developed by <strong style="color:#555">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
+    <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator — Patient-Friendly Summary</p>
+    <p style="font-size:8pt;color:#aaa">A clinical tool developed by <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
   </div>
 </div>
 </body>
@@ -1748,8 +1867,8 @@ buildAllRows('ivc');
 buildAllRows('right');
 buildAllRows('left');
 calculate();
-// Initialize threshold inputs as locked (preset mode)
 applyThresholdPreset('es2016');
+initTimestamp();
 
 // ── Privacy: clear all fields on load ──
 window.addEventListener('load', () => {
