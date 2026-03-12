@@ -887,7 +887,7 @@
         <input type="checkbox" id="opt-summary" checked style="margin-top:2px;accent-color:#1A1714;width:15px;height:15px;flex-shrink:0">
         <div>
           <div style="font-size:13px;font-weight:600;color:#1A1714;margin-bottom:2px">Clinical Summary</div>
-          <div style="font-size:11px;color:#8C867E;line-height:1.5">Calculated indices and clinical interpretation</div>
+          <div style="font-size:11px;color:#8C867E;line-height:1.5">Measured values, calculated indices, and clinical interpretation</div>
         </div>
       </label>
       <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #D8D3C8;border-radius:4px;margin-bottom:10px;cursor:pointer;background:#F7F5F0">
@@ -1695,8 +1695,9 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
     </div>
   </div>
 
-  <!-- CALCULATION WORKSHEET -->
-  ${wantWorksheet ? `
+
+  <!-- CLINICAL SUMMARY: Measured Values + Indices + Interpretation -->
+  ${wantSummary ? `
   <div class="section">
     <h2>Measured Values &amp; A/C Ratios</h2>
     <h3 style="color:#2B3A8C;margin-bottom:6px">Inferior Vena Cava (IVC) — Peripheral Reference</h3>
@@ -1706,9 +1707,33 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
     <h3 style="color:#7A1F1F;margin-bottom:6px">Left Adrenal Vein</h3>
     <div style="border:1px solid #dec4c4;border-radius:3px;overflow:hidden;margin-bottom:0">${buildSampleTableHTML('left', '#7A1F1F')}</div>
   </div>
+
+  <div style="page-break-before:always"></div>
+
+  <div class="section">
+    <h2>Calculated Indices</h2>
+    <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-radius:3px;overflow:hidden">
+      <thead><tr style="background:#f5f5f5">
+        <th style="padding:8px 12px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Index</th>
+        <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Value</th>
+        <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Threshold</th>
+        <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Result</th>
+      </tr></thead>
+      <tbody>${indexTableRows}</tbody>
+    </table>
+  </div>
+  <div class="section">
+    <h2>Clinical Interpretation</h2>
+    ${interpHTML}
+  </div>
+  ` : ''}
+
+  <!-- CALCULATION WORKSHEET -->
+  ${wantWorksheet ? `
+  <div style="page-break-before:always"></div>
   <div class="section">
     <h2>Calculation Workup</h2>
-    <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">A/C ratios are calculated per sample (Aldosterone ÷ Cortisol, in reported units). When multiple samples are included, the A/C ratios are averaged. All indices are derived from these averaged values.</p>
+    <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">A/C ratios are calculated per sample (Aldosterone ÷ Cortisol, in reported units). When multiple samples are included, the A/C ratio is calculated for each sample individually, then those ratios are averaged. All indices are derived from these averaged values.</p>
     ${(() => {
       const aldoUnit = document.querySelector('#aldo-unit-toggle .unit-btn.active')?.textContent || 'pg/mL';
       const cortUnit = document.querySelector('#cort-unit-toggle .unit-btn.active')?.textContent || 'µg/dL';
@@ -1738,39 +1763,19 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
       </tbody></table>`;
     })()}
   </div>
-  ${wantSummary ? `<div style="page-break-before:always"></div>` : ''}
   ` : ''}
 
-  <!-- CLINICAL SUMMARY -->
-  ${wantSummary ? `
-  <div class="section">
-    <h2>Calculated Indices</h2>
-    <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-radius:3px;overflow:hidden">
-      <thead><tr style="background:#f5f5f5">
-        <th style="padding:8px 12px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Index</th>
-        <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Value</th>
-        <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Threshold</th>
-        <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Result</th>
-      </tr></thead>
-      <tbody>${indexTableRows}</tbody>
-    </table>
-  </div>
-  <div class="section">
-    <h2>Clinical Interpretation</h2>
-    ${interpHTML}
-  </div>
-  ` : ''}
-
-  <!-- DISCLAIMER -->
+  <!-- DISCLAIMER + FOOTER (shown if any clinical section selected) -->
+  ${(wantSummary || wantWorksheet) ? `
   <div style="margin-top:24px;padding:12px 14px;background:#f8f8f8;border:1px solid #e0e0e0;border-radius:3px">
     <p style="font-size:8.5pt;color:#888;line-height:1.6"><strong style="color:#555">Disclaimer:</strong> This report was generated by the AVS Calculator tool and is intended to assist qualified clinicians in interpreting adrenal vein sampling data. It does not constitute medical advice and should not be used as a substitute for clinical judgment. All results must be interpreted in the context of the patient's clinical presentation, imaging, and biochemical evaluation. Threshold values used are based on published guidelines and may vary by institution.</p>
   </div>
-
-  <!-- Footer -->
   <div style="margin-top:20px;padding-top:14px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center">
     <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator</p>
     <p style="font-size:8pt;color:#aaa">A clinical tool developed by <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
   </div>
+  ` : ''}
+
   <!-- PATIENT SUMMARY -->
   ${wantPatient ? `<div style="page-break-before:always"></div><div class="page" style="font-family:'DM Sans',sans-serif;font-size:11pt;color:#1a1714">${buildPatientSectionHTML(dateStr)}</div>` : ''}
 
