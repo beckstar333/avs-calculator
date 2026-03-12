@@ -413,6 +413,22 @@
 
     /* Feedback modal */
     #feedback-overlay > div { margin: 12px; max-width: 100%; }
+
+    /* Clear section button */
+    .clear-section-btn { font-size: 12px; padding: 0 0 0 6px; }
+
+    /* Outlier bar */
+    .outlier-bar { margin: 0 10px 10px; font-size: 10px; padding: 6px 10px; }
+
+    /* Timestamp */
+    .session-timestamp { font-size: 8px; margin-bottom: 8px; }
+
+    /* On-screen interpretation */
+    .interp-line { font-size: 10px; padding: 8px 10px; gap: 8px; }
+    .interp-icon { font-size: 12px; }
+
+    /* Copy results button */
+    .copy-results-btn { font-size: 10px; padding: 8px 10px; }
   }
 
   @media (max-width: 480px) {
@@ -429,16 +445,25 @@
     .unit-toggle { flex-wrap: wrap; }
     .unit-btn { flex: 1; min-width: 60px; font-size: 10px; padding: 5px 4px; }
 
-    /* Threshold inputs — single column on very small screens */
+    /* Threshold inputs */
     #threshold-inputs { grid-template-columns: 1fr 1fr; gap: 6px; }
     #threshold-inputs label { font-size: 8px; }
     #threshold-inputs .num-input { font-size: 11px; padding: 4px 6px; }
 
-    /* Toolbar — feedback label hidden on tiny screens */
+    /* Toolbar */
     .toolbar-right { gap: 5px; }
-    .toolbar-right .reset-btn span.btn-label, 
+    .toolbar-right .reset-btn span.btn-label,
     .toolbar-right .feedback-label { display: none; }
-  }
+
+    /* Interpretation — tighter on small screens */
+    .interp-line { font-size: 10px; padding: 7px 8px; }
+    #screen-interp { margin-bottom: 10px; }
+
+    /* Outlier bar */
+    .outlier-bar { font-size: 10px; }
+
+    /* Copy button full width */
+    .copy-results-btn { font-size: 10px; }
 
   /* ═══════════════════════════════════════
      PRINT STYLES
@@ -1622,6 +1647,96 @@ function openPrintReport() {
     <div style="border:1px solid #dec4c4;border-radius:3px;overflow:hidden;margin-bottom:0">
       ${buildSampleTableHTML('left', '#7A1F1F')}
     </div>
+  </div>
+
+  <!-- CALCULATION WORKUP -->
+  <div class="section">
+    <h2>Calculation Workup</h2>
+    <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">
+      A/C ratios are calculated per sample (Aldosterone ÷ Cortisol, in reported units). When multiple samples are included, the A/C ratios are averaged. All indices are derived from these averaged values.
+    </p>
+
+    ${(() => {
+      const aldoUnit = document.querySelector('#aldo-unit-toggle .unit-btn.active')?.textContent || 'pg/mL';
+      const cortUnit = document.querySelector('#cort-unit-toggle .unit-btn.active')?.textContent || 'µg/dL';
+
+      function sectionWorkup(side, label, color) {
+        const samples = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
+        if (!samples.length) return `<p style="color:#aaa;font-size:9pt;font-style:italic">No included samples for ${label}.</p>`;
+        const rows = samples.map((s, i) => {
+          const ac = parseFloat(s.aldo) / parseFloat(s.cort);
+          return `<tr>
+            <td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee">Sample ${i + 1}</td>
+            <td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.aldo).toFixed(1)} ${aldoUnit}</td>
+            <td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.cort).toFixed(2)} ${cortUnit}</td>
+            <td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.aldo).toFixed(1)} ÷ ${parseFloat(s.cort).toFixed(2)}</td>
+            <td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700;color:${color}">${fmt(ac)}</td>
+          </tr>`;
+        }).join('');
+        const avg = samples.reduce((sum, s) => sum + parseFloat(s.aldo) / parseFloat(s.cort), 0) / samples.length;
+        const avgRow = samples.length > 1
+          ? `<tr style="background:#fafafa">
+              <td colspan="4" style="padding:6px 10px;font-size:9pt;color:#666;border-top:2px solid #ddd;text-align:right;font-style:italic">Average A/C (${samples.length} samples):</td>
+              <td style="padding:6px 10px;font-family:monospace;font-weight:700;font-size:10pt;color:${color};border-top:2px solid #ddd;text-align:center">${fmt(avg)}</td>
+            </tr>` : '';
+        return `
+          <p style="font-family:monospace;font-size:8pt;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${label}</p>
+          <table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px">
+            <thead><tr style="background:#f5f5f5">
+              <th style="padding:6px 10px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Sample</th>
+              <th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Aldosterone</th>
+              <th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Cortisol</th>
+              <th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Calculation</th>
+              <th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">A/C Ratio</th>
+            </tr></thead>
+            <tbody>${rows}${avgRow}</tbody>
+          </table>`;
+      }
+
+      const ivcAC  = avgAC('ivc'),  rightAC = avgAC('right'), leftAC = avgAC('left');
+      const domSideLabel = (rightAC !== null && leftAC !== null) ? (rightAC > leftAC ? 'Right' : 'Left') : '—';
+      const contraAC = (rightAC !== null && leftAC !== null) ? Math.min(rightAC, leftAC) : null;
+      const higherAC = (rightAC !== null && leftAC !== null) ? Math.max(rightAC, leftAC) : null;
+
+      const siThreshLocal = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
+      const siRval = (rightAC !== null && ivcAC !== null && ivcAC !== 0) ? rightAC / ivcAC : null;
+      const siLval = (leftAC  !== null && ivcAC !== null && ivcAC !== 0) ? leftAC  / ivcAC : null;
+      const liVal  = (rightAC !== null && leftAC !== null && Math.min(rightAC, leftAC) !== 0) ? higherAC / contraAC : null;
+      const csiVal = (contraAC !== null && ivcAC !== null && ivcAC !== 0) ? contraAC / ivcAC : null;
+
+      function indexWorkupRow(label, numeratorLabel, numeratorVal, denominatorLabel, denominatorVal, result, formula) {
+        if (result === null) return `<tr><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee">${label}</td><td colspan="4" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`;
+        return `<tr>
+          <td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-weight:600">${label}</td>
+          <td style="padding:8px 12px;font-size:9pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;color:#555">${numeratorLabel}<br><span style="font-size:8pt;color:#aaa">${fmt(numeratorVal)}</span></td>
+          <td style="padding:8px 12px;font-size:12pt;border-bottom:1px solid #eee;text-align:center;color:#bbb">÷</td>
+          <td style="padding:8px 12px;font-size:9pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;color:#555">${denominatorLabel}<br><span style="font-size:8pt;color:#aaa">${fmt(denominatorVal)}</span></td>
+          <td style="padding:8px 12px;font-size:10pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700">= ${fmt(result)}</td>
+        </tr>`;
+      }
+
+      return `
+        ${sectionWorkup('ivc',   'Inferior Vena Cava (IVC)',  '#2B3A8C')}
+        ${sectionWorkup('right', 'Right Adrenal Vein',         '#1B4D3E')}
+        ${sectionWorkup('left',  'Left Adrenal Vein',          '#7A1F1F')}
+
+        <p style="font-family:monospace;font-size:8pt;font-weight:600;color:#444;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Index Derivation</p>
+        <table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden">
+          <thead><tr style="background:#f5f5f5">
+            <th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Index</th>
+            <th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Numerator</th>
+            <th style="padding:8px 12px;font-size:8pt;color:#888"></th>
+            <th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Denominator</th>
+            <th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Result</th>
+          </tr></thead>
+          <tbody>
+            ${indexWorkupRow('SI — Right', 'Right A/C', rightAC, 'IVC A/C', ivcAC, siRval)}
+            ${indexWorkupRow('SI — Left',  'Left A/C',  leftAC,  'IVC A/C', ivcAC, siLval)}
+            ${indexWorkupRow('LI', `${domSideLabel} A/C (higher)`, higherAC, 'Contralateral A/C (lower)', contraAC, liVal)}
+            ${indexWorkupRow('CSI', 'Contralateral A/C (lower)', contraAC, 'IVC A/C', ivcAC, csiVal)}
+          </tbody>
+        </table>`;
+    })()}
   </div>
 
   <!-- CALCULATED INDICES -->
