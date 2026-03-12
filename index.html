@@ -486,7 +486,7 @@
 <header>
   <div class="header-left">
     <h1>AVS Calculator</h1>
-    <span class="subtitle">Adrenal Vein Sampling Calculator</span>
+    <span class="subtitle">Adrenal Vein Sampling</span>
   </div>
   <div class="header-right">
     <button class="print-btn-patient-header" onclick="openPatientReport()">
@@ -505,17 +505,6 @@
 
   <!-- LEFT: DATA ENTRY -->
   <div class="data-panel">
-    <div class="panel-title">Patient</div>
-    <div class="patient-fields">
-      <div style="flex:2">
-        <label class="patient-field-label">Patient Name / Initials <em style="font-style:italic;text-transform:none;letter-spacing:0;color:var(--text-3);font-size:9px">(optional)</em></label>
-        <input type="text" id="patient-name" class="patient-field-input" placeholder="—" style="font-family:var(--sans);font-size:13px" autocomplete="off" spellcheck="false">
-      </div>
-      <div style="flex:1">
-        <label class="patient-field-label">MRN <em style="font-style:italic;text-transform:none;letter-spacing:0;color:var(--text-3);font-size:9px">(optional)</em></label>
-        <input type="text" id="patient-mrn" class="patient-field-input" placeholder="—" style="font-family:var(--mono);font-size:13px" autocomplete="off" spellcheck="false">
-      </div>
-    </div>
     <div class="panel-title">Protocol</div>
     <div class="protocol-toggle">
       <button class="proto-btn active" id="btnUnstim" onclick="setProtocol('unstimulated')">Unstimulated</button>
@@ -793,37 +782,16 @@
       </ol>
     </div>
 
-    <!-- Privacy & Data Safety -->
+    <!-- Privacy & Data -->
     <div style="margin-top:12px;border:1px solid #D8D3C8;border-radius:4px;overflow:hidden">
       <div style="background:#F0EDE6;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none" onclick="const b=document.getElementById('privacy-body');const a=document.getElementById('privacy-arrow');b.style.display=b.style.display==='none'?'block':'none';a.style.transform=b.style.display==='none'?'rotate(0deg)':'rotate(180deg)'">
         <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#8C867E;display:flex;align-items:center;gap:7px">
-          🔒 Privacy &amp; Data Safety
+          🔒 Privacy &amp; Data
         </span>
         <svg id="privacy-arrow" width="10" height="10" viewBox="0 0 10 10" fill="none" style="transition:transform 0.2s;flex-shrink:0"><path d="M2 3.5L5 6.5L8 3.5" stroke="#8C867E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div id="privacy-body" style="display:none;padding:14px;font-size:11px;color:#5C564E;line-height:1.8;background:#fff">
-
-        <p style="margin-bottom:8px"><strong style="color:#1A1714">Why this tool is not subject to HIPAA</strong></p>
-        <p style="margin-bottom:10px;font-size:11px;color:#5C564E;line-height:1.7">HIPAA applies to covered entities and their business associates that <em>create, receive, maintain, or transmit</em> protected health information (PHI). This tool does none of these things. It is a passive calculation aid that operates entirely within the user's own browser — no data ever leaves the device.</p>
-        <ul style="margin:0 0 14px 16px;padding:0">
-          <li style="margin-bottom:5px"><strong>No transmission.</strong> All calculations are performed locally in your browser. No data is ever sent to any server, third party, or external system — including the developer.</li>
-          <li style="margin-bottom:5px"><strong>No storage or retention.</strong> This tool does not use cookies, local storage, session storage, or any form of persistent data retention. No PHI is written to disk or retained between sessions.</li>
-          <li style="margin-bottom:5px"><strong>No collection.</strong> Patient name and MRN fields are entirely optional and are never required for calculation. If entered, they exist solely within the browser tab for the duration of that session.</li>
-          <li style="margin-bottom:5px"><strong>No logging or tracking.</strong> There are no analytics scripts, error trackers, or third-party integrations of any kind embedded in this tool.</li>
-          <li><strong>No backend infrastructure.</strong> This is a fully self-contained static HTML file. There is no server, no database, no API, and no account system. The developer has no technical capability to access any data entered by users.</li>
-        </ul>
-
-        <p style="margin-bottom:8px"><strong style="color:#1A1714">Built-in technical safeguards</strong></p>
-        <p style="margin-bottom:8px;font-size:11px;color:#5C564E;line-height:1.7">Although not legally required, the following safeguards are implemented as a matter of clinical best practice:</p>
-        <ul style="margin:0 0 10px 16px;padding:0">
-          <li style="margin-bottom:5px"><strong>Autocomplete disabled.</strong> All input fields suppress browser autofill and autosuggest to prevent inadvertent exposure of patient identifiers.</li>
-          <li style="margin-bottom:5px"><strong>Fields cleared on load.</strong> All fields are wiped each time the page loads or refreshes, ensuring no residual data persists from a prior session.</li>
-          <li style="margin-bottom:5px"><strong>Fields cleared on exit.</strong> All entered data is cleared when the tab is closed or navigated away from.</li>
-          <li><strong>30-minute inactivity timeout.</strong> All patient data and sample values are automatically erased after 30 minutes of inactivity. A warning is displayed 2 minutes prior, with the option to extend the session.</li>
-        </ul>
-
-        <p style="font-size:10px;color:#8C867E;line-height:1.6;font-style:italic">This summary is provided for informational purposes and does not constitute legal advice. Clinicians with specific compliance questions regarding use of this tool within their institution are encouraged to consult their privacy officer or legal counsel.</p>
-
+        This tool runs entirely in your browser. No patient data, calculation results, or identifiers are ever entered, stored, or transmitted. Nothing leaves your device.
       </div>
     </div>
 
@@ -1248,12 +1216,10 @@ function copyResults() {
   const domSide = R !== null && L !== null ? (R > L ? 'Right' : L > R ? 'Left' : 'Equal') : '—';
   const guidelineLabel = document.getElementById('ref-guideline-label').textContent;
   const protLabel = protocol === 'stimulated' ? 'Cosyntropin-Stimulated' : 'Unstimulated';
-  const patientName = document.getElementById('patient-name').value.trim();
-  const patientMRN  = document.getElementById('patient-mrn').value.trim();
+  const patientName = '';
+  const patientMRN  = '';
 
   let lines = ['AVS CALCULATOR RESULTS', '─'.repeat(36)];
-  if (patientName) lines.push(`Patient: ${patientName}`);
-  if (patientMRN)  lines.push(`MRN: ${patientMRN}`);
   lines.push(`Protocol: ${protLabel}`);
   lines.push(`Guideline: ${guidelineLabel}`);
   lines.push('');
@@ -1401,11 +1367,38 @@ function submitFeedback() {
     return;
   }
   const replyTo = document.getElementById('feedback-email').value.trim();
-  const p = ['becky', '.allegretto', '@me', '.com'].join('');
-  const subject = encodeURIComponent(`AVS Calculator — ${feedbackType}`);
-  const body = encodeURIComponent(`Type: ${feedbackType}\n${replyTo ? 'Reply to: ' + replyTo + '\n' : ''}\n${msg}`);
-  window.location.href = `mailto:${p}?subject=${subject}&body=${body}`;
-  closeFeedback();
+  const sendBtn = document.querySelector('#feedback-overlay button[onclick="submitFeedback()"]');
+  sendBtn.textContent = 'Sending…';
+  sendBtn.disabled = true;
+
+  fetch('https://formspree.io/f/myknwayp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      type: feedbackType,
+      message: msg,
+      email: replyTo || 'Not provided'
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      document.getElementById('feedback-message').value = '';
+      document.getElementById('feedback-email').value = '';
+      sendBtn.textContent = '✓ Sent!';
+      sendBtn.style.background = '#1B4D3E';
+      setTimeout(() => { closeFeedback(); sendBtn.textContent = 'Send Feedback'; sendBtn.style.background = '#1A1714'; sendBtn.disabled = false; }, 1800);
+    } else {
+      sendBtn.textContent = 'Send Feedback';
+      sendBtn.disabled = false;
+      alert('Something went wrong. Please try again.');
+    }
+  })
+  .catch(() => {
+    sendBtn.textContent = 'Send Feedback';
+    sendBtn.disabled = false;
+    alert('Could not send feedback. Please check your connection and try again.');
+  });
 }
 
 // Close modal on overlay click
@@ -1533,9 +1526,7 @@ function openPrintReport() {
   const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   const domSide = (R !== null && L !== null) ? (R > L ? 'Right' : 'Left') : null;
-  const patientName = (document.getElementById('patient-name') || {}).value || '';
-  const patientMRN = (document.getElementById('patient-mrn') || {}).value || '';
-  const patientBar = (patientName.trim() || patientMRN.trim()) ? `<div style="margin-top:10px;padding:8px 12px;background:#F0EDE6;border-radius:3px;display:flex;gap:24px;align-items:center">${patientName.trim() ? `<span style="font-size:10pt;color:#1a1714"><span style="font-family:monospace;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-right:8px">Patient</span><strong>${patientName.trim()}</strong></span>` : ''}${patientMRN.trim() ? `<span style="font-size:10pt;color:#1a1714"><span style="font-family:monospace;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-right:8px">MRN</span><strong>${patientMRN.trim()}</strong></span>` : ''}</div>` : '';
+  const patientBar = '';
 
   const interpretLines = getInterpretationText(siR, siL, siThresh, li, csi, R, L);
   const interpHTML = interpretLines.map(l => `
@@ -1573,22 +1564,22 @@ function openPrintReport() {
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; background: #fff; padding: 0; }
-  @page { size: letter portrait; margin: 0; }
+  @page { size: letter portrait; margin: 0.6in 0.5in; }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     .no-print { display: none !important; }
-    html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
-    body { padding: 0; }
+    html, body { width: 100%; margin: 0; padding: 0; }
     .page {
-      padding: 24px 32px;
+      padding: 0;
       width: 100%;
-      transform-origin: top left;
-      transform: scale(1);
+      max-width: 100%;
+      box-shadow: none;
+      margin: 0;
     }
-    .page-scaler {
-      width: 8.5in;
-      transform-origin: top left;
-    }
+    h2 { page-break-after: avoid; }
+    .section { page-break-inside: avoid; }
+    table { page-break-inside: auto; }
+    tr { page-break-inside: avoid; }
   }
   @media screen {
     body { background: #e8e5e0; }
@@ -1615,17 +1606,22 @@ function openPrintReport() {
     <div>
       <h1>Adrenal Vein Sampling Report</h1>
       <p style="font-size:10pt;color:#888;margin-top:4px;font-family:monospace;letter-spacing:0.05em">AVS RESULT SUMMARY — CALCULATED REPORT</p>
-      ${patientBar}
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+        <span style="font-size:9pt;color:#888">${dateStr} &nbsp;·&nbsp; ${timeStr}</span>
+      </div>
+      <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">
+        <span style="font-size:9pt;padding:3px 10px;background:#FDF3E3;color:#7A4F00;border-radius:2px;display:inline-block;font-family:monospace">
+          ${protocol === 'stimulated' ? 'COSYNTROPIN-STIMULATED' : 'UNSTIMULATED'}
+        </span>
+        <span style="font-size:9pt;padding:3px 10px;background:#EBF0FA;color:#2B3A8C;border-radius:2px;display:inline-block;font-family:monospace">
+          ${document.getElementById('ref-guideline-label').textContent}
+        </span>
+      </div>
     </div>
-    <div style="text-align:right">
-      <p style="font-size:9pt;color:#888">${dateStr}</p>
-      <p style="font-size:9pt;color:#aaa">${timeStr}</p>
-      <p style="margin-top:6px;font-size:9pt;padding:3px 10px;background:#FDF3E3;color:#7A4F00;border-radius:2px;display:inline-block;font-family:monospace">
-        ${protocol === 'stimulated' ? 'COSYNTROPIN-STIMULATED' : 'UNSTIMULATED'}
-      </p>
-      <p style="margin-top:4px;font-size:9pt;padding:3px 10px;background:#EBF0FA;color:#2B3A8C;border-radius:2px;display:inline-block;font-family:monospace">
-        ${document.getElementById('ref-guideline-label').textContent}
-      </p>
+    <div style="flex-shrink:0;margin-left:24px">
+      <div style="border:1px dashed #bbb;border-radius:4px;padding:14px 18px;min-width:240px;min-height:80px;display:flex;align-items:center;justify-content:center;background:#fafafa">
+        <span style="font-family:monospace;font-size:8pt;color:#ccc;letter-spacing:0.06em;text-transform:uppercase;text-align:center;line-height:2">Patient Label / Name / MRN</span>
+      </div>
     </div>
   </div>
 
@@ -1723,17 +1719,15 @@ function openPrintReport() {
         <p style="font-family:monospace;font-size:8pt;font-weight:600;color:#444;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Index Derivation</p>
         <table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden">
           <thead><tr style="background:#f5f5f5">
-            <th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Index</th>
-            <th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Numerator</th>
-            <th style="padding:8px 12px;font-size:8pt;color:#888"></th>
-            <th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Denominator</th>
-            <th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Result</th>
+            <th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:18%">Index</th>
+            <th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Formula &amp; Values</th>
+            <th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:14%">Result</th>
           </tr></thead>
           <tbody>
-            ${indexWorkupRow('SI — Right', 'Right A/C', rightAC, 'IVC A/C', ivcAC, siRval)}
-            ${indexWorkupRow('SI — Left',  'Left A/C',  leftAC,  'IVC A/C', ivcAC, siLval)}
-            ${indexWorkupRow('LI', `${domSideLabel} A/C (higher)`, higherAC, 'Contralateral A/C (lower)', contraAC, liVal)}
-            ${indexWorkupRow('CSI', 'Contralateral A/C (lower)', contraAC, 'IVC A/C', ivcAC, csiVal)}
+            ${siRval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Right A/C ÷ IVC A/C &nbsp;=&nbsp; ${fmt(rightAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siRval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
+            ${siLval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Left A/C ÷ IVC A/C &nbsp;=&nbsp; ${fmt(leftAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siLval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
+            ${liVal !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">LI</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">${domSideLabel} A/C ÷ Contralateral A/C &nbsp;=&nbsp; ${fmt(higherAC)} ÷ ${fmt(contraAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(liVal)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">LI</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
+            ${csiVal !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600">CSI</td><td style="padding:8px 12px;font-size:9.5pt;font-family:monospace;color:#555">Contralateral A/C ÷ IVC A/C &nbsp;=&nbsp; ${fmt(contraAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;text-align:center;font-family:monospace">${fmt(csiVal)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600">CSI</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;font-style:italic">Insufficient data</td></tr>`}
           </tbody>
         </table>`;
     })()}
@@ -1782,10 +1776,9 @@ function openPrintReport() {
     win.addEventListener('beforeprint', () => {
       const page = win.document.querySelector('.page');
       if (!page) return;
-      const pageH = win.innerHeight || 1056;
-      const pageW = win.innerWidth  || 816;
+      const pageW = win.innerWidth || 816;
       page.style.transform = 'none';
-      const scale = Math.min(pageW / page.scrollWidth, pageH / page.scrollHeight, 1);
+      const scale = Math.min(pageW / page.scrollWidth, 1);
       page.style.transformOrigin = 'top left';
       page.style.transform = `scale(${scale})`;
       page.style.width = (100 / scale) + '%';
@@ -1797,10 +1790,8 @@ function openPrintReport() {
   });
 }
 
-
 // ══════════════════════════════════════════════
 // PATIENT SUMMARY REPORT
-// ══════════════════════════════════════════════
 function openPatientReport() {
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
   const siThresh = protocol === 'stimulated' ? 3.0 : 2.0;
@@ -1813,8 +1804,7 @@ function openPatientReport() {
 
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  const patientName = (document.getElementById('patient-name') || {}).value || '';
-  const patientMRN  = (document.getElementById('patient-mrn')  || {}).value || '';
+  const patientHeader = '';
   const rightOK = siR !== null && siR >= siThresh;
   const leftOK  = siL !== null && siL >= siThresh;
   const domSide = (R !== null && L !== null) ? (R > L ? 'right' : 'left') : null;
@@ -1912,12 +1902,6 @@ function openPatientReport() {
     <p style="font-size:11pt;color:#5C564E;line-height:1.8;margin:0"><strong style="color:#1A1714">Important:</strong> This summary is meant to help you understand your test results in plain language. Please do not change or stop any of your medications without first speaking with your doctor or care team. Your provider will review all of your results with you and discuss the best plan for your individual situation.</p>
   </div>`;
 
-  const patientHeader = (patientName.trim() || patientMRN.trim()) ? `
-    <div style="margin-bottom:6px;display:flex;gap:20px;flex-wrap:wrap">
-      ${patientName.trim() ? `<span style="font-size:10pt;color:#1a1714"><span style="font-family:monospace;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-right:6px">Patient</span><strong>${patientName.trim()}</strong></span>` : ''}
-      ${patientMRN.trim()  ? `<span style="font-size:10pt;color:#1a1714"><span style="font-family:monospace;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-right:6px">MRN</span><strong>${patientMRN.trim()}</strong></span>` : ''}
-    </div>` : '';
-
   const reportHTML = `<!DOCTYPE html>
 <html>
 <head>
@@ -1942,8 +1926,11 @@ body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; back
 <div class="page">
   <div style="margin-bottom:24px;padding-bottom:18px;border-bottom:3px solid #1B4D3E">
     <p style="font-family:monospace;font-size:8.5pt;color:#888;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">Patient-Friendly Summary — Adrenal Vein Sampling</p>
+    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;border-bottom:1.5px solid #D8D3C8;padding-bottom:6px">
+      <span style="font-family:monospace;font-size:8pt;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap">Patient Name:</span>
+      <span style="flex:1;border-bottom:1px solid #ccc;min-width:180px;display:inline-block">&nbsp;</span>
+    </div>
     <h1 style="font-family:'Libre Baskerville',serif;font-size:22pt;font-weight:700;letter-spacing:-0.02em;color:#1A1714;margin-bottom:10px">Understanding Your AVS Results</h1>
-    ${patientHeader}
     <p style="font-size:9pt;color:#aaa;margin-top:6px">${dateStr}</p>
   </div>
   ${cards}
@@ -2007,8 +1994,6 @@ let warningHandle;
 const WARN_MS = 2 * 60 * 1000; // warn 2 min before
 
 function clearSessionData() {
-  document.getElementById('patient-name').value = '';
-  document.getElementById('patient-mrn').value = '';
   ['right','left'].forEach(side => {
     state[side] = Array.from({length: 3}, (_, i) => ({ id: i, aldo: '', cort: '', included: true }));
     buildAllRows(side);
