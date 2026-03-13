@@ -1112,6 +1112,12 @@ function avgAC(side) {
   return included.reduce((acc, s) => acc + s.aldo / s.cort, 0) / included.length;
 }
 
+function avgCort(side) {
+  const included = state[side].filter(s => s.included && s.cort !== '' && parseFloat(s.cort) !== 0);
+  if (!included.length) return null;
+  return included.reduce((acc, s) => acc + parseFloat(s.cort), 0) / included.length;
+}
+
 // ── Protocol ──
 function setProtocol(p) {
   protocol = p;
@@ -1174,8 +1180,9 @@ function calculate() {
   const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
   document.getElementById('si-thresh-text').textContent = `Threshold: ≥ ${siThresh.toFixed(1)}`;
 
-  const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
-  const siL = (L !== null && IVC !== null && IVC !== 0) ? L / IVC : null;
+  const cortR = avgCort('right'), cortL = avgCort('left'), cortIVC = avgCort('ivc');
+  const siR = (cortR !== null && cortIVC !== null && cortIVC !== 0) ? cortR / cortIVC : null;
+  const siL = (cortL !== null && cortIVC !== null && cortIVC !== 0) ? cortL / cortIVC : null;
   renderIndexVal('si-right-val', siR);
   renderIndexVal('si-left-val', siL);
   renderPill('si-right-status', siR === null ? null : siR >= siThresh ? 'pass' : 'fail', siR === null ? 'No data' : siR >= siThresh ? 'Cannulated' : 'Not cannulated');
@@ -1259,15 +1266,9 @@ function renderSummary(siR, siL, siThresh, li, csi, R, L) {
 function copyResults() {
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
   const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
-  const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
-  const siL = (L !== null && IVC !== null && IVC !== 0) ? L / IVC : null;
-  const li  = (R !== null && L !== null && Math.min(R,L) !== 0) ? Math.max(R,L) / Math.min(R,L) : null;
-  const csi = (R !== null && L !== null && IVC !== null && IVC !== 0) ? Math.min(R,L) / IVC : null;
-  const domSide = R !== null && L !== null ? (R > L ? 'Right' : L > R ? 'Left' : 'Equal') : '—';
-  const guidelineLabel = document.getElementById('ref-guideline-label').textContent;
-  const protLabel = protocol === 'stimulated' ? 'Cosyntropin-Stimulated' : 'Unstimulated';
-  const patientName = '';
-  const patientMRN  = '';
+  const cortR = avgCort('right'), cortL = avgCort('left'), cortIVC = avgCort('ivc');
+  const siR = (cortR !== null && cortIVC !== null && cortIVC !== 0) ? cortR / cortIVC : null;
+  const siL = (cortL !== null && cortIVC !== null && cortIVC !== 0) ? cortL / cortIVC : null;
 
   let lines = ['AVS CALCULATOR RESULTS', '─'.repeat(36)];
   lines.push(`Protocol: ${protLabel}`);
@@ -1588,8 +1589,9 @@ function getInterpretationText(siR, siL, siThresh, li, csi, R, L) {
 function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false) {
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
   const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
-  const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
-  const siL = (L !== null && IVC !== null && IVC !== 0) ? L / IVC : null;
+  const cortR = avgCort('right'), cortL = avgCort('left'), cortIVC = avgCort('ivc');
+  const siR = (cortR !== null && cortIVC !== null && cortIVC !== 0) ? cortR / cortIVC : null;
+  const siL = (cortL !== null && cortIVC !== null && cortIVC !== 0) ? cortL / cortIVC : null;
   let li = null;
   if (R !== null && L !== null && Math.min(R,L) !== 0) li = Math.max(R,L) / Math.min(R,L);
   let csi = null;
@@ -1749,18 +1751,19 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
         return `<p style="font-family:monospace;font-size:8pt;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${label}</p><table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px"><thead><tr style="background:#f5f5f5"><th style="padding:6px 10px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Sample</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Aldosterone</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Cortisol</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Calculation</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">A/C Ratio</th></tr></thead><tbody>${rows}${avgRow}</tbody></table>`;
       }
       const ivcAC = avgAC('ivc'), rightAC = avgAC('right'), leftAC = avgAC('left');
+      const cortIVCw = avgCort('ivc'), cortRw = avgCort('right'), cortLw = avgCort('left');
       const domSideLabel = (rightAC !== null && leftAC !== null) ? (rightAC > leftAC ? 'Right' : 'Left') : '—';
       const contraAC = (rightAC !== null && leftAC !== null) ? Math.min(rightAC, leftAC) : null;
       const higherAC = (rightAC !== null && leftAC !== null) ? Math.max(rightAC, leftAC) : null;
-      const siRval = (rightAC !== null && ivcAC !== null && ivcAC !== 0) ? rightAC/ivcAC : null;
-      const siLval = (leftAC  !== null && ivcAC !== null && ivcAC !== 0) ? leftAC/ivcAC  : null;
+      const siRval = (cortRw !== null && cortIVCw !== null && cortIVCw !== 0) ? cortRw/cortIVCw : null;
+      const siLval = (cortLw !== null && cortIVCw !== null && cortIVCw !== 0) ? cortLw/cortIVCw : null;
       const liVal  = (higherAC !== null && contraAC !== null && contraAC !== 0) ? higherAC/contraAC : null;
       const csiVal = (contraAC !== null && ivcAC !== null && ivcAC !== 0) ? contraAC/ivcAC : null;
       return `${sectionWorkup('ivc','Inferior Vena Cava (IVC)','#2B3A8C')}${sectionWorkup('right','Right Adrenal Vein','#1B4D3E')}${sectionWorkup('left','Left Adrenal Vein','#7A1F1F')}
       <p style="font-family:monospace;font-size:8pt;font-weight:600;color:#444;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Index Derivation</p>
       <table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden"><thead><tr style="background:#f5f5f5"><th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:18%">Index</th><th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Formula &amp; Values</th><th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:14%">Result</th></tr></thead><tbody>
-        ${siRval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Right A/C ÷ IVC A/C = ${fmt(rightAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siRval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
-        ${siLval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Left A/C ÷ IVC A/C = ${fmt(leftAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siLval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
+        ${siRval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Right Cortisol ÷ IVC Cortisol = ${fmt(cortRw)} ÷ ${fmt(cortIVCw)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siRval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
+        ${siLval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Left Cortisol ÷ IVC Cortisol = ${fmt(cortLw)} ÷ ${fmt(cortIVCw)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siLval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
         ${liVal  !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">LI</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">${domSideLabel} A/C ÷ Contralateral A/C = ${fmt(higherAC)} ÷ ${fmt(contraAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(liVal)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">LI</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
         ${csiVal !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600">CSI</td><td style="padding:8px 12px;font-size:9.5pt;font-family:monospace;color:#555">Contralateral A/C ÷ IVC A/C = ${fmt(contraAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;text-align:center;font-family:monospace">${fmt(csiVal)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600">CSI</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;font-style:italic">Insufficient data</td></tr>`}
       </tbody></table>`;
@@ -1812,8 +1815,9 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
 function buildPatientSectionHTML(dateStr) {
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
   const siThresh = protocol === 'stimulated' ? 3.0 : 2.0;
-  const siR = (R !== null && IVC !== null && IVC !== 0) ? R / IVC : null;
-  const siL = (L !== null && IVC !== null && IVC !== 0) ? L / IVC : null;
+  const cortR = avgCort('right'), cortL = avgCort('left'), cortIVC = avgCort('ivc');
+  const siR = (cortR !== null && cortIVC !== null && cortIVC !== 0) ? cortR / cortIVC : null;
+  const siL = (cortL !== null && cortIVC !== null && cortIVC !== 0) ? cortL / cortIVC : null;
   let li = null;
   if (R !== null && L !== null && Math.min(R,L) !== 0) li = Math.max(R,L) / Math.min(R,L);
   let csi = null;
