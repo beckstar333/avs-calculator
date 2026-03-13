@@ -1605,7 +1605,7 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
 
   const interpretLines = getInterpretationText(siR, siL, siThresh, li, csi, R, L);
   const interpHTML = interpretLines.map(l => `
-    <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:${l.bg};border-left:4px solid ${l.color};border-radius:3px;margin-bottom:10px">
+    <div class="interp-card" style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:${l.bg};border-left:4px solid ${l.color};border-radius:3px;margin-bottom:10px">
       <span style="font-size:16px;line-height:1.4;flex-shrink:0">${l.icon}</span>
       <p style="font-size:10.5pt;line-height:1.7;color:#1a1714;margin:0">${l.text}</p>
     </div>`).join('');
@@ -1651,10 +1651,14 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
       box-shadow: none;
       margin: 0;
     }
-    h2 { page-break-after: avoid; }
-    .section { page-break-inside: avoid; }
+    h2 { page-break-after: avoid; margin-bottom: 8px; }
+    .section { page-break-inside: avoid; margin-bottom: 16px; }
     table { page-break-inside: auto; }
     tr { page-break-inside: avoid; }
+    .interp-card { padding: 8px 10px !important; margin-bottom: 6px !important; }
+    .interp-card p { font-size: 9.5pt !important; line-height: 1.5 !important; }
+    .interp-card span { font-size: 14px !important; }
+    td { padding: 5px 10px !important; font-size: 9.5pt !important; }
   }
   @media screen {
     body { background: #e8e5e0; }
