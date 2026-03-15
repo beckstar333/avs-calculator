@@ -901,12 +901,33 @@
         </div>
       </label>
       <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #D8D3C8;border-radius:4px;cursor:pointer;background:#F7F5F0">
-        <input type="checkbox" id="opt-patient" style="margin-top:2px;accent-color:#1A1714;width:15px;height:15px;flex-shrink:0">
-        <div>
+        <input type="checkbox" id="opt-patient" onchange="toggleLangSelector()" style="margin-top:2px;accent-color:#1A1714;width:15px;height:15px;flex-shrink:0">
+        <div style="flex:1">
           <div style="font-size:13px;font-weight:600;color:#1A1714;margin-bottom:2px">Patient-Friendly Summary</div>
           <div style="font-size:11px;color:#8C867E;line-height:1.5">Plain-language explanation of results for the patient</div>
         </div>
       </label>
+      <!-- Language selector — shown when patient summary is checked -->
+      <div id="lang-selector" style="display:none;margin-top:6px;padding:12px 14px;background:#EFEDE8;border:1px solid #D8D3C8;border-radius:4px;border-top:none;border-top-left-radius:0;border-top-right-radius:0">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#8C8680;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Select language(s)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#1A1714">
+            <input type="checkbox" id="lang-en" checked style="accent-color:#1A1714;width:13px;height:13px"> English
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#1A1714">
+            <input type="checkbox" id="lang-es" style="accent-color:#1A1714;width:13px;height:13px"> Español
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#1A1714">
+            <input type="checkbox" id="lang-ko" style="accent-color:#1A1714;width:13px;height:13px"> 한국어
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#1A1714">
+            <input type="checkbox" id="lang-fa" style="accent-color:#1A1714;width:13px;height:13px"> فارسی
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#1A1714">
+            <input type="checkbox" id="lang-ru" style="accent-color:#1A1714;width:13px;height:13px"> Русский
+          </label>
+        </div>
+      </div>
       <p style="font-size:10px;color:#B8B0A0;margin-top:10px;font-style:italic">Selected sections print as a single document with page breaks between them.</p>
       <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
         <button onclick="closePrintOptions()" style="padding:8px 16px;background:transparent;border:1px solid #D8D3C8;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;color:#5C564E;cursor:pointer">Cancel</button>
@@ -1392,6 +1413,11 @@ function updateScreenInterp(siR, siL, siThresh, li, csi, R, L) {
     </div>`).join('');
 }
 
+function toggleLangSelector() {
+  const checked = document.getElementById('opt-patient').checked;
+  document.getElementById('lang-selector').style.display = checked ? 'block' : 'none';
+}
+
 function openPrintOptions() {
   document.getElementById('print-options-overlay').classList.add('open');
 }
@@ -1406,8 +1432,20 @@ function confirmPrintReport() {
     alert('Please select at least one section to print.');
     return;
   }
+  const langs = [];
+  if (wantPatient) {
+    if (document.getElementById('lang-en').checked) langs.push('en');
+    if (document.getElementById('lang-es').checked) langs.push('es');
+    if (document.getElementById('lang-ko').checked) langs.push('ko');
+    if (document.getElementById('lang-fa').checked) langs.push('fa');
+    if (document.getElementById('lang-ru').checked) langs.push('ru');
+    if (langs.length === 0) {
+      alert('Please select at least one language for the Patient-Friendly Summary.');
+      return;
+    }
+  }
   closePrintOptions();
-  openPrintReport(wantSummary, wantWorksheet, wantPatient);
+  openPrintReport(wantSummary, wantWorksheet, wantPatient, langs);
 }
 
 // Close on overlay click
@@ -1586,7 +1624,7 @@ function getInterpretationText(siR, siL, siThresh, li, csi, R, L) {
   return lines;
 }
 
-function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false) {
+function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false, langs=['en']) {
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
   const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
   const cortR = avgCort('right'), cortL = avgCort('left'), cortIVC = avgCort('ivc');
@@ -1786,8 +1824,8 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   </div>
   ` : ''}
 
-  <!-- PATIENT SUMMARY -->
-  ${wantPatient ? `<div style="page-break-before:always"></div><div class="page" style="font-family:'DM Sans',sans-serif;font-size:11pt;color:#1a1714">${buildPatientSectionHTML(dateStr)}</div>` : ''}
+  <!-- PATIENT SUMMARY — one page per selected language -->
+  ${wantPatient ? langs.map(lang => `<div style="page-break-before:always"></div><div class="page" style="font-family:'DM Sans',sans-serif;font-size:11pt;color:#1a1714">${buildPatientSectionHTML(dateStr, lang)}</div>`).join('') : ''}
 
 </div>
 </body>
@@ -1815,8 +1853,194 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
 }
 
 // ══════════════════════════════════════════════
+// TRANSLATIONS
+const patientTranslations = {
+  en: {
+    dir: 'ltr',
+    headerLabel: 'Patient-Friendly Summary — Adrenal Vein Sampling',
+    patientName: 'Patient Name:',
+    title: 'Understanding Your AVS Results',
+    whatIsTitle: 'What is adrenal vein sampling?',
+    whatIsP1: 'Adrenal vein sampling (AVS) is a specialized procedure used to find the source of a hormone problem called <strong>primary aldosteronism</strong> — a condition where your body produces too much of a hormone called aldosterone, which can cause high blood pressure and low potassium levels.',
+    whatIsP2: 'During this procedure, tiny blood samples were collected from the veins of each adrenal gland (small glands that sit on top of your kidneys) and from a large vein in your body. These samples are compared to figure out whether <strong>one</strong> adrenal gland is overproducing aldosterone, or whether <strong>both</strong> glands are involved.',
+    noDataTitle: 'No data has been entered yet',
+    noDataText: 'Your care team has not yet entered the laboratory results from your procedure. This summary will be updated once those values are available.',
+    successTitle: 'The procedure was technically successful',
+    successText: 'Blood samples were successfully collected from both the right and left adrenal veins, which means the results can be reliably interpreted by your care team.',
+    failTitle: 'The procedure may need to be repeated',
+    failText: (which) => `Your care team was not able to obtain a reliable sample from ${which}. This can happen in some cases because these veins are small and can be difficult to access. Your doctor will discuss whether a repeat procedure makes sense for you.`,
+    eitherVein: 'either adrenal vein', rightVein: 'the right adrenal vein', leftVein: 'the left adrenal vein',
+    lateralTitle: 'One adrenal gland appears to be the source',
+    lateralText: (side) => `The results show that your <strong>${side} adrenal gland</strong> is producing significantly more aldosterone than the other side. This pattern is called <em>lateralization</em> and suggests that the problem is coming from a single gland.`,
+    lateralCSIText: (opp) => `Additionally, the <strong>${opp} adrenal gland</strong> appears to have reduced activity, which further supports that the problem is coming from one side.`,
+    lateralCSIWarnText: 'Your care team will also review whether both glands show signs of activity and will factor this into the overall recommendation.',
+    rightSide: 'right', leftSide: 'left',
+    borderlineTitle: 'The results are not fully clear yet',
+    borderlineText: 'There is a <em>possible</em> tendency for one adrenal gland to be more active than the other, but the difference is not large enough to be certain. Your doctor will review these results carefully along with your other test results, your health history, and any imaging scans before making a recommendation.',
+    bilateralTitle: 'Both adrenal glands appear to be involved equally',
+    bilateralText: 'The results suggest that <strong>both adrenal glands</strong> are contributing to the overproduction of aldosterone equally. When this is the case, it is called <em>bilateral hyperplasia</em>. Surgery is generally not recommended for this pattern — instead, it is typically managed with medication.',
+    nextTitle: 'What happens next?',
+    nextNoData: 'Please follow up with your care team to discuss when your results will be available.',
+    nextFail: 'Your doctor will discuss whether additional testing or a repeat procedure is recommended. In some cases, other imaging or tests may be used to help guide decisions.',
+    nextNoLI: 'Your care team is reviewing the results and will discuss next steps with you, including treatment options.',
+    nextLateral: (side) => `Your doctor may discuss the possibility of surgery to remove the overactive ${side} adrenal gland. This is called a <strong>unilateral adrenalectomy</strong>. Many patients who have this surgery see significant improvement in their blood pressure and may be able to reduce or stop blood pressure medications. Your care team will help you understand all your options.`,
+    nextBorderline: 'Your care team will review the full picture — including your scans, lab work, and overall health — before making a recommendation. Additional follow-up or repeat testing may be suggested.',
+    nextBilateral: 'Since both glands appear to be involved, your doctor will likely recommend <strong>medication</strong> to manage your aldosterone levels. Common medications used for this condition include spironolactone or eplerenone. These are generally very effective and many patients do well with this approach.',
+    importantTitle: 'Important:',
+    importantText: 'This summary is meant to help you understand your test results in plain language. Please do not change or stop any of your medications without first speaking with your doctor or care team. Your provider will review all of your results with you and discuss the best plan for your individual situation.',
+    footer: 'AVS Calculator — Patient-Friendly Summary',
+    credit: 'A clinical tool developed by <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong>',
+  },
+  es: {
+    dir: 'ltr',
+    headerLabel: 'Resumen para el Paciente — Muestreo de Vena Suprarrenal',
+    patientName: 'Nombre del paciente:',
+    title: 'Comprendiendo Sus Resultados de AVS',
+    whatIsTitle: '¿Qué es el muestreo de vena suprarrenal?',
+    whatIsP1: 'El muestreo de vena suprarrenal (AVS) es un procedimiento especializado que se utiliza para encontrar la causa de un problema hormonal llamado <strong>aldosteronismo primario</strong> — una condición en la que su cuerpo produce demasiada aldosterona, una hormona que puede causar presión arterial alta y niveles bajos de potasio.',
+    whatIsP2: 'Durante este procedimiento, se tomaron pequeñas muestras de sangre de las venas de cada glándula suprarrenal (glándulas pequeñas que se encuentran encima de sus riñones) y de una vena grande de su cuerpo. Estas muestras se comparan para determinar si <strong>una</strong> glándula suprarrenal está produciendo demasiada aldosterona, o si <strong>ambas</strong> glándulas están involucradas.',
+    noDataTitle: 'Aún no se han ingresado datos',
+    noDataText: 'Su equipo médico aún no ha ingresado los resultados de laboratorio de su procedimiento. Este resumen se actualizará una vez que esos valores estén disponibles.',
+    successTitle: 'El procedimiento fue técnicamente exitoso',
+    successText: 'Se recolectaron muestras de sangre exitosamente de las venas suprarrenales derecha e izquierda, lo que significa que los resultados pueden ser interpretados de manera confiable por su equipo médico.',
+    failTitle: 'Es posible que el procedimiento deba repetirse',
+    failText: (which) => `Su equipo médico no pudo obtener una muestra confiable de ${which}. Esto puede ocurrir en algunos casos porque estas venas son pequeñas y difíciles de acceder. Su médico discutirá si repetir el procedimiento es apropiado para usted.`,
+    eitherVein: 'ninguna vena suprarrenal', rightVein: 'la vena suprarrenal derecha', leftVein: 'la vena suprarrenal izquierda',
+    lateralTitle: 'Una glándula suprarrenal parece ser la fuente',
+    lateralText: (side) => `Los resultados muestran que su <strong>glándula suprarrenal ${side}</strong> está produciendo significativamente más aldosterona que el otro lado. Este patrón se llama <em>lateralización</em> y sugiere que el problema proviene de una sola glándula.`,
+    lateralCSIText: (opp) => `Además, la <strong>glándula suprarrenal ${opp}</strong> parece tener actividad reducida, lo que refuerza aún más que el problema proviene de un solo lado.`,
+    lateralCSIWarnText: 'Su equipo médico también revisará si ambas glándulas muestran signos de actividad y lo tendrá en cuenta en la recomendación general.',
+    rightSide: 'derecha', leftSide: 'izquierda',
+    borderlineTitle: 'Los resultados aún no son completamente claros',
+    borderlineText: 'Existe una tendencia <em>posible</em> de que una glándula suprarrenal sea más activa que la otra, pero la diferencia no es suficientemente grande para ser definitiva. Su médico revisará estos resultados cuidadosamente junto con sus otros resultados, su historial médico y cualquier imagen antes de hacer una recomendación.',
+    bilateralTitle: 'Ambas glándulas suprarrenales parecen estar igualmente involucradas',
+    bilateralText: 'Los resultados sugieren que <strong>ambas glándulas suprarrenales</strong> están contribuyendo igualmente a la sobreproducción de aldosterona. Cuando esto ocurre, se llama <em>hiperplasia bilateral</em>. Generalmente no se recomienda cirugía para este patrón — en cambio, se trata típicamente con medicamentos.',
+    nextTitle: '¿Qué sucede ahora?',
+    nextNoData: 'Por favor, haga seguimiento con su equipo médico para saber cuándo estarán disponibles sus resultados.',
+    nextFail: 'Su médico discutirá si se recomienda realizar pruebas adicionales o repetir el procedimiento. En algunos casos, se pueden usar otras imágenes o pruebas para ayudar a guiar las decisiones.',
+    nextNoLI: 'Su equipo médico está revisando los resultados y discutirá los próximos pasos con usted, incluyendo las opciones de tratamiento.',
+    nextLateral: (side) => `Su médico puede discutir la posibilidad de una cirugía para extirpar la glándula suprarrenal ${side} hiperactiva. Esto se llama <strong>adrenalectomía unilateral</strong>. Muchos pacientes que se someten a esta cirugía ven una mejora significativa en su presión arterial y pueden reducir o dejar los medicamentos para la presión. Su equipo médico le ayudará a entender todas sus opciones.`,
+    nextBorderline: 'Su equipo médico revisará el panorama completo — incluyendo sus imágenes, análisis de laboratorio y salud general — antes de hacer una recomendación. Se puede sugerir seguimiento adicional o pruebas repetidas.',
+    nextBilateral: 'Dado que ambas glándulas parecen estar involucradas, su médico probablemente recomendará <strong>medicamentos</strong> para controlar sus niveles de aldosterona. Los medicamentos comunes para esta condición incluyen espironolactona o eplerenona. Generalmente son muy efectivos y muchos pacientes responden bien a este enfoque.',
+    importantTitle: 'Importante:',
+    importantText: 'Este resumen está diseñado para ayudarle a comprender sus resultados en términos sencillos. Por favor, no cambie ni suspenda ninguno de sus medicamentos sin antes hablar con su médico o equipo de atención. Su proveedor revisará todos sus resultados con usted y discutirá el mejor plan para su situación individual.',
+    footer: 'Calculadora AVS — Resumen para el Paciente',
+    credit: 'Una herramienta clínica desarrollada por <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong>',
+  },
+  ko: {
+    dir: 'ltr',
+    headerLabel: '환자용 요약 — 부신 정맥 채혈',
+    patientName: '환자 성명:',
+    title: '부신 정맥 채혈(AVS) 결과 이해하기',
+    whatIsTitle: '부신 정맥 채혈이란 무엇인가요?',
+    whatIsP1: '부신 정맥 채혈(AVS)은 <strong>원발성 알도스테론증</strong>이라는 호르몬 이상의 원인을 찾기 위한 전문 시술입니다. 이 질환은 체내에서 알도스테론이라는 호르몬이 과다 분비되어 고혈압과 저칼륨혈증을 유발할 수 있습니다.',
+    whatIsP2: '이 시술 중 양쪽 부신(신장 위에 위치한 작은 샘)의 정맥과 체내 큰 정맥에서 소량의 혈액을 채취합니다. 이 검체를 비교하여 <strong>한쪽</strong> 부신에서 알도스테론이 과다 분비되는지, 아니면 <strong>양쪽</strong> 부신이 모두 관련되어 있는지 확인합니다.',
+    noDataTitle: '아직 데이터가 입력되지 않았습니다',
+    noDataText: '의료진이 아직 시술 결과를 입력하지 않았습니다. 결과값이 입력되면 이 요약이 업데이트됩니다.',
+    successTitle: '시술이 기술적으로 성공적이었습니다',
+    successText: '우측 및 좌측 부신 정맥 모두에서 혈액 채취가 성공적으로 이루어졌습니다. 이는 의료진이 결과를 신뢰할 수 있게 해석할 수 있음을 의미합니다.',
+    failTitle: '시술을 반복해야 할 수 있습니다',
+    failText: (which) => `의료진이 ${which}에서 신뢰할 수 있는 검체를 얻지 못했습니다. 부신 정맥은 가늘고 접근하기 어려운 경우가 있어 이런 일이 발생할 수 있습니다. 담당 의사가 시술 반복 여부에 대해 상담해 드릴 것입니다.`,
+    eitherVein: '양쪽 부신 정맥', rightVein: '우측 부신 정맥', leftVein: '좌측 부신 정맥',
+    lateralTitle: '한쪽 부신이 원인인 것으로 보입니다',
+    lateralText: (side) => `결과에 따르면 <strong>${side} 부신</strong>이 반대쪽보다 훨씬 더 많은 알도스테론을 분비하고 있습니다. 이 패턴을 <em>편측화</em>라고 하며, 문제가 한쪽 샘에서 비롯되고 있음을 시사합니다.`,
+    lateralCSIText: (opp) => `또한 <strong>${opp} 부신</strong>의 활성이 감소된 것으로 나타나, 문제가 한쪽에서 비롯된다는 것을 더욱 뒷받침합니다.`,
+    lateralCSIWarnText: '의료진은 양쪽 부신 모두에서 활성 징후가 있는지도 검토하여 전체 권고안에 반영할 것입니다.',
+    rightSide: '우측', leftSide: '좌측',
+    borderlineTitle: '결과가 아직 명확하지 않습니다',
+    borderlineText: '한쪽 부신이 더 활성화될 <em>가능성</em>이 있지만, 차이가 확실하다고 할 만큼 크지는 않습니다. 담당 의사가 다른 검사 결과, 병력, 영상 검사 등을 종합적으로 검토한 후 권고안을 제시할 것입니다.',
+    bilateralTitle: '양쪽 부신이 동등하게 관련된 것으로 보입니다',
+    bilateralText: '결과는 <strong>양쪽 부신</strong>이 동등하게 알도스테론 과다 분비에 기여하고 있음을 시사합니다. 이 경우를 <em>양측성 과증식</em>이라고 합니다. 이 패턴에는 일반적으로 수술이 권장되지 않으며, 보통 약물로 관리합니다.',
+    nextTitle: '앞으로 어떻게 되나요?',
+    nextNoData: '결과가 언제 제공될지 담당 의료진에게 문의하시기 바랍니다.',
+    nextFail: '담당 의사가 추가 검사나 시술 반복이 필요한지 상담해 드릴 것입니다. 경우에 따라 결정을 돕기 위해 다른 영상 검사나 테스트가 활용될 수 있습니다.',
+    nextNoLI: '의료진이 결과를 검토하고 있으며, 치료 옵션을 포함한 다음 단계에 대해 상담해 드릴 것입니다.',
+    nextLateral: (side) => `담당 의사가 과활성화된 ${side} 부신 제거 수술 가능성에 대해 논의할 수 있습니다. 이를 <strong>일측 부신 절제술</strong>이라고 합니다. 이 수술을 받은 많은 환자들이 혈압이 크게 개선되고 혈압약을 줄이거나 중단할 수 있게 됩니다. 의료진이 모든 옵션을 이해하는 데 도움을 드릴 것입니다.`,
+    nextBorderline: '의료진은 영상 검사, 혈액 검사, 전반적인 건강 상태 등을 종합적으로 검토한 후 권고안을 제시할 것입니다. 추가 추적 관찰이나 재검사가 권장될 수 있습니다.',
+    nextBilateral: '양쪽 부신이 모두 관련된 것으로 보이므로, 담당 의사는 알도스테론 수치를 조절하기 위한 <strong>약물 치료</strong>를 권고할 가능성이 높습니다. 이 질환에 흔히 사용되는 약물로는 스피로노락톤이나 에플레레논이 있습니다. 일반적으로 매우 효과적이며 많은 환자들이 좋은 결과를 보입니다.',
+    importantTitle: '중요:',
+    importantText: '이 요약은 검사 결과를 쉬운 언어로 이해하는 데 도움을 드리기 위한 것입니다. 의사나 의료진과 먼저 상의하지 않고 어떠한 약도 변경하거나 중단하지 마십시오. 의료진이 모든 결과를 함께 검토하고 개인 상황에 맞는 최적의 계획을 논의해 드릴 것입니다.',
+    footer: 'AVS 계산기 — 환자용 요약',
+    credit: '<strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong>가 개발한 임상 도구',
+  },
+  fa: {
+    dir: 'rtl',
+    headerLabel: 'خلاصه برای بیمار — نمونه‌گیری از ورید آدرنال',
+    patientName: 'نام بیمار:',
+    title: 'درک نتایج AVS شما',
+    whatIsTitle: 'نمونه‌گیری از ورید آدرنال چیست؟',
+    whatIsP1: 'نمونه‌گیری از ورید آدرنال (AVS) یک روش تخصصی است که برای یافتن منشأ یک اختلال هورمونی به نام <strong>هیپرآلدوسترونیسم اولیه</strong> استفاده می‌شود — وضعیتی که در آن بدن شما بیش از حد هورمونی به نام آلدوسترون تولید می‌کند که می‌تواند باعث فشار خون بالا و کاهش پتاسیم شود.',
+    whatIsP2: 'در طی این روش، نمونه‌های خون کوچکی از وریدهای هر غده آدرنال (غدد کوچکی که بالای کلیه‌های شما قرار دارند) و از یک ورید بزرگ در بدن شما جمع‌آوری شد. این نمونه‌ها با هم مقایسه می‌شوند تا مشخص شود که آیا <strong>یک</strong> غده آدرنال آلدوسترون بیش از حد تولید می‌کند یا هر <strong>دو</strong> غده درگیر هستند.',
+    noDataTitle: 'هنوز داده‌ای وارد نشده است',
+    noDataText: 'تیم درمانی شما هنوز نتایج آزمایشگاهی روش را وارد نکرده است. این خلاصه پس از در دسترس بودن آن مقادیر به‌روزرسانی خواهد شد.',
+    successTitle: 'روش از نظر فنی موفق بود',
+    successText: 'نمونه‌های خون با موفقیت از هر دو ورید آدرنال راست و چپ جمع‌آوری شد، به این معنی که نتایج می‌توانند توسط تیم درمانی شما به طور قابل اطمینان تفسیر شوند.',
+    failTitle: 'ممکن است روش نیاز به تکرار داشته باشد',
+    failText: (which) => `تیم درمانی شما نتوانست نمونه قابل اعتمادی از ${which} به دست آورد. این می‌تواند در برخی موارد اتفاق بیفتد زیرا این وریدها کوچک هستند و دسترسی به آن‌ها دشوار است. پزشک شما درباره اینکه آیا تکرار روش برای شما مناسب است صحبت خواهد کرد.`,
+    eitherVein: 'هیچ‌یک از وریدهای آدرنال', rightVein: 'ورید آدرنال راست', leftVein: 'ورید آدرنال چپ',
+    lateralTitle: 'به نظر می‌رسد یک غده آدرنال منشأ مشکل است',
+    lateralText: (side) => `نتایج نشان می‌دهد که <strong>غده آدرنال ${side}</strong> شما به طور قابل توجهی آلدوسترون بیشتری نسبت به طرف دیگر تولید می‌کند. این الگو <em>جانبی‌سازی</em> نامیده می‌شود و نشان می‌دهد که مشکل از یک غده ناشی می‌شود.`,
+    lateralCSIText: (opp) => `علاوه بر این، <strong>غده آدرنال ${opp}</strong> به نظر می‌رسد فعالیت کاهش یافته‌ای داشته باشد که بیشتر تأیید می‌کند مشکل از یک طرف است.`,
+    lateralCSIWarnText: 'تیم درمانی شما همچنین بررسی خواهد کرد که آیا هر دو غده نشانه‌هایی از فعالیت دارند و این را در توصیه کلی در نظر خواهند گرفت.',
+    rightSide: 'راست', leftSide: 'چپ',
+    borderlineTitle: 'نتایج هنوز کاملاً روشن نیست',
+    borderlineText: 'یک تمایل <em>احتمالی</em> وجود دارد که یک غده آدرنال فعال‌تر از دیگری باشد، اما تفاوت به اندازه کافی برای اطمینان نیست. پزشک شما این نتایج را با دقت همراه با سایر نتایج آزمایش، سابقه سلامتی و هر گونه اسکن تصویربرداری قبل از ارائه توصیه بررسی خواهد کرد.',
+    bilateralTitle: 'به نظر می‌رسد هر دو غده آدرنال به طور مساوی درگیر هستند',
+    bilateralText: 'نتایج نشان می‌دهد که <strong>هر دو غده آدرنال</strong> به طور مساوی در تولید بیش از حد آلدوسترون نقش دارند. در این صورت به آن <em>هیپرپلازی دو طرفه</em> می‌گویند. جراحی معمولاً برای این الگو توصیه نمی‌شود — در عوض، معمولاً با دارو کنترل می‌شود.',
+    nextTitle: 'بعد چه اتفاقی می‌افتد؟',
+    nextNoData: 'لطفاً با تیم درمانی خود پیگیری کنید تا بدانید نتایج چه زمانی در دسترس خواهند بود.',
+    nextFail: 'پزشک شما درباره اینکه آیا آزمایش‌های بیشتر یا تکرار روش توصیه می‌شود صحبت خواهد کرد. در برخی موارد، سایر تصویربرداری‌ها یا آزمایش‌ها ممکن است برای کمک به تصمیم‌گیری استفاده شوند.',
+    nextNoLI: 'تیم درمانی شما در حال بررسی نتایج است و درباره مراحل بعدی از جمله گزینه‌های درمانی با شما صحبت خواهد کرد.',
+    nextLateral: (side) => `پزشک شما ممکن است درباره امکان جراحی برای برداشتن غده آدرنال ${side} بیش‌فعال صحبت کند. این <strong>آدرنالکتومی یک‌طرفه</strong> نامیده می‌شود. بسیاری از بیمارانی که این جراحی را انجام می‌دهند بهبود قابل توجهی در فشار خون خود می‌بینند و ممکن است بتوانند داروهای فشار خون را کاهش دهند یا قطع کنند. تیم درمانی شما به شما کمک خواهد کرد تا همه گزینه‌های خود را بفهمید.`,
+    nextBorderline: 'تیم درمانی شما تصویر کامل — از جمله اسکن‌ها، آزمایشات خون و سلامت کلی — را قبل از ارائه توصیه بررسی خواهد کرد. پیگیری بیشتر یا آزمایش مجدد ممکن است پیشنهاد شود.',
+    nextBilateral: 'از آنجایی که هر دو غده به نظر می‌رسد درگیر هستند، پزشک شما احتمالاً <strong>دارو</strong> را برای کنترل سطح آلدوسترون توصیه خواهد کرد. داروهای رایج مورد استفاده برای این وضعیت شامل اسپیرونولاکتون یا اپلرنون است. این داروها معمولاً بسیار مؤثر هستند و بسیاری از بیماران با این رویکرد نتایج خوبی کسب می‌کنند.',
+    importantTitle: 'مهم:',
+    importantText: 'این خلاصه برای کمک به شما در درک نتایج آزمایشتان به زبان ساده است. لطفاً بدون اینکه ابتدا با پزشک یا تیم درمانی خود صحبت کنید، هیچ دارویی را تغییر ندهید یا قطع نکنید. پزشک شما تمام نتایج را با شما بررسی کرده و بهترین برنامه را برای وضعیت فردی شما مورد بحث قرار خواهد داد.',
+    footer: 'ماشین حساب AVS — خلاصه برای بیمار',
+    credit: 'یک ابزار بالینی توسعه‌یافته توسط <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong>',
+  },
+  ru: {
+    dir: 'ltr',
+    headerLabel: 'Резюме для пациента — Забор крови из надпочечниковых вен',
+    patientName: 'Имя пациента:',
+    title: 'Понимание результатов AVS',
+    whatIsTitle: 'Что такое забор крови из надпочечниковых вен?',
+    whatIsP1: 'Забор крови из надпочечниковых вен (AVS) — это специализированная процедура, используемая для выявления источника гормонального нарушения, называемого <strong>первичным гиперальдостеронизмом</strong> — состояния, при котором организм вырабатывает слишком много гормона альдостерона, что может вызывать высокое артериальное давление и низкий уровень калия.',
+    whatIsP2: 'Во время этой процедуры из вен каждого надпочечника (небольших желёз, расположенных над почками) и из крупной вены в вашем теле были взяты небольшие образцы крови. Эти образцы сравниваются, чтобы определить, производит ли <strong>один</strong> надпочечник избыток альдостерона или задействованы <strong>оба</strong>.',
+    noDataTitle: 'Данные ещё не введены',
+    noDataText: 'Ваша медицинская команда ещё не внесла результаты лабораторного анализа. Это резюме будет обновлено после получения данных.',
+    successTitle: 'Процедура технически прошла успешно',
+    successText: 'Образцы крови были успешно получены из правой и левой надпочечниковых вен, что означает, что результаты могут быть достоверно интерпретированы вашей медицинской командой.',
+    failTitle: 'Возможно, потребуется повторная процедура',
+    failText: (which) => `Вашей медицинской команде не удалось получить надёжный образец из ${which}. Это может происходить в ряде случаев, поскольку эти вены небольшие и труднодоступные. Ваш врач обсудит, целесообразно ли повторное проведение процедуры.`,
+    eitherVein: 'ни одной из надпочечниковых вен', rightVein: 'правой надпочечниковой вены', leftVein: 'левой надпочечниковой вены',
+    lateralTitle: 'Источником проблемы, по всей видимости, является один надпочечник',
+    lateralText: (side) => `Результаты показывают, что ваш <strong>${side} надпочечник</strong> вырабатывает значительно больше альдостерона, чем другой. Этот паттерн называется <em>латерализацией</em> и свидетельствует о том, что проблема исходит из одной железы.`,
+    lateralCSIText: (opp) => `Кроме того, <strong>${opp} надпочечник</strong>, по всей видимости, имеет сниженную активность, что дополнительно подтверждает, что проблема исходит с одной стороны.`,
+    lateralCSIWarnText: 'Ваша медицинская команда также проверит, проявляют ли обе железы признаки активности, и учтёт это в общей рекомендации.',
+    rightSide: 'правый', leftSide: 'левый',
+    borderlineTitle: 'Результаты пока не полностью ясны',
+    borderlineText: 'Существует <em>возможная</em> тенденция к тому, что один надпочечник более активен, чем другой, однако разница недостаточно велика для уверенного заключения. Ваш врач тщательно изучит эти результаты вместе с другими анализами, историей болезни и результатами визуализации, прежде чем давать рекомендации.',
+    bilateralTitle: 'По всей видимости, оба надпочечника задействованы в равной мере',
+    bilateralText: 'Результаты свидетельствуют о том, что <strong>оба надпочечника</strong> в равной мере участвуют в избыточной выработке альдостерона. В таком случае это называется <em>двусторонней гиперплазией</em>. Хирургическое вмешательство при этом паттерне, как правило, не рекомендуется — вместо этого состояние обычно контролируется с помощью медикаментов.',
+    nextTitle: 'Что будет дальше?',
+    nextNoData: 'Пожалуйста, свяжитесь со своей медицинской командой, чтобы уточнить, когда будут готовы результаты.',
+    nextFail: 'Ваш врач обсудит, рекомендуется ли дополнительное обследование или повторная процедура. В ряде случаев для помощи в принятии решений могут использоваться другие методы визуализации или анализы.',
+    nextNoLI: 'Ваша медицинская команда изучает результаты и обсудит с вами дальнейшие шаги, включая варианты лечения.',
+    nextLateral: (side) => `Ваш врач может обсудить возможность операции по удалению гиперактивного ${side} надпочечника. Это называется <strong>односторонней адреналэктомией</strong>. Многие пациенты после этой операции отмечают значительное улучшение артериального давления и могут снизить дозу или полностью отменить препараты от давления. Ваша медицинская команда поможет вам разобраться во всех доступных вариантах.`,
+    nextBorderline: 'Ваша медицинская команда изучит полную картину — включая результаты визуализации, лабораторные данные и общее состояние здоровья — прежде чем давать рекомендации. Возможно, будет предложено дополнительное наблюдение или повторное обследование.',
+    nextBilateral: 'Поскольку, по всей видимости, задействованы обе железы, ваш врач, скорее всего, порекомендует <strong>медикаментозное лечение</strong> для контроля уровня альдостерона. Распространённые препараты для этого состояния включают спиронолактон или эплеренон. Как правило, они весьма эффективны, и многие пациенты хорошо реагируют на такой подход.',
+    importantTitle: 'Важно:',
+    importantText: 'Это резюме предназначено для того, чтобы помочь вам понять результаты анализов простым языком. Пожалуйста, не изменяйте и не прекращайте приём каких-либо лекарств, не проконсультировавшись предварительно с врачом или медицинской командой. Ваш врач обсудит с вами все результаты и предложит оптимальный план лечения для вашей конкретной ситуации.',
+    footer: 'Калькулятор AVS — Резюме для пациента',
+    credit: 'Клинический инструмент, разработанный <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong>',
+  },
+};
+
+// ══════════════════════════════════════════════
 // PATIENT SUMMARY — shared helper
-function buildPatientSectionHTML(dateStr) {
+function buildPatientSectionHTML(dateStr, lang='en') {
+  const t = patientTranslations[lang] || patientTranslations['en'];
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
   const siThresh = protocol === 'stimulated' ? 3.0 : 2.0;
   const cortR = avgCort('right'), cortL = avgCort('left'), cortIVC = avgCort('ivc');
@@ -1829,65 +2053,66 @@ function buildPatientSectionHTML(dateStr) {
   const rightOK = siR !== null && siR >= siThresh;
   const leftOK  = siL !== null && siL >= siThresh;
   const domSide = (R !== null && L !== null) ? (R > L ? 'right' : 'left') : null;
+  const domSideLabel  = domSide === 'right' ? t.rightSide : t.leftSide;
+  const contraSideLabel = domSide === 'right' ? t.leftSide : t.rightSide;
 
   let cards = '';
   cards += `<div style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
-    <h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">What is adrenal vein sampling?</h3>
-    <p style="font-size:11pt;color:#3a3530;line-height:1.8">Adrenal vein sampling (AVS) is a specialized procedure used to find the source of a hormone problem called <strong>primary aldosteronism</strong> — a condition where your body produces too much of a hormone called aldosterone, which can cause high blood pressure and low potassium levels.</p>
-    <p style="font-size:11pt;color:#3a3530;line-height:1.8;margin-top:10px">During this procedure, tiny blood samples were collected from the veins of each adrenal gland (small glands that sit on top of your kidneys) and from a large vein in your body. These samples are compared to figure out whether <strong>one</strong> adrenal gland is overproducing aldosterone, or whether <strong>both</strong> glands are involved.</p>
+    <h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.whatIsTitle}</h3>
+    <p style="font-size:11pt;color:#3a3530;line-height:1.8">${t.whatIsP1}</p>
+    <p style="font-size:11pt;color:#3a3530;line-height:1.8;margin-top:10px">${t.whatIsP2}</p>
   </div>`;
 
   let cannulationCard = '';
   if (siR === null && siL === null) {
-    cannulationCard = `<div style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">No data has been entered yet</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">Your care team has not yet entered the laboratory results from your procedure. This summary will be updated once those values are available.</p></div>`;
+    cannulationCard = `<div style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.noDataTitle}</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">${t.noDataText}</p></div>`;
   } else if (rightOK && leftOK) {
-    cannulationCard = `<div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">✅</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">The procedure was technically successful</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">Blood samples were successfully collected from both the right and left adrenal veins, which means the results can be reliably interpreted by your care team.</p></div>`;
+    cannulationCard = `<div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">✅</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.successTitle}</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">${t.successText}</p></div>`;
   } else {
-    const which = !rightOK && !leftOK ? 'either adrenal vein' : (!rightOK ? 'the right adrenal vein' : 'the left adrenal vein');
-    cannulationCard = `<div style="background:#FDEAEA;border:1px solid #e8b4b4;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#8B1A1A;margin-bottom:10px;font-family:'Libre Baskerville',serif">The procedure may need to be repeated</h3><p style="font-size:11pt;color:#5a1010;line-height:1.8">Your care team was not able to obtain a reliable sample from ${which}. This can happen in some cases because these veins are small and can be difficult to access. Your doctor will discuss whether a repeat procedure makes sense for you.</p></div>`;
+    const which = !rightOK && !leftOK ? t.eitherVein : (!rightOK ? t.rightVein : t.leftVein);
+    cannulationCard = `<div style="background:#FDEAEA;border:1px solid #e8b4b4;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#8B1A1A;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.failTitle}</h3><p style="font-size:11pt;color:#5a1010;line-height:1.8">${t.failText(which)}</p></div>`;
   }
   cards += cannulationCard;
 
   if (rightOK && leftOK && li !== null) {
     let findingCard = '';
     if (li >= 4) {
-      const sideFull = domSide === 'right' ? 'right' : 'left';
-      const sideOpp  = domSide === 'right' ? 'left'  : 'right';
-      const csiText = csi !== null ? (csi < 1 ? `<p style="font-size:11pt;color:#1a3d28;line-height:1.8;margin-top:10px">Additionally, the <strong>${sideOpp} adrenal gland</strong> appears to have reduced activity, which further supports that the problem is coming from one side.</p>` : `<p style="font-size:11pt;color:#5a3e00;line-height:1.8;margin-top:10px">Your care team will also review whether both glands show signs of activity and will factor this into the overall recommendation.</p>`) : '';
-      findingCard = `<div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🎯</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">One adrenal gland appears to be the source</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">The results show that your <strong>${sideFull} adrenal gland</strong> is producing significantly more aldosterone than the other side. This pattern is called <em>lateralization</em> and suggests that the problem is coming from a single gland.</p>${csiText}</div>`;
+      const csiText = csi !== null ? (csi < 1 ? `<p style="font-size:11pt;color:#1a3d28;line-height:1.8;margin-top:10px">${t.lateralCSIText(contraSideLabel)}</p>` : `<p style="font-size:11pt;color:#5a3e00;line-height:1.8;margin-top:10px">${t.lateralCSIWarnText}</p>`) : '';
+      findingCard = `<div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🎯</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.lateralTitle}</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">${t.lateralText(domSideLabel)}</p>${csiText}</div>`;
     } else if (li >= 2) {
-      findingCard = `<div style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🔍</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">The results are not fully clear yet</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">There is a <em>possible</em> tendency for one adrenal gland to be more active than the other, but the difference is not large enough to be certain. Your doctor will review these results carefully along with your other test results, your health history, and any imaging scans before making a recommendation.</p></div>`;
+      findingCard = `<div style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🔍</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.borderlineTitle}</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">${t.borderlineText}</p></div>`;
     } else {
-      findingCard = `<div style="background:#EBF0FA;border:1px solid #b0c0e8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚖️</div><h3 style="font-size:13pt;color:#2B3A8C;margin-bottom:10px;font-family:'Libre Baskerville',serif">Both adrenal glands appear to be involved equally</h3><p style="font-size:11pt;color:#1a2560;line-height:1.8">The results suggest that <strong>both adrenal glands</strong> are contributing to the overproduction of aldosterone equally. When this is the case, it is called <em>bilateral hyperplasia</em>. Surgery is generally not recommended for this pattern — instead, it is typically managed with medication.</p></div>`;
+      findingCard = `<div style="background:#EBF0FA;border:1px solid #b0c0e8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚖️</div><h3 style="font-size:13pt;color:#2B3A8C;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.bilateralTitle}</h3><p style="font-size:11pt;color:#1a2560;line-height:1.8">${t.bilateralText}</p></div>`;
     }
     cards += findingCard;
   }
 
   let nextSteps = '';
-  if (siR === null && siL === null) nextSteps = 'Please follow up with your care team to discuss when your results will be available.';
-  else if (!rightOK || !leftOK) nextSteps = 'Your doctor will discuss whether additional testing or a repeat procedure is recommended. In some cases, other imaging or tests may be used to help guide decisions.';
-  else if (li === null) nextSteps = 'Your care team is reviewing the results and will discuss next steps with you, including treatment options.';
-  else if (li >= 4) nextSteps = `Your doctor may discuss the possibility of surgery to remove the overactive ${domSide} adrenal gland. This is called a <strong>unilateral adrenalectomy</strong>. Many patients who have this surgery see significant improvement in their blood pressure and may be able to reduce or stop blood pressure medications. Your care team will help you understand all your options.`;
-  else if (li >= 2) nextSteps = 'Your care team will review the full picture — including your scans, lab work, and overall health — before making a recommendation. Additional follow-up or repeat testing may be suggested.';
-  else nextSteps = 'Since both glands appear to be involved, your doctor will likely recommend <strong>medication</strong> to manage your aldosterone levels. Common medications used for this condition include spironolactone or eplerenone. These are generally very effective and many patients do well with this approach.';
+  if (siR === null && siL === null) nextSteps = t.nextNoData;
+  else if (!rightOK || !leftOK) nextSteps = t.nextFail;
+  else if (li === null) nextSteps = t.nextNoLI;
+  else if (li >= 4) nextSteps = t.nextLateral(domSideLabel);
+  else if (li >= 2) nextSteps = t.nextBorderline;
+  else nextSteps = t.nextBilateral;
 
-  cards += `<div style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">What happens next?</h3><p style="font-size:11pt;color:#3a3530;line-height:1.8">${nextSteps}</p></div>`;
-  cards += `<div style="background:#fff;border:2px solid #D8D3C8;border-radius:8px;padding:18px 24px;margin-bottom:20px"><p style="font-size:11pt;color:#5C564E;line-height:1.8;margin:0"><strong style="color:#1A1714">Important:</strong> This summary is meant to help you understand your test results in plain language. Please do not change or stop any of your medications without first speaking with your doctor or care team. Your provider will review all of your results with you and discuss the best plan for your individual situation.</p></div>`;
+  cards += `<div style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.nextTitle}</h3><p style="font-size:11pt;color:#3a3530;line-height:1.8">${nextSteps}</p></div>`;
+  cards += `<div style="background:#fff;border:2px solid #D8D3C8;border-radius:8px;padding:18px 24px;margin-bottom:20px"><p style="font-size:11pt;color:#5C564E;line-height:1.8;margin:0"><strong style="color:#1A1714">${t.importantTitle}</strong> ${t.importantText}</p></div>`;
 
-  return `
+  return `<div dir="${t.dir}">
   <div style="margin-bottom:24px;padding-bottom:18px;border-bottom:3px solid #1B4D3E">
-    <p style="font-family:monospace;font-size:8.5pt;color:#888;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">Patient-Friendly Summary — Adrenal Vein Sampling</p>
+    <p style="font-family:monospace;font-size:8.5pt;color:#888;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">${t.headerLabel}</p>
     <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;border-bottom:1.5px solid #D8D3C8;padding-bottom:6px">
-      <span style="font-family:monospace;font-size:8pt;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap">Patient Name:</span>
+      <span style="font-family:monospace;font-size:8pt;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap">${t.patientName}</span>
       <span style="flex:1;border-bottom:1px solid #ccc;min-width:180px;display:inline-block">&nbsp;</span>
     </div>
-    <h1 style="font-family:'Libre Baskerville',serif;font-size:22pt;font-weight:700;letter-spacing:-0.02em;color:#1A1714;margin-bottom:10px">Understanding Your AVS Results</h1>
+    <h1 style="font-family:'Libre Baskerville',serif;font-size:22pt;font-weight:700;letter-spacing:-0.02em;color:#1A1714;margin-bottom:10px">${t.title}</h1>
     <p style="font-size:9pt;color:#aaa;margin-top:6px">${dateStr}</p>
   </div>
   ${cards}
   <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-    <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator — Patient-Friendly Summary</p>
-    <p style="font-size:8pt;color:#aaa">A clinical tool developed by <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
+    <p style="font-size:9pt;color:#aaa;font-family:monospace">${t.footer}</p>
+    <p style="font-size:8pt;color:#aaa">${t.credit}</p>
+  </div>
   </div>`;
 }
 
@@ -1904,7 +2129,7 @@ function openPatientReport() {
 .cbtn { padding: 9px 18px; background: #fff; color: #444; border: 1px solid #ccc; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
 </style></head><body>
 <div class="no-print"><button class="cbtn" onclick="window.close()">✕ Close</button><button class="pbtn" onclick="window.print()">🖨 Print / Save as PDF</button></div>
-<div class="page">${buildPatientSectionHTML(dateStr)}</div></body></html>`;
+<div class="page">${buildPatientSectionHTML(dateStr, 'en')}</div></body></html>`;
   const win = window.open('', '_blank', 'width=820,height=800,scrollbars=yes');
   win.document.write(reportHTML);
   win.document.close();
