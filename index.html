@@ -910,23 +910,27 @@
       <!-- Language selector — shown when patient summary is checked -->
       <div id="lang-selector" style="display:none;margin-top:6px;padding:12px 14px;background:#EFEDE8;border:1px solid #D8D3C8;border-radius:4px;border-top:none;border-top-left-radius:0;border-top-right-radius:0">
         <div style="font-family:'DM Mono',monospace;font-size:9px;color:#8C8680;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Select language(s)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#1A1714">
-            <input type="checkbox" id="lang-en" checked style="accent-color:#1A1714;width:13px;height:13px"> English
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#1A1714">
-            <input type="checkbox" id="lang-es" style="accent-color:#1A1714;width:13px;height:13px"> Español
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#1A1714">
-            <input type="checkbox" id="lang-ko" style="accent-color:#1A1714;width:13px;height:13px"> 한국어
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#1A1714">
-            <input type="checkbox" id="lang-fa" style="accent-color:#1A1714;width:13px;height:13px"> فارسی
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:#1A1714">
-            <input type="checkbox" id="lang-ru" style="accent-color:#1A1714;width:13px;height:13px"> Русский
-          </label>
+        <div style="display:flex;flex-wrap:wrap;gap:7px">
+          <button type="button" data-lang="en" onclick="toggleLangPill(this)" class="lang-pill active" style="padding:5px 11px;border-radius:20px;border:1.5px solid #1A1714;background:#1A1714;color:#fff;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;line-height:1.4">
+            English
+          </button>
+          <button type="button" data-lang="es" onclick="toggleLangPill(this)" class="lang-pill" style="padding:5px 11px;border-radius:20px;border:1.5px solid #C8C0B4;background:#fff;color:#1A1714;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;line-height:1.4" title="AI translation · certification pending">
+            Español <span style="font-weight:400;opacity:0.7">ES</span>
+          </button>
+          <button type="button" data-lang="zh" onclick="toggleLangPill(this)" class="lang-pill" style="padding:5px 11px;border-radius:20px;border:1.5px solid #C8C0B4;background:#fff;color:#1A1714;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;line-height:1.4" title="AI translation · certification pending">
+            中文 <span style="font-weight:400;opacity:0.7">ZH</span>
+          </button>
+          <button type="button" data-lang="ko" onclick="toggleLangPill(this)" class="lang-pill" style="padding:5px 11px;border-radius:20px;border:1.5px solid #C8C0B4;background:#fff;color:#1A1714;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;line-height:1.4" title="AI translation · certification pending">
+            한국어 <span style="font-weight:400;opacity:0.7">KO</span>
+          </button>
+          <button type="button" data-lang="fa" onclick="toggleLangPill(this)" class="lang-pill" style="padding:5px 11px;border-radius:20px;border:1.5px solid #C8C0B4;background:#fff;color:#1A1714;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;line-height:1.4" title="AI translation · certification pending">
+            فارسی <span style="font-weight:400;opacity:0.7">FA</span>
+          </button>
+          <button type="button" data-lang="ru" onclick="toggleLangPill(this)" class="lang-pill" style="padding:5px 11px;border-radius:20px;border:1.5px solid #C8C0B4;background:#fff;color:#1A1714;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;line-height:1.4" title="AI translation · certification pending">
+            Русский <span style="font-weight:400;opacity:0.7">RU</span>
+          </button>
         </div>
+        <p style="font-size:10px;color:#B8A882;font-style:italic;margin-top:9px">Non-English translations are AI-generated · certification pending. Hover a pill to see status.</p>
       </div>
       <p style="font-size:10px;color:#B8B0A0;margin-top:10px;font-style:italic">Selected sections print as a single document with page breaks between them.</p>
       <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
@@ -1418,11 +1422,42 @@ function toggleLangSelector() {
   document.getElementById('lang-selector').style.display = checked ? 'block' : 'none';
 }
 
+function toggleLangPill(btn) {
+  const isActive = btn.classList.contains('active');
+  // English must always stay selected — don't allow deselecting it alone,
+  // but allow if another lang is also active
+  if (btn.dataset.lang === 'en' && isActive) {
+    const anyOther = [...document.querySelectorAll('.lang-pill.active')].some(b => b.dataset.lang !== 'en');
+    if (!anyOther) return; // must have at least one selected
+  }
+  if (isActive) {
+    btn.classList.remove('active');
+    btn.style.background = '#fff';
+    btn.style.color = '#1A1714';
+    btn.style.borderColor = '#C8C0B4';
+  } else {
+    btn.classList.add('active');
+    btn.style.background = '#1A1714';
+    btn.style.color = '#fff';
+    btn.style.borderColor = '#1A1714';
+  }
+}
+
 function openPrintOptions() {
   document.getElementById('print-options-overlay').classList.add('open');
 }
 function closePrintOptions() {
   document.getElementById('print-options-overlay').classList.remove('open');
+  // Reset language pills to English only
+  document.querySelectorAll('.lang-pill').forEach(btn => {
+    const isEn = btn.dataset.lang === 'en';
+    btn.classList.toggle('active', isEn);
+    btn.style.background = isEn ? '#1A1714' : '#fff';
+    btn.style.color = isEn ? '#fff' : '#1A1714';
+    btn.style.borderColor = isEn ? '#1A1714' : '#C8C0B4';
+  });
+  document.getElementById('opt-patient').checked = false;
+  document.getElementById('lang-selector').style.display = 'none';
 }
 function confirmPrintReport() {
   const wantSummary   = document.getElementById('opt-summary').checked;
@@ -1434,11 +1469,7 @@ function confirmPrintReport() {
   }
   const langs = [];
   if (wantPatient) {
-    if (document.getElementById('lang-en').checked) langs.push('en');
-    if (document.getElementById('lang-es').checked) langs.push('es');
-    if (document.getElementById('lang-ko').checked) langs.push('ko');
-    if (document.getElementById('lang-fa').checked) langs.push('fa');
-    if (document.getElementById('lang-ru').checked) langs.push('ru');
+    document.querySelectorAll('.lang-pill.active').forEach(btn => langs.push(btn.dataset.lang));
     if (langs.length === 0) {
       alert('Please select at least one language for the Patient-Friendly Summary.');
       return;
@@ -2034,6 +2065,42 @@ const patientTranslations = {
     importantText: 'Это резюме предназначено для того, чтобы помочь вам понять результаты анализов простым языком. Пожалуйста, не изменяйте и не прекращайте приём каких-либо лекарств, не проконсультировавшись предварительно с врачом или медицинской командой. Ваш врач обсудит с вами все результаты и предложит оптимальный план лечения для вашей конкретной ситуации.',
     footer: 'Калькулятор AVS — Резюме для пациента',
     credit: 'Клинический инструмент, разработанный <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong>',
+  },
+  zh: {
+    dir: 'ltr',
+    headerLabel: '患者友好摘要 — 肾上腺静脉采样',
+    patientName: '患者姓名：',
+    title: '了解您的 AVS 检查结果',
+    whatIsTitle: '什么是肾上腺静脉采样？',
+    whatIsP1: '肾上腺静脉采样（AVS）是一种专项检查，用于寻找一种称为<strong>原发性醛固酮增多症</strong>的激素异常的来源——这是一种您的身体产生过多醛固酮激素的疾病，可能导致高血压和低钾血症。',
+    whatIsP2: '在此检查过程中，医生从您两侧肾上腺（位于肾脏上方的小腺体）的静脉以及您体内的一条大静脉中采集了少量血液样本。通过比较这些样本，可以判断是<strong>一侧</strong>肾上腺过度分泌醛固酮，还是<strong>两侧</strong>均受累。',
+    noDataTitle: '尚未输入数据',
+    noDataText: '您的医疗团队尚未输入本次检查的实验室结果。待数据录入后，本摘要将予以更新。',
+    successTitle: '检查在技术上取得成功',
+    successText: '已成功从左右两侧肾上腺静脉采集血液样本，这意味着您的医疗团队可以对结果进行可靠的解读。',
+    failTitle: '可能需要重复检查',
+    failText: (which) => `您的医疗团队未能从${which}获取可靠样本。这在某些情况下可能发生，因为这些静脉细小且难以触及。您的医生将与您讨论是否需要重复检查。`,
+    eitherVein: '任何一侧肾上腺静脉', rightVein: '右侧肾上腺静脉', leftVein: '左侧肾上腺静脉',
+    lateralTitle: '一侧肾上腺似乎是病变来源',
+    lateralText: (side) => `结果显示，您的<strong>${side}肾上腺</strong>产生的醛固酮明显多于另一侧。这种模式称为<em>侧位化</em>，提示问题来源于单侧腺体。`,
+    lateralCSIText: (opp) => `此外，<strong>${opp}肾上腺</strong>的活性似乎有所降低，进一步支持问题来源于单侧的判断。`,
+    lateralCSIWarnText: '您的医疗团队还将评估两侧腺体是否均有活动迹象，并将其纳入整体建议中。',
+    rightSide: '右侧', leftSide: '左侧',
+    borderlineTitle: '结果尚不完全明确',
+    borderlineText: '一侧肾上腺<em>可能</em>比另一侧更活跃，但差异尚不足以作出确定性判断。您的医生将结合其他检查结果、病史及影像学检查，仔细审阅这些结果后再给出建议。',
+    bilateralTitle: '两侧肾上腺似乎同等受累',
+    bilateralText: '结果提示<strong>两侧肾上腺</strong>对醛固酮过度分泌的贡献程度相当。这种情况称为<em>双侧增生</em>。通常不建议对此类情况进行手术治疗，而是采用药物管理。',
+    nextTitle: '接下来会发生什么？',
+    nextNoData: '请与您的医疗团队保持联系，了解结果何时可以获得。',
+    nextFail: '您的医生将讨论是否建议进行进一步检查或重复检查。在某些情况下，可能会使用其他影像学检查或化验来辅助决策。',
+    nextNoLI: '您的医疗团队正在审阅结果，并将与您讨论下一步计划，包括治疗方案。',
+    nextLateral: (side) => `您的医生可能会与您讨论通过手术切除${side}过度活跃肾上腺的可能性。这种手术称为<strong>单侧肾上腺切除术</strong>。许多接受此手术的患者血压得到显著改善，并可能减少或停用降压药物。您的医疗团队将帮助您了解所有可用选项。`,
+    nextBorderline: '您的医疗团队将综合评估全面情况——包括影像学检查、实验室结果及整体健康状况——再给出建议。可能会建议进一步随访或复查。',
+    nextBilateral: '由于两侧腺体似乎均受累，您的医生很可能会建议使用<strong>药物</strong>控制醛固酮水平。常用药物包括螺内酯或依普利酮。这些药物通常非常有效，许多患者对此方案反应良好。',
+    importantTitle: '重要提示：',
+    importantText: '本摘要旨在帮助您以通俗语言理解检查结果。在未与医生或医疗团队沟通之前，请勿自行更改或停用任何药物。您的医生将与您一起审阅所有结果，并针对您的具体情况讨论最佳治疗方案。',
+    footer: 'AVS 计算器 — 患者友好摘要',
+    credit: '由 <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong> 开发的临床工具',
   },
 };
 
