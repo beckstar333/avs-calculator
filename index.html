@@ -467,8 +467,17 @@
     /* Copy button full width */
     .copy-results-btn { font-size: 10px; }
 
+    /* Print modal — full width on small screens */
+    #print-options-overlay > div { margin: 8px; }
+    #feedback-overlay > div { margin: 8px; }
+
+    /* Language pills — wrap tighter */
+    #lang-selector { padding: 10px 12px; }
+    .lang-pill { font-size: 10px; padding: 4px 9px; }
+  }
+
   /* ═══════════════════════════════════════
-     PRINT STYLES
+     PRINT STYLES (main app)
   ═══════════════════════════════════════ */
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -1707,27 +1716,32 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; background: #fff; padding: 0; }
-  @page { size: letter portrait; margin: 0.6in 0.5in; }
+  body { font-family: 'DM Sans', sans-serif; font-size: 10pt; color: #1a1714; background: #fff; padding: 0; }
+  @page { size: letter portrait; margin: 0.45in 0.45in; }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     .no-print { display: none !important; }
-    html, body { width: 100%; margin: 0; padding: 0; }
-    .page {
-      padding: 0;
-      width: 100%;
-      max-width: 100%;
-      box-shadow: none;
-      margin: 0;
-    }
-    h2 { page-break-after: avoid; margin-bottom: 8px; }
-    .section { page-break-inside: avoid; margin-bottom: 16px; }
-    table { page-break-inside: auto; }
+    html, body { width: 100%; margin: 0; padding: 0; font-size: 9pt; }
+    .page { padding: 0; width: 100%; max-width: 100%; box-shadow: none; margin: 0; }
+    h1 { font-size: 16pt !important; }
+    h2 { font-size: 11pt !important; margin-bottom: 6px !important; padding-bottom: 4px !important; page-break-after: avoid; }
+    h3 { font-size: 8pt !important; margin-bottom: 5px !important; }
+    .section { margin-bottom: 10px; page-break-inside: avoid; }
+    .report-header { margin-bottom: 12px !important; padding-bottom: 10px !important; }
+    .report-header h1 { margin-bottom: 2px !important; }
+    table { page-break-inside: auto; width: 100%; }
     tr { page-break-inside: avoid; }
-    .interp-card { padding: 8px 10px !important; margin-bottom: 6px !important; }
-    .interp-card p { font-size: 9.5pt !important; line-height: 1.5 !important; }
-    .interp-card span { font-size: 14px !important; }
-    td { padding: 5px 10px !important; font-size: 9.5pt !important; }
+    td, th { padding: 4px 8px !important; font-size: 8.5pt !important; }
+    .interp-card { padding: 6px 9px !important; margin-bottom: 5px !important; }
+    .interp-card p { font-size: 8.5pt !important; line-height: 1.4 !important; }
+    .interp-card span { font-size: 13px !important; }
+    .summary-row td { font-size: 8.5pt !important; padding: 4px 8px !important; }
+    .disclaimer-box { padding: 8px 10px !important; margin-top: 12px !important; }
+    .disclaimer-box p { font-size: 7.5pt !important; line-height: 1.4 !important; }
+    .report-footer { margin-top: 10px !important; padding-top: 8px !important; }
+    .report-footer p { font-size: 7.5pt !important; }
+    .badge { font-size: 7pt !important; padding: 2px 6px !important; }
+    .label-box { min-width: 180px !important; min-height: 55px !important; font-size: 8pt !important; }
   }
   @media screen {
     body { background: #e8e5e0; }
@@ -1736,7 +1750,7 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   }
   h1 { font-family: 'Libre Baskerville', serif; font-size: 20pt; font-weight: 700; letter-spacing: -0.02em; }
   h2 { font-family: 'Libre Baskerville', serif; font-size: 13pt; font-weight: 700; color: #1a1714; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #1a1714; }
-  h3 { font-size: 11pt; font-weight: 600; color: #444; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; font-size: 9pt; }
+  h3 { font-size: 9pt; font-weight: 600; color: #444; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
   .section { margin-bottom: 28px; }
   .print-btn-r { padding: 9px 18px; background: #1a1714; color: #fff; border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
   .close-btn-r { padding: 9px 18px; background: #fff; color: #444; border: 1px solid #ccc; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
@@ -1750,24 +1764,24 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
 
 <div class="page">
   <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid #C8901A">
+  <div class="report-header" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid #C8901A">
     <div>
       <h1>Adrenal Vein Sampling Report</h1>
-      <p style="font-size:10pt;color:#888;margin-top:4px;font-family:monospace;letter-spacing:0.05em">AVS RESULT SUMMARY — CALCULATED REPORT</p>
-      <div style="margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+      <p style="font-size:9pt;color:#888;margin-top:4px;font-family:monospace;letter-spacing:0.05em">AVS RESULT SUMMARY — CALCULATED REPORT</p>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;align-items:center;gap:8px">
         <span style="font-size:9pt;color:#888">${dateStr} &nbsp;·&nbsp; ${timeStr}</span>
       </div>
       <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">
-        <span style="font-size:9pt;padding:3px 10px;background:#FDF3E3;color:#7A4F00;border-radius:2px;display:inline-block;font-family:monospace">
+        <span class="badge" style="font-size:9pt;padding:3px 10px;background:#FDF3E3;color:#7A4F00;border-radius:2px;display:inline-block;font-family:monospace">
           ${protocol === 'stimulated' ? 'COSYNTROPIN-STIMULATED' : 'UNSTIMULATED'}
         </span>
-        <span style="font-size:9pt;padding:3px 10px;background:#EBF0FA;color:#2B3A8C;border-radius:2px;display:inline-block;font-family:monospace">
+        <span class="badge" style="font-size:9pt;padding:3px 10px;background:#EBF0FA;color:#2B3A8C;border-radius:2px;display:inline-block;font-family:monospace">
           ${document.getElementById('ref-guideline-label').textContent}
         </span>
       </div>
     </div>
     <div style="flex-shrink:0;margin-left:24px">
-      <div style="border:1px dashed #bbb;border-radius:4px;padding:14px 18px;min-width:240px;min-height:80px;display:flex;align-items:center;justify-content:center;background:#fafafa">
+      <div class="label-box" style="border:1px dashed #bbb;border-radius:4px;padding:14px 18px;min-width:240px;min-height:80px;display:flex;align-items:center;justify-content:center;background:#fafafa">
         <span style="font-family:monospace;font-size:8pt;color:#ccc;letter-spacing:0.06em;text-transform:uppercase;text-align:center;line-height:2">Patient Label / Name / MRN</span>
       </div>
     </div>
@@ -1823,14 +1837,14 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
         const avgCortVal = samples.reduce((sum, s) => sum + parseFloat(s.cort), 0) / samples.length;
         const avgACVal = samples.reduce((sum, s) => sum + parseFloat(s.aldo)/parseFloat(s.cort), 0) / samples.length;
         const summaryRows = samples.length > 1
-          ? `<tr style="background:#f0f0f0;border-top:2px solid #ddd">
+          ? `<tr class="summary-row" style="background:#f0f0f0;border-top:2px solid #ddd">
               <td style="padding:6px 10px;font-size:8.5pt;color:#555;font-style:italic;font-weight:600">Average (${samples.length} samples)</td>
               <td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">${avgAldo.toFixed(1)} ${aldoUnit}</td>
               <td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">${avgCortVal.toFixed(2)} ${cortUnit}</td>
               <td style="padding:6px 10px;text-align:center;font-size:8.5pt;color:#888;font-style:italic">averaged per sample</td>
               <td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:10pt;font-weight:700;color:${color}">${fmt(avgACVal)}</td>
             </tr>`
-          : `<tr style="background:#f0f0f0;border-top:2px solid #ddd">
+          : `<tr class="summary-row" style="background:#f0f0f0;border-top:2px solid #ddd">
               <td style="padding:6px 10px;font-size:8.5pt;color:#555;font-style:italic;font-weight:600">Used in calculations</td>
               <td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">${avgAldo.toFixed(1)} ${aldoUnit}</td>
               <td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">${avgCortVal.toFixed(2)} ${cortUnit}</td>
@@ -1862,10 +1876,10 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
 
   <!-- DISCLAIMER + FOOTER (shown if any clinical section selected) -->
   ${(wantSummary || wantWorksheet) ? `
-  <div style="margin-top:24px;padding:12px 14px;background:#f8f8f8;border:1px solid #e0e0e0;border-radius:3px">
+  <div class="disclaimer-box" style="margin-top:24px;padding:12px 14px;background:#f8f8f8;border:1px solid #e0e0e0;border-radius:3px">
     <p style="font-size:8.5pt;color:#888;line-height:1.6"><strong style="color:#555">Disclaimer:</strong> This report was generated by the AVS Calculator tool and is intended to assist qualified clinicians in interpreting adrenal vein sampling data. It does not constitute medical advice and should not be used as a substitute for clinical judgment. All results must be interpreted in the context of the patient's clinical presentation, imaging, and biochemical evaluation. Threshold values used are based on published guidelines and may vary by institution.</p>
   </div>
-  <div style="margin-top:20px;padding-top:14px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center">
+  <div class="report-footer" style="margin-top:20px;padding-top:14px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center">
     <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator</p>
     <p style="font-size:8pt;color:#aaa">A clinical tool developed by <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
   </div>
