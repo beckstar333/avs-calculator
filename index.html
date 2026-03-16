@@ -1736,6 +1736,8 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
     .interp-card p { font-size: 8.5pt !important; line-height: 1.4 !important; }
     .interp-card span { font-size: 13px !important; }
     .summary-row td { font-size: 8.5pt !important; padding: 4px 8px !important; }
+    .label-strip { margin-bottom: 8px !important; padding-bottom: 5px !important; }
+    .label-strip span { font-size: 7pt !important; }
     .disclaimer-box { padding: 8px 10px !important; margin-top: 12px !important; }
     .disclaimer-box p { font-size: 7.5pt !important; line-height: 1.4 !important; }
     .report-footer { margin-top: 10px !important; padding-top: 8px !important; }
@@ -1801,6 +1803,10 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   </div>
 
   <div style="page-break-before:always"></div>
+  <div class="label-strip" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e0e0e0">
+    <span style="font-family:monospace;font-size:7.5pt;color:#aaa;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap">Patient Label / Name / MRN</span>
+    <span style="flex:1;border-bottom:1px solid #ccc;display:inline-block">&nbsp;</span>
+  </div>
 
   <div class="section">
     <h2>Calculated Indices</h2>
@@ -1823,12 +1829,16 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   <!-- CALCULATION WORKSHEET -->
   ${wantWorksheet ? `
   <div style="page-break-before:always"></div>
+  <div class="label-strip" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e0e0e0">
+    <span style="font-family:monospace;font-size:7.5pt;color:#aaa;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap">Patient Label / Name / MRN</span>
+    <span style="flex:1;border-bottom:1px solid #ccc;display:inline-block">&nbsp;</span>
+  </div>
   <div class="section">
     <h2>Calculation Workup</h2>
     <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">A/C ratios are calculated per sample (Aldosterone ÷ Cortisol, in reported units). When multiple samples are included, the A/C ratio is calculated for each sample individually, then those ratios are averaged. All indices are derived from these averaged values.</p>
     ${(() => {
-      const aldoUnit = document.querySelector('#aldo-unit-toggle .unit-btn.active')?.textContent || 'pg/mL';
-      const cortUnit = document.querySelector('#cort-unit-toggle .unit-btn.active')?.textContent || 'µg/dL';
+      const aldoUnit = units.aldo;
+      const cortUnit = units.cort;
       function sectionWorkup(side, label, color) {
         const samples = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
         if (!samples.length) return `<p style="color:#aaa;font-size:9pt;font-style:italic">No included samples for ${label}.</p>`;
