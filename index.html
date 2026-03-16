@@ -726,7 +726,7 @@
       <div class="ref-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <span style="display:flex;align-items:center;gap:8px">Reference Thresholds <span style="flex:1;height:1px;background:var(--border);display:inline-block;width:20px"></span></span>
         <select id="threshold-preset" onchange="applyThresholdPreset(this.value)" style="font-family:var(--mono);font-size:9px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text-2);cursor:pointer;letter-spacing:0.03em">
-          <option value="es2016">Endocrine Society 2016</option>
+          <option value="es2016">ES Guidelines 2016</option>
           <option value="custom">Custom</option>
         </select>
       </div>
@@ -770,7 +770,7 @@
           <input type="number" id="thresh-csi" class="thresh-custom-input" min="0.1" max="5" step="0.1" value="1.0" oninput="onCustomThreshold()" style="display:none">
         </span>
       </div>
-      <div style="margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--text-3);text-align:right" id="ref-guideline-label">Endocrine Society 2016</div>
+      <div style="margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--text-3);text-align:right" id="ref-guideline-label">ES Guidelines 2016</div>
     </div>
 
     <div class="ref-section" style="margin-top:24px">
@@ -809,7 +809,7 @@
     </div>
 
     <div style="margin-top:12px;padding:12px 14px;background:#F0EDE6;border:1px solid #D8D3C8;border-radius:4px;font-size:11px;color:#5C564E;line-height:1.6">
-      <strong style="color:#1A1714">Disclaimer:</strong> This tool is intended to support — not replace — clinical judgment. Threshold values may vary by institution and protocol; this calculator applies the most widely cited Endocrine Society thresholds (by default). Results must always be interpreted by a qualified clinician in the context of the patient's full clinical picture, including imaging, biochemistry, comorbidities, and surgical candidacy. This calculator does not constitute medical advice and should not be used as the sole basis for clinical decision-making.
+      <strong style="color:#1A1714">Disclaimer:</strong> This tool is intended to support — not replace — clinical judgment. Threshold values may vary by institution and protocol; this calculator applies the most widely cited published guideline thresholds (by default). Results must always be interpreted by a qualified clinician in the context of the patient's full clinical picture, including imaging, biochemistry, comorbidities, and surgical candidacy. This calculator does not constitute medical advice and should not be used as the sole basis for clinical decision-making.
     </div>
 
   </div>
@@ -966,7 +966,7 @@ const units = { aldo: 'pg/mL', cort: 'µg/dL' };
 
 // ── Threshold State ──
 const PRESETS = {
-  es2016: { siUnstim: 2.0, siStim: 3.0, liLat: 4.0, liBorder: 2.0, csi: 1.0, label: 'Endocrine Society 2016' },
+  es2016: { siUnstim: 2.0, siStim: 3.0, liLat: 4.0, liBorder: 2.0, csi: 1.0, label: 'ES Guidelines 2016' },
 };
 
 const thresholds = { siUnstim: 2.0, siStim: 3.0, liLat: 4.0, liBorder: 2.0, csi: 1.0 };
@@ -1597,8 +1597,8 @@ function buildSampleTableHTML(side, color) {
       <thead>
         <tr style="background:#f5f5f5">
           <th style="padding:6px 10px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Sample</th>
-          <th style="padding:6px 10px;text-align:right;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Aldo (${units.aldo})</th>
-          <th style="padding:6px 10px;text-align:right;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Cortisol (${units.cort})</th>
+          <th style="padding:6px 10px;text-align:right;font-size:9pt;color:#666;letter-spacing:0.05em;border-bottom:2px solid #ddd">ALDO (${units.aldo})</th>
+          <th style="padding:6px 10px;text-align:right;font-size:9pt;color:#666;letter-spacing:0.05em;border-bottom:2px solid #ddd">CORTISOL (${units.cort})</th>
           <th style="padding:6px 10px;text-align:right;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">A/C Ratio</th>
         </tr>
       </thead>
@@ -1861,7 +1861,7 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
               <td style="padding:6px 10px;text-align:center;font-size:8.5pt;color:#888;font-style:italic">single sample</td>
               <td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:10pt;font-weight:700;color:${color}">${fmt(avgACVal)}</td>
             </tr>`;
-        return `<p style="font-family:monospace;font-size:8pt;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${label}</p><table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px"><thead><tr style="background:#f5f5f5"><th style="padding:6px 10px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Sample</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Aldosterone</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Cortisol</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Calculation</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">A/C Ratio</th></tr></thead><tbody>${rows}${summaryRows}</tbody></table>`;
+        return `<p style="font-family:monospace;font-size:8pt;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${label}</p><table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px"><thead><tr style="background:#f5f5f5"><th style="padding:6px 10px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Sample</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;letter-spacing:0.05em">ALDO (${aldoUnit})</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;letter-spacing:0.05em">CORTISOL (${cortUnit})</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Calculation</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">A/C Ratio</th></tr></thead><tbody>${rows}${summaryRows}</tbody></table>`;
       }
       const ivcAC = avgAC('ivc'), rightAC = avgAC('right'), leftAC = avgAC('left');
       const cortIVCw = avgCort('ivc'), cortRw = avgCort('right'), cortLw = avgCort('left');
