@@ -310,6 +310,8 @@
   #feedback-overlay.open { display: flex !important; }
   #print-options-overlay { display: none; }
   #print-options-overlay.open { display: flex !important; }
+  #changelog-overlay { display: none; }
+  #changelog-overlay.open { display: flex !important; }
   .fb-type-btn {
     padding: 5px 12px; border: 1px solid var(--border); border-radius: 2px;
     background: var(--surface2); font-family: var(--sans); font-size: 11px;
@@ -822,6 +824,8 @@
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;opacity:0.7"><rect width="24" height="24" rx="4" fill="#0A66C2"/><path d="M7.5 9.5H5V19H7.5V9.5Z" fill="white"/><circle cx="6.25" cy="6.75" r="1.5" fill="white"/><path d="M19 19H16.5V14.25C16.5 13.01 15.49 12 14.25 12C13.01 12 12 13.01 12 14.25V19H9.5V9.5H12V10.76C12.68 9.95 13.76 9.5 14.25 9.5C16.87 9.5 19 11.63 19 14.25V19Z" fill="white"/></svg>
       <strong>Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong>
     </a>
+    <span style="margin-left:10px;opacity:0.4">·</span>
+    <button onclick="openChangelog()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Changelog</button>
   </div>
   <div class="toolbar-right">
     <button class="reset-btn" onclick="resetAll()">
@@ -949,6 +953,102 @@
           Print / Save PDF
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     CHANGELOG MODAL
+════════════════════════════════════════════════ -->
+<div id="changelog-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:6px;width:100%;max-width:480px;margin:20px;box-shadow:0 8px 40px rgba(0,0,0,0.2);overflow:hidden;max-height:80vh;display:flex;flex-direction:column">
+    <div style="background:#1A1714;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:#fff">Changelog</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#8C8680;letter-spacing:0.08em;text-transform:uppercase;margin-top:2px">AVS Calculator — Version History</div>
+      </div>
+      <button onclick="closeChangelog()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1">✕</button>
+    </div>
+    <div style="padding:20px;overflow-y:auto">
+
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#1A1714;background:#F0EDE6;padding:2px 8px;border-radius:2px">v1.5</span>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">March 2026</span>
+        </div>
+        <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
+          <li>Multilingual patient summaries — English, Spanish, Mandarin, Korean, Farsi, Russian</li>
+          <li>Language pill selector in print modal</li>
+          <li>SI calculation corrected — now uses adrenal cortisol ÷ IVC cortisol</li>
+          <li>Calculation worksheet with per-sample averages for aldo, cortisol, and A/C ratio</li>
+          <li>Report restructured — one page per section with patient label strips</li>
+          <li>Print layout optimized for single-page sections</li>
+          <li>Cloudflare Web Analytics added (cookieless)</li>
+          <li>Copyright notice added</li>
+          <li>"Endocrine Society" replaced with "ES Guidelines" in labels</li>
+          <li>Unit label bug fixed — µg/dL no longer renders as mg/dL in reports</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#1A1714;background:#F0EDE6;padding:2px 8px;border-radius:2px">v1.4</span>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">March 2026</span>
+        </div>
+        <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
+          <li>Clinical Reports modal with section checkboxes (Summary, Worksheet, Patient Summary)</li>
+          <li>Single print window with page breaks between selected sections</li>
+          <li>Patient-Friendly Summary merged into Clinical Reports dropdown</li>
+          <li>Calculation worksheet with index derivation table</li>
+          <li>Report page order restructured</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#1A1714;background:#F0EDE6;padding:2px 8px;border-radius:2px">v1.3</span>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">March 2026</span>
+        </div>
+        <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
+          <li>Patient-Friendly Summary with plain-language interpretation</li>
+          <li>PHI removed — patient name/MRN fields replaced with label box</li>
+          <li>Feedback form via Formspree</li>
+          <li>Session timestamp in results panel</li>
+          <li>On-screen interpretation cards</li>
+          <li>Input validation with shake animation</li>
+          <li>Outlier warning for samples deviating &gt;50% from section average</li>
+          <li>Clear section button per vein</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#1A1714;background:#F0EDE6;padding:2px 8px;border-radius:2px">v1.2</span>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">March 2026</span>
+        </div>
+        <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
+          <li>Multi-sample support per vein (up to 8 samples)</li>
+          <li>Toggle to include/exclude individual samples</li>
+          <li>Unit conversion — aldosterone (pg/mL, ng/dL, pmol/L) and cortisol (µg/dL, nmol/L, ng/mL)</li>
+          <li>Cosyntropin-stimulated protocol support</li>
+          <li>Customizable threshold inputs</li>
+          <li>Guideline presets — ES 2016, Adler 2025, Rossi 2014</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:4px">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#1A1714;background:#F0EDE6;padding:2px 8px;border-radius:2px">v1.0</span>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">March 2026</span>
+        </div>
+        <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
+          <li>Initial release</li>
+          <li>SI, LI, and CSI calculation</li>
+          <li>IVC, right, and left adrenal vein inputs</li>
+          <li>Clinical report export</li>
+        </ul>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1493,6 +1593,16 @@ document.getElementById('print-options-overlay').addEventListener('click', funct
   if (e.target === this) closePrintOptions();
 });
 
+function openChangelog() {
+  document.getElementById('changelog-overlay').classList.add('open');
+}
+function closeChangelog() {
+  document.getElementById('changelog-overlay').classList.remove('open');
+}
+document.getElementById('changelog-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeChangelog();
+});
+
 function openFeedback() {
   document.getElementById('feedback-overlay').classList.add('open');
   document.getElementById('feedback-message').value = '';
@@ -1889,9 +1999,8 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   <div class="disclaimer-box" style="margin-top:24px;padding:12px 14px;background:#f8f8f8;border:1px solid #e0e0e0;border-radius:3px">
     <p style="font-size:8.5pt;color:#888;line-height:1.6"><strong style="color:#555">Disclaimer:</strong> This report was generated by the AVS Calculator tool and is intended to assist qualified clinicians in interpreting adrenal vein sampling data. It does not constitute medical advice and should not be used as a substitute for clinical judgment. All results must be interpreted in the context of the patient's clinical presentation, imaging, and biochemical evaluation. Threshold values used are based on published guidelines and may vary by institution.</p>
   </div>
-  <div class="report-footer" style="margin-top:20px;padding-top:14px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center">
-    <p style="font-size:9pt;color:#aaa;font-family:monospace">AVS Calculator</p>
-    <p style="font-size:8pt;color:#aaa">A clinical tool developed by <strong style="color:#888">Rebecca Allegretto, NP, MSN, MBA, ACNP-BC</strong></p>
+  <div class="report-footer" style="margin-top:20px;padding-top:14px;border-top:1px solid #e0e0e0;display:flex;justify-content:flex-end;align-items:center">
+    <p style="font-size:8pt;color:#ccc;font-family:monospace">www.avsresults.com</p>
   </div>
   ` : ''}
 
@@ -2216,9 +2325,8 @@ function buildPatientSectionHTML(dateStr, lang='en') {
     <p style="font-size:9pt;color:#aaa;margin-top:6px">${dateStr}</p>
   </div>
   ${cards}
-  <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-    <p style="font-size:9pt;color:#aaa;font-family:monospace">${t.footer}</p>
-    <p style="font-size:8pt;color:#aaa">${t.credit}</p>
+  <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0;display:flex;justify-content:flex-end;align-items:center">
+    <p style="font-size:8pt;color:#ccc;font-family:monospace">www.avsresults.com</p>
   </div>
   </div>`;
 }
