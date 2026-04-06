@@ -1832,6 +1832,8 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
     margin: 0.45in 0.45in;
     @top-left { content: "Adrenal Vein Sampling Calculator"; font-family: 'DM Sans', sans-serif; font-size: 8pt; color: #bbb; }
     @top-right { content: "www.avsresults.com"; font-family: monospace; font-size: 8pt; color: #bbb; }
+    @bottom-left { content: ""; }
+    @bottom-right { content: ""; }
   }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -1853,6 +1855,9 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
     .summary-row td { font-size: 8.5pt !important; padding: 4px 8px !important; }
     .label-strip { margin-bottom: 8px !important; padding-bottom: 5px !important; }
     .label-strip span { font-size: 7pt !important; }
+    .patient-card { page-break-inside: avoid !important; break-inside: avoid !important; margin-bottom: 8px !important; padding: 12px 16px !important; }
+    .patient-card h3 { font-size: 10pt !important; margin-bottom: 5px !important; }
+    .patient-card p { font-size: 9pt !important; line-height: 1.5 !important; }
     .disclaimer-box { padding: 8px 10px !important; margin-top: 12px !important; }
     .disclaimer-box p { font-size: 7.5pt !important; line-height: 1.4 !important; }
     .report-footer { margin-top: 10px !important; padding-top: 8px !important; }
@@ -2278,7 +2283,7 @@ function buildPatientSectionHTML(dateStr, lang='en') {
   const contraSideLabel = domSide === 'right' ? t.leftSide : t.rightSide;
 
   let cards = '';
-  cards += `<div style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
+  cards += `<div class="patient-card" style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px">
     <h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.whatIsTitle}</h3>
     <p style="font-size:11pt;color:#3a3530;line-height:1.8">${t.whatIsP1}</p>
     <p style="font-size:11pt;color:#3a3530;line-height:1.8;margin-top:10px">${t.whatIsP2}</p>
@@ -2286,12 +2291,12 @@ function buildPatientSectionHTML(dateStr, lang='en') {
 
   let cannulationCard = '';
   if (siR === null && siL === null) {
-    cannulationCard = `<div style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.noDataTitle}</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">${t.noDataText}</p></div>`;
+    cannulationCard = `<div class="patient-card" style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.noDataTitle}</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">${t.noDataText}</p></div>`;
   } else if (rightOK && leftOK) {
-    cannulationCard = `<div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">✅</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.successTitle}</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">${t.successText}</p></div>`;
+    cannulationCard = `<div class="patient-card" style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">✅</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.successTitle}</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">${t.successText}</p></div>`;
   } else {
     const which = !rightOK && !leftOK ? t.eitherVein : (!rightOK ? t.rightVein : t.leftVein);
-    cannulationCard = `<div style="background:#FDEAEA;border:1px solid #e8b4b4;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#8B1A1A;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.failTitle}</h3><p style="font-size:11pt;color:#5a1010;line-height:1.8">${t.failText(which)}</p></div>`;
+    cannulationCard = `<div class="patient-card" style="background:#FDEAEA;border:1px solid #e8b4b4;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#8B1A1A;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.failTitle}</h3><p style="font-size:11pt;color:#5a1010;line-height:1.8">${t.failText(which)}</p></div>`;
   }
   cards += cannulationCard;
 
@@ -2299,11 +2304,11 @@ function buildPatientSectionHTML(dateStr, lang='en') {
     let findingCard = '';
     if (li >= 4) {
       const csiText = csi !== null ? (csi < 1 ? `<p style="font-size:11pt;color:#1a3d28;line-height:1.8;margin-top:10px">${t.lateralCSIText(contraSideLabel)}</p>` : `<p style="font-size:11pt;color:#5a3e00;line-height:1.8;margin-top:10px">${t.lateralCSIWarnText}</p>`) : '';
-      findingCard = `<div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🎯</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.lateralTitle}</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">${t.lateralText(domSideLabel)}</p>${csiText}</div>`;
+      findingCard = `<div class="patient-card" style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🎯</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.lateralTitle}</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">${t.lateralText(domSideLabel)}</p>${csiText}</div>`;
     } else if (li >= 2) {
-      findingCard = `<div style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🔍</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.borderlineTitle}</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">${t.borderlineText}</p></div>`;
+      findingCard = `<div class="patient-card" style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🔍</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.borderlineTitle}</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">${t.borderlineText}</p></div>`;
     } else {
-      findingCard = `<div style="background:#EBF0FA;border:1px solid #b0c0e8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚖️</div><h3 style="font-size:13pt;color:#2B3A8C;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.bilateralTitle}</h3><p style="font-size:11pt;color:#1a2560;line-height:1.8">${t.bilateralText}</p></div>`;
+      findingCard = `<div class="patient-card" style="background:#EBF0FA;border:1px solid #b0c0e8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚖️</div><h3 style="font-size:13pt;color:#2B3A8C;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.bilateralTitle}</h3><p style="font-size:11pt;color:#1a2560;line-height:1.8">${t.bilateralText}</p></div>`;
     }
     cards += findingCard;
   }
@@ -2316,11 +2321,11 @@ function buildPatientSectionHTML(dateStr, lang='en') {
   else if (li >= 2) nextSteps = t.nextBorderline;
   else nextSteps = t.nextBilateral;
 
-  cards += `<div style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.nextTitle}</h3><p style="font-size:11pt;color:#3a3530;line-height:1.8">${nextSteps}</p></div>`;
-  cards += `<div style="background:#fff;border:2px solid #D8D3C8;border-radius:8px;padding:18px 24px;margin-bottom:20px"><p style="font-size:11pt;color:#5C564E;line-height:1.8;margin:0"><strong style="color:#1A1714">${t.importantTitle}</strong> ${t.importantText}</p></div>`;
+  cards += `<div class="patient-card" style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.nextTitle}</h3><p style="font-size:11pt;color:#3a3530;line-height:1.8">${nextSteps}</p></div>`;
+  cards += `<div class="patient-card" style="background:#fff;border:2px solid #D8D3C8;border-radius:8px;padding:18px 24px;margin-bottom:20px"><p style="font-size:11pt;color:#5C564E;line-height:1.8;margin:0"><strong style="color:#1A1714">${t.importantTitle}</strong> ${t.importantText}</p></div>`;
 
   return `<div dir="${t.dir}">
-  <div style="margin-bottom:24px;padding-bottom:18px;border-bottom:3px solid #1B4D3E">
+  <div class="patient-header" style="margin-bottom:24px;padding-bottom:18px;border-bottom:3px solid #1B4D3E">
     <p style="font-family:monospace;font-size:8.5pt;color:#888;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">${t.headerLabel}</p>
     <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;border-bottom:1.5px solid #D8D3C8;padding-bottom:6px">
       <span style="font-family:monospace;font-size:8pt;color:#aaa;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap">${t.patientName}</span>
@@ -2341,10 +2346,20 @@ function openPatientReport() {
   const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const reportHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Adrenal Vein Sampling Calculator — Patient Summary</title>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: 'DM Sans', sans-serif; font-size: 11pt; color: #1a1714; background: #fff; }
+<style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: 'DM Sans', sans-serif; font-size: 10pt; color: #1a1714; background: #fff; }
 @media screen { body { background: #e8e5e0; } .page { max-width: 720px; margin: 24px auto; background: #fff; padding: 40px 48px; box-shadow: 0 2px 20px rgba(0,0,0,0.12); } .no-print { position: fixed; top: 16px; right: 16px; display: flex; gap: 10px; z-index: 99; } }
-@page { size: letter portrait; margin: 0.45in 0.45in; @top-left { content: "Adrenal Vein Sampling Calculator"; font-family: sans-serif; font-size: 8pt; color: #bbb; } @top-right { content: "www.avsresults.com"; font-family: monospace; font-size: 8pt; color: #bbb; } }
-@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .no-print { display: none !important; } html, body { margin: 0; padding: 0; } .page { padding: 24px 32px; } }
+@page { size: letter portrait; margin: 0.45in 0.45in; @top-left { content: "Adrenal Vein Sampling Calculator"; font-family: sans-serif; font-size: 8pt; color: #bbb; } @top-right { content: "www.avsresults.com"; font-family: monospace; font-size: 8pt; color: #bbb; } @bottom-left { content: ""; } @bottom-right { content: ""; } }
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  .no-print { display: none !important; }
+  html, body { margin: 0; padding: 0; font-size: 9pt; }
+  .page { padding: 0; }
+  .patient-card { page-break-inside: avoid !important; break-inside: avoid !important; margin-bottom: 8px !important; padding: 12px 16px !important; }
+  .patient-card h3 { font-size: 11pt !important; margin-bottom: 6px !important; }
+  .patient-card p { font-size: 9pt !important; line-height: 1.5 !important; }
+  .patient-header { margin-bottom: 14px !important; padding-bottom: 12px !important; }
+  .patient-header h1 { font-size: 18pt !important; }
+}
 .pbtn { padding: 9px 18px; background: #1B4D3E; color: #fff; border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
 .cbtn { padding: 9px 18px; background: #fff; color: #444; border: 1px solid #ccc; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
 </style></head><body>
