@@ -1757,9 +1757,7 @@ function submitFeedback() {
 }
 
 // Close modal on overlay click
-document.getElementById('feedback-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeFeedback();
-});
+const _fb = document.getElementById('feedback-overlay'); if (_fb) _fb.addEventListener('click', function(e) { if (e.target === this) closeFeedback(); });
 
 // ── Reset ──
 function resetAll() {
