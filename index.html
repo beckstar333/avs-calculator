@@ -2,6 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="description" content="Free browser-based adrenal vein sampling calculator. Calculates Selectivity Index (SI), Lateralization Index (LI), and Contralateral Suppression Index (CSI) in real time. No login required. PHI-safe.">
+<meta name="keywords" content="adrenal vein sampling, AVS calculator, primary aldosteronism, selectivity index, lateralization index, contralateral suppression index, AVS interpretation, adrenal vein sampling tool, primary hyperaldosteronism, adrenalectomy">
+<meta name="author" content="Rebecca Allegretto, NP, MSN, MBA, ACNP-BC">
+<meta property="og:title" content="AVS Calculator — Adrenal Vein Sampling Interpretation">
+<meta property="og:description" content="Free, PHI-safe, browser-based tool for real-time adrenal vein sampling interpretation. Calculates SI, LI, and CSI. No login. No data storage.">
+<meta property="og:url" content="https://avsresults.com">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AVS Calculator — Adrenal Vein Sampling">
+<meta name="twitter:description" content="Free, PHI-safe clinical tool for adrenal vein sampling interpretation. Real-time SI, LI, CSI. No login required.">
+<link rel="canonical" href="https://avsresults.com">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "AVS Calculator",
+  "description": "Free browser-based clinical tool for adrenal vein sampling interpretation. Calculates Selectivity Index, Lateralization Index, and Contralateral Suppression Index in real time. PHI-safe, no login required.",
+  "url": "https://avsresults.com",
+  "applicationCategory": "MedicalApplication",
+  "operatingSystem": "Any",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "author": {"@type": "Person", "name": "Rebecca Allegretto", "jobTitle": "Nurse Practitioner, ACNP-BC"},
+  "keywords": "adrenal vein sampling, primary aldosteronism, AVS calculator, selectivity index, lateralization index"
+}
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AVS Calculator — Adrenal Vein Sampling</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%231a1714'/><g transform='translate(50,52)'><line x1='0' y1='32' x2='0' y2='10' stroke='%232B3A8C' stroke-width='5' stroke-linecap='round'/><path d='M0 10 C-4 4 -10 0 -17 -5' fill='none' stroke='%237A1F1F' stroke-width='4' stroke-linecap='round'/><path d='M0 10 C5 3 13 -2 21 -8' fill='none' stroke='%231B4D3E' stroke-width='4' stroke-linecap='round'/><path d='M-17 -5 C-20 -12 -18 -20 -15 -25' fill='none' stroke='%237A1F1F' stroke-width='3' stroke-linecap='round'/><path d='M21 -8 C24 -15 23 -23 20 -28' fill='none' stroke='%231B4D3E' stroke-width='3' stroke-linecap='round'/><circle cx='-15' cy='-25' r='7' fill='%237A1F1F'/><circle cx='20' cy='-28' r='7' fill='%231B4D3E'/><circle cx='0' cy='32' r='5' fill='none' stroke='%232B3A8C' stroke-width='3'/><circle cx='0' cy='10' r='3.5' fill='%23aaa'/></g></svg>">
@@ -168,6 +193,7 @@
   .add-row-btn:hover { color: var(--text-2); border-color: var(--border-strong); background: var(--surface2); }
   .add-row-btn.right-add:hover { color: var(--right); border-color: var(--right); }
   .add-row-btn.left-add:hover { color: var(--left); border-color: var(--left); }
+  .add-row-btn.ivc-add:hover { color: var(--ivc); border-color: var(--ivc); }
   .add-row-btn:disabled { opacity: 0.35; cursor: not-allowed; }
   .add-row-btn svg { flex-shrink: 0; }
 
@@ -245,11 +271,13 @@
   .designer-credit strong { color: var(--text-2); font-weight: 500; }
   .toolbar-right { display: flex; gap: 10px; align-items: center; }
   .reset-btn {
+    font-weight: 500;
     display: flex; align-items: center; gap: 6px; padding: 7px 14px;
     background: transparent; border: 1px solid var(--border); border-radius: var(--radius);
     color: var(--text-2); font-family: var(--sans); font-size: 12px; cursor: pointer; transition: all 0.15s;
   }
-  .reset-btn:hover { border-color: var(--text); color: var(--text); background: var(--surface2); }
+  .reset-btn:hover { border-color: #8B1A1A; color: #8B1A1A; background: #FDEAEA; }
+  .reset-btn.reset-danger { border-color: #c0392b; color: #c0392b; }
 
   /* ── Sample count badge ── */
   .sample-badge { font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; background: rgba(255,255,255,0.18); color: rgba(255,255,255,0.85); padding: 2px 8px; border-radius: 10px; }
@@ -269,6 +297,8 @@
 
   /* ── Copy results button ── */
   .copy-results-btn {
+    font-weight: 500;
+    background: var(--surface2);
     display: flex; align-items: center; gap: 6px; width: 100%;
     margin-bottom: 14px; padding: 9px 14px;
     background: var(--surface2); border: 1px dashed var(--border);
@@ -585,6 +615,12 @@
         </div>
         <span class="avg-value ivc-val" id="ivc-avg">—</span>
       </div>
+      <div class="add-row-bar">
+        <button class="add-row-btn ivc-add" id="ivc-add-btn" onclick="addRow('ivc')">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1v9M1 5.5h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Add Sample
+        </button>
+      </div>
       <div class="outlier-bar" id="ivc-outlier"></div>
     </div>
 
@@ -841,11 +877,15 @@
     </a>
     <span style="margin-left:10px;opacity:0.4">·</span>
     <button onclick="openChangelog()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Changelog</button>
+    <span style="margin-left:6px;opacity:0.4">·</span>
+    <button onclick="openMethods()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Methods</button>
+    <span style="margin-left:6px;opacity:0.4">·</span>
+    <button onclick="openCitation()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Cite This Tool</button>
   </div>
   <div class="toolbar-right">
-    <button class="reset-btn" onclick="resetAll()">
+    <button class="reset-btn reset-danger" onclick="resetAll()">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6a5 5 0 1 0 1.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M1 2v4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Reset
+      Reset All
     </button>
     <button class="reset-btn" onclick="openFeedback()">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 1H2a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h3l2 2 2-2h1a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
@@ -1430,7 +1470,7 @@ function copyResults() {
   lines.push(`LI:        ${li  !== null ? fmt(li)  : '—'}  — ${li !== null ? (li >= thresholds.liLat ? 'Lateralized' : li >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}`);
   lines.push(`CSI:       ${csi !== null ? fmt(csi) : '—'}  — ${csi !== null ? (csi < thresholds.csi ? 'Suppressed' : 'Not suppressed') : 'No data'}`);
   lines.push('');
-  lines.push(`Generated by AVS Calculator — avsresults.com`);
+  lines.push(`Generated by AVS Calculator ${APP_VERSION} — avsresults.com`);
 
   navigator.clipboard.writeText(lines.join('\n')).then(() => {
     const btn = document.getElementById('copy-btn');
@@ -1500,19 +1540,26 @@ function validateInput(el, value) {
 
 // ── Outlier detection ──
 function checkOutliers(side) {
-  const included = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
   const bar = document.getElementById(`${side}-outlier`);
   if (!bar) return;
-  if (included.length < 2) { bar.style.display = 'none'; return; }
-  const ratios = included.map(s => parseFloat(s.aldo) / parseFloat(s.cort));
-  const avg = ratios.reduce((a,b) => a+b, 0) / ratios.length;
-  const outliers = ratios.filter(r => Math.abs(r - avg) / avg > 0.5);
-  if (outliers.length > 0) {
-    bar.style.display = 'block';
-    bar.innerHTML = `⚠ <strong>Possible outlier detected.</strong> One or more included samples has an A/C ratio that differs from the section average by more than 50%. Consider reviewing your values or toggling off the outlying sample before calculating.`;
-  } else {
-    bar.style.display = 'none';
+  const withData = state[side].filter(s => s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
+  const excluded = withData.filter(s => !s.included);
+  const included = withData.filter(s => s.included);
+  const msgs = [];
+  if (excluded.length > 0) {
+    msgs.push(`<span style="color:#8B1A1A;font-weight:500">⊘ ${excluded.length} sample${excluded.length>1?' are':' is'} excluded from this calculation.</span>`);
   }
+  if (included.length >= 2) {
+    const ratios = included.map(s => parseFloat(s.aldo) / parseFloat(s.cort));
+    const avg = ratios.reduce((a,b) => a+b, 0) / ratios.length;
+    const outliers = ratios.filter(r => Math.abs(r - avg) / avg > 0.5);
+    if (outliers.length > 0) {
+      msgs.push(`⚠ <strong>Possible outlier detected.</strong> One or more included samples has an A/C ratio that differs from the section average by >50%. Consider reviewing or toggling off the outlying sample.`);
+    }
+  }
+  if (msgs.length === 0) { bar.style.display = 'none'; return; }
+  bar.style.display = 'block';
+  bar.innerHTML = msgs.join('<br style="margin:3px 0">');
 }
 
 // ── Colored dominant box ──
@@ -1614,8 +1661,35 @@ function openChangelog() {
 function closeChangelog() {
   document.getElementById('changelog-overlay').classList.remove('open');
 }
-document.getElementById('changelog-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeChangelog();
+function openMethods() {
+  document.getElementById('methods-overlay').style.display = 'flex';
+}
+function closeMethods() {
+  document.getElementById('methods-overlay').style.display = 'none';
+}
+function openCitation() {
+  document.getElementById('citation-overlay').style.display = 'flex';
+}
+function closeCitation() {
+  document.getElementById('citation-overlay').style.display = 'none';
+}
+function copyText(sourceId, btnId) {
+  const text = document.getElementById(sourceId).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById(btnId);
+    const orig = btn.innerText;
+    btn.innerText = 'Copied!';
+    btn.style.color = '#4CAF50';
+    setTimeout(() => { btn.innerText = orig; btn.style.color = ''; }, 2000);
+  });
+}
+document.addEventListener('DOMContentLoaded', function() {
+  const clog = document.getElementById('changelog-overlay');
+  if (clog) clog.addEventListener('click', function(e) { if (e.target === this) closeChangelog(); });
+  const meth = document.getElementById('methods-overlay');
+  if (meth) meth.addEventListener('click', function(e) { if (e.target === this) closeMethods(); });
+  const cite = document.getElementById('citation-overlay');
+  if (cite) cite.addEventListener('click', function(e) { if (e.target === this) closeCitation(); });
 });
 
 function openFeedback() {
@@ -1915,6 +1989,9 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
         <span class="badge" style="font-size:9pt;padding:3px 10px;background:#EBF0FA;color:#2B3A8C;border-radius:2px;display:inline-block;font-family:monospace">
           ${document.getElementById('ref-guideline-label').textContent}
         </span>
+        <span class="badge" style="font-size:9pt;padding:3px 10px;background:#F0EDE6;color:#555;border-radius:2px;display:inline-block;font-family:monospace">
+          AVS Calculator ${APP_VERSION}
+        </span>
       </div>
     </div>
     <div style="flex-shrink:0;margin-left:24px">
@@ -2032,6 +2109,57 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   <!-- PATIENT SUMMARY — one page per selected language -->
   ${wantPatient ? langs.map(lang => `<div style="page-break-before:always"></div><div class="page" style="font-family:'DM Sans',sans-serif;font-size:11pt;color:#1a1714">${buildPatientSectionHTML(dateStr, lang)}</div>`).join('') : ''}
 
+</div>
+
+<!-- METHODS MODAL -->
+<div id="methods-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#1A1714;border-radius:8px;width:min(680px,94vw);max-height:85vh;overflow-y:auto;padding:0;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.1)">
+      <div style="font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:#fff">Calculation Methods</div>
+      <button onclick="closeMethods()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1">✕</button>
+    </div>
+    <div style="padding:24px;color:rgba(255,255,255,0.85);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.8">
+      <p style="margin-bottom:16px;color:rgba(255,255,255,0.6);font-size:12px;font-style:italic">All calculations are performed locally in your browser. No data is transmitted or stored.</p>
+      <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Selectivity Index (SI)</h3>
+      <p style="margin-bottom:6px">Confirms adequate adrenal vein catheterization. Calculated as adrenal vein cortisol divided by IVC cortisol:</p>
+      <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:10px 14px;font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px;color:#C8901A">SI = Adrenal Vein Cortisol ÷ IVC Cortisol</div>
+      <p style="margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.55)">Thresholds: ≥2.0 (unstimulated) or ≥5.0 (cosyntropin-stimulated) per ES Guidelines. If multiple samples are entered, cortisol values are averaged across included samples before division.</p>
+      <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Lateralization Index (LI)</h3>
+      <p style="margin-bottom:6px">Compares cortisol-corrected aldosterone (A/C ratio) between the dominant and non-dominant adrenal veins:</p>
+      <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:10px 14px;font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px;color:#C8901A">LI = (Dominant Aldo ÷ Dominant Cort) ÷ (Non-Dominant Aldo ÷ Non-Dominant Cort)</div>
+      <p style="margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.55)">A/C ratios are calculated per sample first, then averaged across included samples. The side with the higher average A/C ratio is designated dominant. Threshold: ≥4.0 (stimulated) per ES Guidelines.</p>
+      <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Contralateral Suppression Index (CSI)</h3>
+      <p style="margin-bottom:6px">Assesses suppression of aldosterone in the non-dominant gland relative to IVC:</p>
+      <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:10px 14px;font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px;color:#C8901A">CSI = (Non-Dominant Aldo ÷ Non-Dominant Cort) ÷ (IVC Aldo ÷ IVC Cort)</div>
+      <p style="margin-bottom:20px;font-size:12px;color:rgba(255,255,255,0.55)">A CSI &lt;1.0 indicates contralateral suppression, supporting unilateral disease. Used in conjunction with LI.</p>
+      <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Multi-Sample Averaging</h3>
+      <p style="margin-bottom:20px;font-size:12px;color:rgba(255,255,255,0.55)">When multiple samples are entered for a vein, A/C ratios are calculated for each sample individually (Aldo ÷ Cort per sample), then averaged across included samples. This preserves per-sample accuracy and is consistent with published multi-sample AVS methodology. Excluded samples are omitted from all averages.</p>
+      <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Guideline References</h3>
+      <p style="font-size:12px;color:rgba(255,255,255,0.55);margin:0">Funder JW et al. J Clin Endocrinol Metab. 2016;101(5):1889–1916.<br>Adler GK et al. J Clin Endocrinol Metab. 2025;110(9):2453–2495.<br>Rossi GP et al. Hypertension. 2014;63(1):151–160.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CITATION MODAL -->
+<div id="citation-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#1A1714;border-radius:8px;width:min(600px,94vw);max-height:80vh;overflow-y:auto;padding:0;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.1)">
+      <div style="font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:#fff">Cite This Tool</div>
+      <button onclick="closeCitation()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1">✕</button>
+    </div>
+    <div style="padding:24px;color:rgba(255,255,255,0.85);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.8">
+      <p style="margin-bottom:16px;color:rgba(255,255,255,0.6);font-size:12px">If you use AVS Calculator in a publication or clinical quality improvement project, please cite it using one of the formats below.</p>
+      <h3 style="font-size:11px;font-weight:600;color:#C8901A;margin:0 0 8px;letter-spacing:0.06em;text-transform:uppercase">APA</h3>
+      <div id="cite-apa" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto, R. (2024). <em>AVS Calculator: Adrenal vein sampling interpretation tool</em> (Version 1.6) [Web application]. https://avsresults.com</div>
+      <button onclick="copyText('cite-apa','copy-apa')" id="copy-apa" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);padding:5px 12px;border-radius:3px;font-size:11px;cursor:pointer;margin-bottom:20px;font-family:var(--mono)">Copy APA</button>
+      <h3 style="font-size:11px;font-weight:600;color:#C8901A;margin:0 0 8px;letter-spacing:0.06em;text-transform:uppercase">AMA</h3>
+      <div id="cite-ama" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto R. AVS Calculator: Adrenal Vein Sampling Interpretation Tool. Version 1.6. Web application. Published 2024. Accessed [date]. https://avsresults.com</div>
+      <button onclick="copyText('cite-ama','copy-ama')" id="copy-ama" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);padding:5px 12px;border-radius:3px;font-size:11px;cursor:pointer;margin-bottom:20px;font-family:var(--mono)">Copy AMA</button>
+      <h3 style="font-size:11px;font-weight:600;color:#C8901A;margin:0 0 8px;letter-spacing:0.06em;text-transform:uppercase">Vancouver</h3>
+      <div id="cite-van" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto R. AVS Calculator [Internet]. Version 1.6. 2024 [cited [date]]. Available from: https://avsresults.com</div>
+      <button onclick="copyText('cite-van','copy-van')" id="copy-van" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);padding:5px 12px;border-radius:3px;font-size:11px;cursor:pointer;font-family:var(--mono)">Copy Vancouver</button>
+    </div>
+  </div>
 </div>
 </body>
 </html>`;
@@ -2347,7 +2475,7 @@ function buildPatientSectionHTML(dateStr, lang='en') {
       <span style="flex:1;border-bottom:1px solid #ccc;min-width:180px;display:inline-block">&nbsp;</span>
     </div>
     <h1 style="font-family:'Libre Baskerville',serif;font-size:22pt;font-weight:700;letter-spacing:-0.02em;color:#1A1714;margin-bottom:10px">${t.title}</h1>
-    <p style="font-size:9pt;color:#aaa;margin-top:6px">${dateStr}</p>
+    <p style="font-size:9pt;color:#aaa;margin-top:6px">${dateStr} at ${timeStr}</p>
   </div>
   ${cards}
   <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e0e0e0;display:flex;justify-content:flex-end;align-items:center">
@@ -2359,6 +2487,10 @@ function buildPatientSectionHTML(dateStr, lang='en') {
 function openPatientReport() {
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  const APP_VERSION = 'v1.6';
+  const presetEl = document.getElementById('threshold-preset');
+  const presetLabel = presetEl ? presetEl.options[presetEl.selectedIndex].text : 'ES Guidelines 2016';
   const reportHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Adrenal Vein Sampling Calculator — Patient Summary</title>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: 'DM Sans', sans-serif; font-size: 10pt; color: #1a1714; background: #fff; }
@@ -2379,7 +2511,8 @@ function openPatientReport() {
 .cbtn { padding: 9px 18px; background: #fff; color: #444; border: 1px solid #ccc; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
 </style></head><body>
 <div class="no-print"><button class="cbtn" onclick="window.close()">✕ Close</button><button class="pbtn" onclick="window.print()">🖨 Print / Save as PDF</button></div>
-<div class="page">${buildPatientSectionHTML(dateStr, 'en')}</div></body></html>`;
+<div class="page">${buildPatientSectionHTML(dateStr, 'en')}</div>
+</body></html>`;
   const win = window.open('', '_blank', 'width=820,height=800,scrollbars=yes');
   win.document.write(reportHTML);
   win.document.close();
@@ -2463,6 +2596,7 @@ resetTimer();
 <div id="timeout-notice" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:999;background:#1B4D3E;color:#fff;padding:12px 24px;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:13px;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,0.25);">
   <span>🔒 Session cleared for patient privacy.</span>
 </div>
+
 
 </body>
 </html>
