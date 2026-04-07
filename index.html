@@ -342,6 +342,10 @@
   #print-options-overlay.open { display: flex !important; }
   #changelog-overlay { display: none; }
   #changelog-overlay.open { display: flex !important; }
+  #methods-overlay { display: none; }
+  #methods-overlay.open { display: flex !important; }
+  #citation-overlay { display: none; }
+  #citation-overlay.open { display: flex !important; }
   .fb-type-btn {
     padding: 5px 12px; border: 1px solid var(--border); border-radius: 2px;
     background: var(--surface2); font-family: var(--sans); font-size: 11px;
@@ -1662,16 +1666,16 @@ function closeChangelog() {
   document.getElementById('changelog-overlay').classList.remove('open');
 }
 function openMethods() {
-  document.getElementById('methods-overlay').style.display = 'flex';
+  document.getElementById('methods-overlay').classList.add('open');
 }
 function closeMethods() {
-  document.getElementById('methods-overlay').style.display = 'none';
+  document.getElementById('methods-overlay').classList.remove('open');
 }
 function openCitation() {
-  document.getElementById('citation-overlay').style.display = 'flex';
+  document.getElementById('citation-overlay').classList.add('open');
 }
 function closeCitation() {
-  document.getElementById('citation-overlay').style.display = 'none';
+  document.getElementById('citation-overlay').classList.remove('open');
 }
 function copyText(sourceId, btnId) {
   const text = document.getElementById(sourceId).innerText;
