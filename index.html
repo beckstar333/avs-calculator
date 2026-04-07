@@ -1139,6 +1139,8 @@
      PRINT REPORT WINDOW (opened separately)
 ════════════════════════════════════════════════ -->
 <script>
+const APP_VERSION = 'v1.6';
+
 // ── State ──
 let protocol = 'unstimulated';
 const MAX_ROWS = 8;
@@ -1902,6 +1904,8 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  const presetEl = document.getElementById('threshold-preset');
+  const presetLabel = presetEl ? presetEl.options[presetEl.selectedIndex].text : 'ES Guidelines 2016';
   const domSide = (R !== null && L !== null) ? (R > L ? 'Right' : 'Left') : null;
   const patientBar = '';
 
@@ -2141,6 +2145,10 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
 </html>`;
 
   const win = window.open('', '_blank', 'width=900,height=800,scrollbars=yes');
+  if (!win) {
+    alert('Pop-up blocked. Please allow pop-ups for avsresults.com in your browser settings, then try again.');
+    return;
+  }
   win.document.write(html);
   win.document.close();
   win.addEventListener('load', () => {
@@ -2464,7 +2472,6 @@ function openPatientReport() {
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  const APP_VERSION = 'v1.6';
   const presetEl = document.getElementById('threshold-preset');
   const presetLabel = presetEl ? presetEl.options[presetEl.selectedIndex].text : 'ES Guidelines 2016';
   const reportHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Adrenal Vein Sampling Calculator — Patient Summary</title>
@@ -2490,6 +2497,10 @@ function openPatientReport() {
 <div class="page">${buildPatientSectionHTML(dateStr, 'en')}</div>
 </body></html>`;
   const win = window.open('', '_blank', 'width=820,height=800,scrollbars=yes');
+  if (!win) {
+    alert('Pop-up blocked. Please allow pop-ups for avsresults.com in your browser settings, then try again.');
+    return;
+  }
   win.document.write(reportHTML);
   win.document.close();
 }
