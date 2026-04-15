@@ -145,10 +145,10 @@
     font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; color: var(--text-3);
     text-transform: uppercase; border-bottom: 1px solid var(--border); font-weight: 500;
   }
-  .sample-table thead th:nth-child(1) { width: 14%; }
-  .sample-table thead th:nth-child(2) { width: 30%; text-align: right; }
-  .sample-table thead th:nth-child(3) { width: 30%; text-align: right; }
-  .sample-table thead th:nth-child(4) { width: 14%; text-align: right; }
+  .sample-table thead th:nth-child(1) { width: 28%; }
+  .sample-table thead th:nth-child(2) { width: 22%; text-align: right; }
+  .sample-table thead th:nth-child(3) { width: 22%; text-align: right; }
+  .sample-table thead th:nth-child(4) { width: 16%; text-align: right; }
   .sample-table thead th:nth-child(5) { width: 12%; text-align: center; }
   .sample-row td { padding: 7px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
   .sample-row td:nth-child(2), .sample-row td:nth-child(3), .sample-row td:nth-child(4) { text-align: right; }
@@ -170,6 +170,7 @@
 
   .ac-ratio { font-family: var(--mono); font-size: 11px; color: var(--text-3); text-align: right; min-width: 70px; display: block; }
   .ac-ratio.has-value { color: var(--text-2); font-weight: 500; }
+  .ac-ratio.ac-significant { color: #1B5E35; font-weight: 700; background: rgba(76,175,128,0.12); padding: 2px 6px; border-radius: 3px; }
 
   .toggle-include { width: 32px; height: 18px; position: relative; cursor: pointer; flex-shrink: 0; display: inline-block; }
   .toggle-include input { opacity: 0; width: 0; height: 0; position: absolute; }
@@ -519,10 +520,9 @@
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     body { background: #fff; font-size: 11pt; }
-    header, .data-panel, .bottom-toolbar, .print-btn, .print-btn-header, .reset-btn, .add-row-bar, .protocol-toggle { display: none !important; }
-    .app { display: block; }
-    .results-panel { position: static; height: auto; overflow: visible; padding: 0; border: none; }
-    #print-report { display: block !important; }
+    header, .data-panel, .bottom-toolbar, .print-btn, .print-btn-header, .reset-btn, .add-row-bar, .protocol-toggle, .results-panel, .app, .designer-credit, .toolbar-right, .copy-results-btn, #print-options-overlay, #changelog-overlay, #methods-overlay, #citation-overlay, #feedback-overlay, #timeout-banner { display: none !important; }
+    #print-report { display: block !important; position: static; }
+    #print-report .page { max-width: 100%; padding: 0; box-shadow: none; margin: 0; }
   }
 
   /* ── Print Report (hidden on screen) ── */
@@ -561,9 +561,19 @@
         Clinical Reports
       </button>
     </div>
+    <button class="print-btn-header" onclick="openAdvancedReportOptions()" style="background:#1B5E35">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Advanced Report
+    </button>
     <button class="protocol-badge" id="headerProtocol" onclick="cycleProtocol()">Unstimulated</button>
   </div>
 </header>
+
+<div id="settings-banner" onclick="scrollToThresholds()" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 16px;background:var(--surface2);border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'">
+  <span id="banner-protocol" style="font-family:var(--mono);font-size:10px;padding:3px 8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-2);font-weight:500">Unstimulated</span>
+  <span id="banner-guideline" style="font-family:var(--mono);font-size:10px;padding:3px 8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-2);font-weight:500">ES Guidelines 2016</span>
+  <span style="font-family:var(--mono);font-size:10px;color:var(--text);padding:3px 10px;border:1px solid var(--border);border-radius:3px;background:var(--surface);font-weight:500">Change Settings ▸</span>
+</div>
 
 <div class="app">
 
@@ -598,7 +608,7 @@
     <!-- IVC -->
     <div class="section-card">
       <div class="section-header ivc">
-        <span class="section-title">Inferior Vena Cava (IVC)</span>
+        <span class="section-title">Inferior Vena Cava (IVC) / Peripheral</span>
         <span class="section-tag" style="display:flex;align-items:center;gap:6px">Peripheral Reference &nbsp;·&nbsp; <span id="ivc-badge">0 samples</span>
           <button class="clear-section-btn" onclick="clearSection('ivc')" title="Clear section">✕</button>
         </span>
@@ -780,6 +790,28 @@
     </button>
     <p style="font-size:10px;color:var(--text-3);text-align:center;margin-top:5px;font-style:italic">Copies a brief summary suitable for pasting into a clinical note</p>
 
+    <!-- Advanced Calculations Dropdown -->
+    <div style="text-align:center;margin-top:16px;margin-bottom:10px">
+      <button onclick="toggleAdvancedCalc()" style="font-family:var(--mono);font-size:11px;padding:8px 18px;border:1px solid #1B5E35;border-radius:var(--radius);background:rgba(27,94,53,0.08);color:#1B5E35;cursor:pointer;font-weight:600;letter-spacing:0.03em;transition:all 0.15s" onmouseover="this.style.background='rgba(27,94,53,0.15)'" onmouseout="this.style.background='rgba(27,94,53,0.08)'">
+        <span id="adv-calc-arrow" style="display:inline-block;transition:transform 0.2s;margin-right:4px">▸</span> Advanced Calculations
+      </button>
+    </div>
+    <div id="adv-calc-panel" style="display:none;margin-bottom:16px;border:1px solid #c2ddd3;border-radius:var(--radius);overflow:visible;background:var(--surface2)">
+      <div style="padding:12px 16px;background:rgba(27,94,53,0.06);border-bottom:1px solid #c2ddd3">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:#1B5E35;text-transform:uppercase;letter-spacing:0.08em">Advanced Calculations</span>
+        <p style="font-size:10px;color:var(--text-3);margin-top:4px;font-family:var(--sans);line-height:1.5">These calculations are provided for your comparison. Two methods are shown using the same sample data.</p>
+      </div>
+      <div id="adv-calc-content" style="padding:14px 16px;font-family:var(--mono);font-size:11px;color:var(--text);line-height:2.2">
+        <em style="color:var(--text-3);font-size:10px">Enter sample values to see advanced calculations</em>
+      </div>
+      <div style="padding:8px 16px 12px;border-top:1px solid #c2ddd3;text-align:center">
+        <button onclick="copyAdvancedResults()" id="adv-copy-btn" style="font-family:var(--mono);font-size:10px;padding:6px 14px;border:1px solid #c2ddd3;border-radius:var(--radius);background:var(--surface);color:var(--text-2);cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='#1B5E35';this.style.color='#1B5E35'" onmouseout="this.style.borderColor='#c2ddd3';this.style.color='var(--text-2)'">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" style="vertical-align:-1px;margin-right:4px"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M1 8V2a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Copy Advanced Results
+        </button>
+      </div>
+    </div>
+
     <div class="ref-section">
       <div class="ref-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <span style="display:flex;align-items:center;gap:8px">Reference Thresholds <span style="flex:1;height:1px;background:var(--border);display:inline-block;width:20px"></span></span>
@@ -819,7 +851,7 @@
         </span>
       </div>
       <div class="ref-item">
-        <span class="ref-key">LI bilateral</span>
+        <span class="ref-key">LI bilateral <span style="font-size:8px;color:var(--text-3);font-weight:400;font-style:italic">(derived from borderline)</span></span>
         <span class="ref-val" id="ref-li-bilat">&lt; 2.0</span>
       </div>
       <div class="ref-item">
@@ -836,7 +868,7 @@
       <ol style="padding-left:16px;margin:0;list-style-position:outside">
         <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
           <strong>Funder JW, Carey RM, Mantero F, et al.</strong> The Management of Primary Aldosteronism: Case Detection, Diagnosis, and Treatment: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab.</em> 2016;101(5):1889–1916.
-          <div style="font-size:10px;color:#8C867E;margin-top:2px">Primary source for SI, LI, and CSI thresholds used in this calculator.</div>
+          <div style="font-size:10px;color:#8C867E;margin-top:2px">Endocrine Society clinical practice guideline for primary aldosteronism management. Discusses AVS lateralization criteria; specific numeric cutoffs for SI, LI, and CSI are detailed in Rossi et al. (2014) below.</div>
         </li>
         <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
           <strong>Adler GK, Stowasser M, Correa RR, et al.</strong> Primary Aldosteronism: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab.</em> 2025;110(9):2453–2495. <a href="https://doi.org/10.1210/clinem/dgaf284" target="_blank" style="color:#2B3A8C">doi:10.1210/clinem/dgaf284</a>
@@ -844,7 +876,7 @@
         </li>
         <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
           <strong>Rossi GP, Auchus RJ, Brown M, et al.</strong> An Expert Consensus Statement on the Use of Adrenal Vein Sampling for the Subtyping of Primary Aldosteronism. <em>Hypertension.</em> 2014;63(1):151–160. <a href="https://doi.org/10.1161/HYPERTENSIONAHA.113.02097" target="_blank" style="color:#2B3A8C">doi:10.1161/HYPERTENSIONAHA.113.02097</a>
-          <div style="font-size:10px;color:#8C867E;margin-top:2px">International expert consensus on AVS protocols and selectivity/lateralization criteria.</div>
+          <div style="font-size:10px;color:#8C867E;margin-top:2px">Primary source for SI, LI, and CSI numeric thresholds used in this calculator (SI ≥2.0/3.0, LI ≥4.0, CSI &lt;1.0).</div>
         </li>
         <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:0;padding-left:4px">
           <strong>Vonend O, Ockenfels N, Gao X, et al.</strong> Clinical impact of strict criteria for selectivity and lateralization in adrenal vein sampling. <em>Eur J Endocrinol.</em> <a href="https://pubmed.ncbi.nlm.nih.gov/27376419/" target="_blank" style="color:#2B3A8C">PMID: 27376419</a>
@@ -1009,6 +1041,70 @@
       <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
         <button onclick="closePrintOptions()" style="padding:8px 16px;background:transparent;border:1px solid #D8D3C8;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;color:#5C564E;cursor:pointer">Cancel</button>
         <button onclick="confirmPrintReport()" style="padding:8px 18px;background:#1A1714;border:1px solid #1A1714;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer">
+          <svg width="12" height="12" viewBox="0 0 13 13" fill="none" style="margin-right:5px;vertical-align:middle"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/></svg>
+          Print / Save PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     ADVANCED REPORT OPTIONS MODAL
+════════════════════════════════════════════════ -->
+<div id="adv-report-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:6px;width:100%;max-width:400px;margin:20px;box-shadow:0 8px 40px rgba(0,0,0,0.2);overflow:hidden">
+    <div style="background:#1B5E35;padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:#fff">Advanced Report</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:0.08em;text-transform:uppercase;margin-top:2px">Select sections to include</div>
+      </div>
+      <button onclick="closeAdvancedReportOptions()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1">✕</button>
+    </div>
+    <div style="padding:20px">
+      <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #c2ddd3;border-radius:4px;margin-bottom:10px;cursor:pointer;background:#F0F7F3">
+        <input type="checkbox" id="adv-opt-comparison" checked style="margin-top:2px;accent-color:#1B5E35;width:15px;height:15px;flex-shrink:0">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#1A1714;margin-bottom:2px">Index Comparison</div>
+          <div style="font-size:11px;color:#8C867E;line-height:1.5">Average vs. Highest Value method side-by-side with interpretation</div>
+        </div>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #c2ddd3;border-radius:4px;margin-bottom:10px;cursor:pointer;background:#F0F7F3">
+        <input type="checkbox" id="adv-opt-summary" checked style="margin-top:2px;accent-color:#1B5E35;width:15px;height:15px;flex-shrink:0">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#1A1714;margin-bottom:2px">Clinical Summary</div>
+          <div style="font-size:11px;color:#8C867E;line-height:1.5">Measured values, calculated indices, and clinical interpretation</div>
+        </div>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #c2ddd3;border-radius:4px;margin-bottom:10px;cursor:pointer;background:#F0F7F3">
+        <input type="checkbox" id="adv-opt-worksheet" checked style="margin-top:2px;accent-color:#1B5E35;width:15px;height:15px;flex-shrink:0">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#1A1714;margin-bottom:2px">Calculation Worksheet</div>
+          <div style="font-size:11px;color:#8C867E;line-height:1.5">Full A/C ratio workup and step-by-step index derivation</div>
+        </div>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #c2ddd3;border-radius:4px;cursor:pointer;background:#F0F7F3">
+        <input type="checkbox" id="adv-opt-patient" onchange="toggleAdvLangSelector()" style="margin-top:2px;accent-color:#1B5E35;width:15px;height:15px;flex-shrink:0">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:#1A1714;margin-bottom:2px">Patient-Friendly Summary</div>
+          <div style="font-size:11px;color:#8C867E;line-height:1.5">Plain-language explanation of results for the patient</div>
+        </div>
+      </label>
+      <div id="adv-lang-selector" style="display:none;margin-top:6px;padding:12px 14px;background:#E8F0EB;border:1px solid #c2ddd3;border-radius:4px;border-top:none;border-top-left-radius:0;border-top-right-radius:0">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#8C8680;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Select language(s)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px">
+          <button type="button" data-lang="en" onclick="toggleAdvLangPill(this)" class="adv-lang-pill active" style="padding:5px 11px;border-radius:20px;border:1.5px solid #1B5E35;background:#1B5E35;color:#fff;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;line-height:1.4">English</button>
+          <button type="button" data-lang="es" onclick="toggleAdvLangPill(this)" class="adv-lang-pill" style="padding:5px 11px;border-radius:20px;border:1.5px solid #c2ddd3;background:#fff;color:#1A1714;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;line-height:1.4" title="AI translation · certification pending">Español <span style="font-weight:400;opacity:0.7">ES</span></button>
+          <button type="button" data-lang="zh" onclick="toggleAdvLangPill(this)" class="adv-lang-pill" style="padding:5px 11px;border-radius:20px;border:1.5px solid #c2ddd3;background:#fff;color:#1A1714;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;line-height:1.4" title="AI translation · certification pending">中文 <span style="font-weight:400;opacity:0.7">ZH</span></button>
+          <button type="button" data-lang="ko" onclick="toggleAdvLangPill(this)" class="adv-lang-pill" style="padding:5px 11px;border-radius:20px;border:1.5px solid #c2ddd3;background:#fff;color:#1A1714;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;line-height:1.4" title="AI translation · certification pending">한국어 <span style="font-weight:400;opacity:0.7">KO</span></button>
+          <button type="button" data-lang="fa" onclick="toggleAdvLangPill(this)" class="adv-lang-pill" style="padding:5px 11px;border-radius:20px;border:1.5px solid #c2ddd3;background:#fff;color:#1A1714;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;line-height:1.4" title="AI translation · certification pending">فارسی <span style="font-weight:400;opacity:0.7">FA</span></button>
+          <button type="button" data-lang="ru" onclick="toggleAdvLangPill(this)" class="adv-lang-pill" style="padding:5px 11px;border-radius:20px;border:1.5px solid #c2ddd3;background:#fff;color:#1A1714;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;line-height:1.4" title="AI translation · certification pending">Русский <span style="font-weight:400;opacity:0.7">RU</span></button>
+        </div>
+        <p style="font-size:10px;color:#8C8680;font-style:italic;margin-top:9px">Non-English translations are AI-generated · certification pending.</p>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
+        <button onclick="closeAdvancedReportOptions()" style="padding:8px 16px;background:transparent;border:1px solid #D8D3C8;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;color:#5C564E;cursor:pointer">Cancel</button>
+        <button onclick="confirmAdvancedReport()" style="padding:8px 18px;background:#1B5E35;border:1px solid #1B5E35;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer">
           <svg width="12" height="12" viewBox="0 0 13 13" fill="none" style="margin-right:5px;vertical-align:middle"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/></svg>
           Print / Save PDF
         </button>
@@ -1187,6 +1283,7 @@ function applyThresholdPreset(value) {
     document.getElementById('thresh-csi').value        = thresholds.csi.toFixed(1);
   }
   updateRefPanel();
+  updateBanner();
   calculate();
 }
 
@@ -1197,6 +1294,7 @@ function onCustomThreshold() {
   thresholds.liBorder = parseFloat(document.getElementById('thresh-li-border').value) || 2.0;
   thresholds.csi      = parseFloat(document.getElementById('thresh-csi').value)       || 1.0;
   updateRefPanel();
+  updateBanner();
   calculate();
 }
 
@@ -1235,9 +1333,9 @@ function setUnit(field, unit) {
 }
 
 const state = {
-  ivc:   Array.from({length: 2}, (_, i) => ({ id: i, aldo: '', cort: '', included: true })),
-  right: Array.from({length: 3}, (_, i) => ({ id: i, aldo: '', cort: '', included: true })),
-  left:  Array.from({length: 3}, (_, i) => ({ id: i, aldo: '', cort: '', included: true })),
+  ivc:   Array.from({length: 2}, (_, i) => ({ id: i, aldo: '', cort: '', included: true, note: '' })),
+  right: Array.from({length: 3}, (_, i) => ({ id: i, aldo: '', cort: '', included: true, note: '' })),
+  left:  Array.from({length: 3}, (_, i) => ({ id: i, aldo: '', cort: '', included: true, note: '' })),
 };
 
 // ── Render a single row into a tbody ──
@@ -1257,7 +1355,7 @@ function renderRow(side, idx) {
   if (!state[side][idx].included) row.classList.add('excluded');
 
   row.innerHTML = `
-    <td><span class="row-label">${labelPrefix} ${idx + 1}</span></td>
+    <td style="white-space:nowrap"><span class="row-label">${labelPrefix} ${idx + 1}</span><input type="text" class="note-input" id="${side}-note-${idx}" placeholder="note" value="${state[side][idx].note || ''}" oninput="handleNote('${side}',${idx},this.value)" style="margin-left:6px;width:110px;font-size:12px;padding:5px 8px;border:1px solid #D8D3C8;border-radius:3px;color:#555;background:#F7F5F0;font-family:inherit;outline:none"></td>
     <td><input type="number" class="num-input ${colorClass}" id="${side}-aldo-${idx}" placeholder="—" min="0" step="any" value="${state[side][idx].aldo !== '' ? state[side][idx].aldo : ''}" oninput="handleInput('${side}',${idx},'aldo',this.value)"></td>
     <td><input type="number" class="num-input ${colorClass}" id="${side}-cort-${idx}" placeholder="—" min="0" step="any" value="${state[side][idx].cort !== '' ? state[side][idx].cort : ''}" oninput="handleInput('${side}',${idx},'cort',this.value)"></td>
     <td><span class="ac-ratio${state[side][idx].aldo !== '' && state[side][idx].cort !== '' && state[side][idx].cort !== 0 ? ' has-value' : ''}" id="${side}-ac-${idx}">${state[side][idx].aldo !== '' && state[side][idx].cort !== '' && state[side][idx].cort !== 0 ? (state[side][idx].aldo / state[side][idx].cort).toFixed(2) : '—'}</span></td>
@@ -1287,7 +1385,7 @@ function updateAddBtn(side) {
 function addRow(side) {
   if (state[side].length >= MAX_ROWS) return;
   const idx = state[side].length;
-  state[side].push({ id: idx, aldo: '', cort: '', included: true });
+  state[side].push({ id: idx, aldo: '', cort: '', included: true, note: '' });
   renderRow(side, idx);
   updateAddBtn(side);
   // Focus new aldo input
@@ -1304,6 +1402,10 @@ function handleInput(side, idx, field, value) {
   calculate();
 }
 
+function handleNote(side, idx, value) {
+  state[side][idx].note = value;
+}
+
 function handleToggle(side, idx, checked) {
   state[side][idx].included = checked;
   document.getElementById(`${side}-row-${idx}`).classList.toggle('excluded', !checked);
@@ -1315,8 +1417,9 @@ function updateRowDisplay(side, idx) {
   const acEl = document.getElementById(`${side}-ac-${idx}`);
   if (!acEl) return;
   if (s.aldo !== '' && s.cort !== '' && s.cort !== 0) {
-    acEl.textContent = (s.aldo / s.cort).toFixed(2);
-    acEl.className = 'ac-ratio has-value';
+    const acVal = s.aldo / s.cort;
+    acEl.textContent = acVal.toFixed(2);
+    acEl.className = 'ac-ratio has-value' + (acVal >= 4.0 ? ' ac-significant' : '');
   } else {
     acEl.textContent = '—';
     acEl.className = 'ac-ratio';
@@ -1345,9 +1448,45 @@ function setProtocol(p) {
   const hdr = document.getElementById('headerProtocol');
   hdr.textContent = p === 'stimulated' ? 'Cosyntropin-Stimulated' : 'Unstimulated';
   hdr.classList.toggle('stimulated', p === 'stimulated');
+  updateBanner();
+  // Highlight active SI threshold in reference section
+  const unstimRow = document.getElementById('ref-si-unstim');
+  const stimRow = document.getElementById('ref-si-stim');
+  if (unstimRow && stimRow) {
+    unstimRow.parentElement.style.background = p === 'unstimulated' ? 'rgba(76,175,128,0.1)' : '';
+    unstimRow.parentElement.style.borderLeft = p === 'unstimulated' ? '3px solid #1B5E35' : '';
+    stimRow.parentElement.style.background = p === 'stimulated' ? 'rgba(76,175,128,0.1)' : '';
+    stimRow.parentElement.style.borderLeft = p === 'stimulated' ? '3px solid #1B5E35' : '';
+  }
   calculate();
 }
 function cycleProtocol() { setProtocol(protocol === 'stimulated' ? 'unstimulated' : 'stimulated'); }
+
+function scrollToThresholds() {
+  const el = document.getElementById('threshold-preset');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function updateBanner() {
+  const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
+  const bp = document.getElementById('banner-protocol');
+  const bg = document.getElementById('banner-guideline');
+  const bs = document.getElementById('banner-si');
+  const bl = document.getElementById('banner-li');
+  const bc = document.getElementById('banner-csi');
+  if (bp) bp.textContent = protocol === 'stimulated' ? 'Cosyntropin-Stimulated' : 'Unstimulated';
+  if (bg) {
+    const presetEl = document.getElementById('threshold-preset');
+    const isCustom = presetEl && presetEl.value === 'custom';
+    bg.textContent = isCustom ? 'Custom Thresholds' : 'ES Guidelines 2016';
+    bg.style.background = isCustom ? '#FFF8E6' : '';
+    bg.style.borderColor = isCustom ? '#e8c97a' : '';
+    bg.style.color = isCustom ? '#7A4F00' : '';
+  }
+  if (bs) bs.textContent = 'SI ≥ ' + siThresh.toFixed(1);
+  if (bl) bl.textContent = 'LI ≥ ' + thresholds.liLat.toFixed(1);
+  if (bc) bc.textContent = 'CSI < ' + thresholds.csi.toFixed(1);
+}
 
 // ── Helpers ──
 function fmt(n, d = 2) { return (n === null || n === undefined || isNaN(n)) ? '—' : n.toFixed(d); }
@@ -1444,6 +1583,7 @@ function calculate() {
   updateBadges();
   updateDomBox(R, L);
   updateScreenInterp(siR, siL, siThresh, li, csi, R, L);
+  updateAdvancedCalc();
 }
 
 function renderSummary(siR, siL, siThresh, li, csi, R, L) {
@@ -1676,7 +1816,11 @@ function confirmPrintReport() {
     }
   }
   closePrintOptions();
-  openPrintReport(wantSummary, wantWorksheet, wantPatient, langs);
+  try {
+    openPrintReport(wantSummary, wantWorksheet, wantPatient, langs);
+  } catch(err) {
+    alert('Error generating report: ' + err.message);
+  }
 }
 
 // Close on overlay click
@@ -1810,8 +1954,9 @@ function buildSampleTableHTML(side, color) {
     const ac = (s.aldo !== '' && s.cort !== '' && s.cort !== 0) ? (s.aldo / s.cort).toFixed(2) : '—';
     const incl = s.included ? '' : ' style="opacity:0.5;text-decoration:line-through"';
     const inclLabel = s.included ? '' : ' <em style="color:#999;font-size:9pt">(excluded)</em>';
+    const noteStr = s.note ? ` <span style="font-size:8pt;color:#888;font-style:italic">(${s.note})</span>` : '';
     return `<tr${incl}>
-      <td style="padding:5px 10px;border-bottom:1px solid #eee;font-size:10pt">${label} ${i+1}${inclLabel}</td>
+      <td style="padding:5px 10px;border-bottom:1px solid #eee;font-size:10pt">${label} ${i+1}${noteStr}${inclLabel}</td>
       <td style="padding:5px 10px;border-bottom:1px solid #eee;text-align:right;font-family:monospace;font-size:10pt">${s.aldo !== '' ? s.aldo : '—'}</td>
       <td style="padding:5px 10px;border-bottom:1px solid #eee;text-align:right;font-family:monospace;font-size:10pt">${s.cort !== '' ? s.cort : '—'}</td>
       <td style="padding:5px 10px;border-bottom:1px solid #eee;text-align:right;font-family:monospace;font-size:10pt;font-weight:600;color:${color}">${ac}</td>
@@ -1888,6 +2033,500 @@ function getInterpretationText(siR, siL, siThresh, li, csi, R, L) {
   }
 
   return lines;
+}
+
+// ══════════════════════════════════════════════
+// CUSTOM THRESHOLDS BLOCK FOR REPORTS
+function buildCustomThresholdsHTML() {
+  const presetEl = document.getElementById('threshold-preset');
+  const isCustom = presetEl && presetEl.value === 'custom';
+  if (!isCustom) return '';
+  return `<div style="margin:16px 0;padding:12px 16px;background:#FFF8E6;border:1px solid #e8c97a;border-left:4px solid #7A4F00;border-radius:3px">
+    <div style="font-family:monospace;font-size:8pt;font-weight:600;color:#7A4F00;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">⚠ Custom Thresholds in Use</div>
+    <div style="font-size:9.5pt;color:#5a3e00;line-height:1.8">
+      SI (unstimulated) ≥ ${thresholds.siUnstim.toFixed(1)} ·
+      SI (stimulated) ≥ ${thresholds.siStim.toFixed(1)} ·
+      LI lateralized ≥ ${thresholds.liLat.toFixed(1)} ·
+      LI borderline ≥ ${thresholds.liBorder.toFixed(1)} ·
+      CSI < ${thresholds.csi.toFixed(1)}
+    </div>
+    <div style="font-size:8pt;color:#7A4F00;margin-top:4px;font-style:italic">These thresholds are not based on published guidelines. Results should be interpreted accordingly.</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════
+// COPY ADVANCED RESULTS
+function copyAdvancedResults() {
+  const cortIVC = avgCort('ivc');
+  const cortR = avgCort('right');
+  const cortL = avgCort('left');
+  const avgR = avgAC('right');
+  const avgL = avgAC('left');
+  const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
+
+  const siR_avg = (cortR !== null && cortIVC !== null && cortIVC !== 0) ? cortR / cortIVC : null;
+  const siL_avg = (cortL !== null && cortIVC !== null && cortIVC !== 0) ? cortL / cortIVC : null;
+  let liAvg = null;
+  if (avgR !== null && avgL !== null && Math.min(avgR, avgL) !== 0) liAvg = Math.max(avgR, avgL) / Math.min(avgR, avgL);
+
+  function highestAC(side) {
+    const incl = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && s.cort !== 0);
+    if (!incl.length) return null;
+    return Math.max(...incl.map(s => s.aldo / s.cort));
+  }
+  function highestCort(side) {
+    const incl = state[side].filter(s => s.included && s.cort !== '' && parseFloat(s.cort) !== 0);
+    if (!incl.length) return null;
+    return Math.max(...incl.map(s => parseFloat(s.cort)));
+  }
+  const highR = highestAC('right');
+  const highL = highestAC('left');
+  const highCortR = highestCort('right');
+  const highCortL = highestCort('left');
+  const highCortIVC = highestCort('ivc');
+  const siR_high = (highCortR !== null && highCortIVC !== null && highCortIVC !== 0) ? highCortR / highCortIVC : null;
+  const siL_high = (highCortL !== null && highCortIVC !== null && highCortIVC !== 0) ? highCortL / highCortIVC : null;
+  let liHigh = null;
+  if (highR !== null && highL !== null && Math.min(highR, highL) !== 0) liHigh = Math.max(highR, highL) / Math.min(highR, highL);
+
+  const domAvg = (avgR !== null && avgL !== null) ? (avgR > avgL ? 'Right' : 'Left') : '—';
+  const domHigh = (highR !== null && highL !== null) ? (highR > highL ? 'Right' : 'Left') : '—';
+
+  const v = (val) => val !== null ? fmt(val) : '—';
+  const text = `AVS Advanced Calculations (${protocol === 'stimulated' ? 'Cosyntropin-Stimulated' : 'Unstimulated'})
+
+AVERAGE METHOD (all included samples averaged):
+  SI Right: ${v(siR_avg)} (threshold ≥${siThresh.toFixed(1)}) — ${siR_avg !== null ? (siR_avg >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}
+  SI Left:  ${v(siL_avg)} (threshold ≥${siThresh.toFixed(1)}) — ${siL_avg !== null ? (siL_avg >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}
+  LI:       ${v(liAvg)} — ${liAvg !== null ? (liAvg >= thresholds.liLat ? 'Lateralized' : liAvg >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}
+  Dominant: ${domAvg}
+
+HIGHEST VALUE METHOD (single highest A/C ratio per side):
+  SI Right: ${v(siR_high)} (threshold ≥${siThresh.toFixed(1)}) — ${siR_high !== null ? (siR_high >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}
+  SI Left:  ${v(siL_high)} (threshold ≥${siThresh.toFixed(1)}) — ${siL_high !== null ? (siL_high >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}
+  LI:       ${v(liHigh)} — ${liHigh !== null ? (liHigh >= thresholds.liLat ? 'Lateralized' : liHigh >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}
+  Dominant: ${domHigh}
+
+Methods ${domAvg === domHigh ? 'agree' : 'disagree'} on dominant side.`;
+
+  navigator.clipboard.writeText(text).then(function() {
+    const btn = document.getElementById('adv-copy-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Copied!';
+    setTimeout(function() { btn.innerHTML = orig; }, 2000);
+  });
+}
+
+// ══════════════════════════════════════════════
+// ADVANCED CALCULATIONS DROPDOWN
+function toggleAdvancedCalc() {
+  const panel = document.getElementById('adv-calc-panel');
+  const arrow = document.getElementById('adv-calc-arrow');
+  const visible = panel.style.display !== 'none';
+  panel.style.display = visible ? 'none' : 'block';
+  arrow.style.transform = visible ? '' : 'rotate(90deg)';
+}
+
+function updateAdvancedCalc() {
+  const el = document.getElementById('adv-calc-content');
+  if (!el) return;
+
+  const cortIVC = avgCort('ivc');
+  const cortR = avgCort('right');
+  const cortL = avgCort('left');
+  const avgR = avgAC('right');
+  const avgL = avgAC('left');
+
+  function highestAC(side) {
+    const incl = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && s.cort !== 0);
+    if (!incl.length) return null;
+    return Math.max(...incl.map(s => s.aldo / s.cort));
+  }
+  function highestCort(side) {
+    const incl = state[side].filter(s => s.included && s.cort !== '' && parseFloat(s.cort) !== 0);
+    if (!incl.length) return null;
+    return Math.max(...incl.map(s => parseFloat(s.cort)));
+  }
+
+  const highR = highestAC('right');
+  const highL = highestAC('left');
+  const highCortR = highestCort('right');
+  const highCortL = highestCort('left');
+  const highCortIVC = highestCort('ivc');
+
+  const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
+
+  // Average method
+  const siR_avg = (cortR !== null && cortIVC !== null && cortIVC !== 0) ? cortR / cortIVC : null;
+  const siL_avg = (cortL !== null && cortIVC !== null && cortIVC !== 0) ? cortL / cortIVC : null;
+  let liAvg = null;
+  if (avgR !== null && avgL !== null && Math.min(avgR, avgL) !== 0) liAvg = Math.max(avgR, avgL) / Math.min(avgR, avgL);
+
+  // Highest method
+  const siR_high = (highCortR !== null && highCortIVC !== null && highCortIVC !== 0) ? highCortR / highCortIVC : null;
+  const siL_high = (highCortL !== null && highCortIVC !== null && highCortIVC !== 0) ? highCortL / highCortIVC : null;
+  let liHigh = null;
+  if (highR !== null && highL !== null && Math.min(highR, highL) !== 0) liHigh = Math.max(highR, highL) / Math.min(highR, highL);
+
+  if (avgR === null && avgL === null) {
+    el.innerHTML = '<em style="color:var(--text-3);font-size:10px">Enter sample values to see advanced calculations</em>';
+    return;
+  }
+
+  function badge(val, thresh, type) {
+    if (val === null) return '<span style="color:var(--text-3)">—</span>';
+    let pass, label;
+    if (type === 'si') {
+      pass = val >= thresh;
+      label = pass ? 'Cannulated' : 'Not cannulated';
+    } else {
+      if (val >= thresholds.liLat) { pass = true; label = 'Lateralized'; }
+      else if (val >= thresholds.liBorder) { pass = null; label = 'Borderline'; }
+      else { pass = false; label = 'Bilateral'; }
+    }
+    const color = pass === true ? '#1B5E35' : pass === null ? '#7A4F00' : '#8B1A1A';
+    const bg = pass === true ? 'rgba(27,94,53,0.1)' : pass === null ? 'rgba(122,79,0,0.1)' : 'rgba(139,26,26,0.1)';
+    return `<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:${bg};color:${color}">${label}</span>`;
+  }
+
+  function valStr(v) { return v !== null ? fmt(v) : '—'; }
+
+  el.innerHTML = `
+    <div style="margin-bottom:14px">
+      <div style="font-family:var(--mono);font-size:9px;font-weight:600;color:#1B5E35;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Method 1: Average of All Values</div>
+      <p style="font-size:10px;color:var(--text-3);margin-bottom:8px;line-height:1.5">All included sample A/C ratios are averaged for each side. This is the standard calculation method.</p>
+      <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;border:1px solid var(--border);border-radius:3px">
+        <thead>
+          <tr style="background:rgba(27,94,53,0.05)">
+            <th style="text-align:left;padding:6px 10px;font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Index</th>
+            <th style="text-align:center;padding:6px 10px;font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Value</th>
+            <th style="text-align:center;padding:6px 10px;font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(0,0,0,0.05)">
+            <td style="padding:6px 10px;font-weight:500">SI Right</td>
+            <td style="padding:6px 10px;text-align:center;font-weight:700">${valStr(siR_avg)}</td>
+            <td style="padding:6px 10px;text-align:center">${badge(siR_avg, siThresh, 'si')}</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(0,0,0,0.05)">
+            <td style="padding:6px 10px;font-weight:500">SI Left</td>
+            <td style="padding:6px 10px;text-align:center;font-weight:700">${valStr(siL_avg)}</td>
+            <td style="padding:6px 10px;text-align:center">${badge(siL_avg, siThresh, 'si')}</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px;font-weight:500">LI</td>
+            <td style="padding:6px 10px;text-align:center;font-weight:700">${valStr(liAvg)}</td>
+            <td style="padding:6px 10px;text-align:center">${badge(liAvg, thresholds.liLat, 'li')}</td>
+          </tr>
+        </tbody>
+      </table>
+      ${(() => {
+        const dom = (avgR !== null && avgL !== null) ? (avgR > avgL ? 'Right' : avgR < avgL ? 'Left' : null) : null;
+        const lat = liAvg !== null ? (liAvg >= thresholds.liLat ? 'Lateralized' : liAvg >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : null;
+        const side = dom || 'Indeterminate';
+        const color = lat === 'Lateralized' ? '#1B5E35' : lat === 'Borderline' ? '#7A4F00' : '#8B1A1A';
+        const bg = lat === 'Lateralized' ? 'rgba(27,94,53,0.08)' : lat === 'Borderline' ? 'rgba(122,79,0,0.08)' : 'rgba(139,26,26,0.08)';
+        return '<div style="margin-top:8px;padding:6px 10px;background:' + bg + ';border-radius:3px;font-size:11px;font-family:var(--mono)"><strong style="color:' + color + '">Lateralization: ' + side + '</strong>' + (lat ? ' <span style="color:var(--text-3)">(' + lat + ')</span>' : '') + '</div>';
+      })()}
+    </div>
+
+    <div style="margin-bottom:4px">
+      <div style="font-family:var(--mono);font-size:9px;font-weight:600;color:#7A4F00;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Method 2: Highest Value Only</div>
+      <p style="font-size:10px;color:var(--text-3);margin-bottom:8px;line-height:1.5">Only the single highest A/C ratio from each side is used. This can reveal whether a single sample drives lateralization.</p>
+      <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;border:1px solid var(--border);border-radius:3px">
+        <thead>
+          <tr style="background:rgba(122,79,0,0.05)">
+            <th style="text-align:left;padding:6px 10px;font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Index</th>
+            <th style="text-align:center;padding:6px 10px;font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Value</th>
+            <th style="text-align:center;padding:6px 10px;font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(0,0,0,0.05)">
+            <td style="padding:6px 10px;font-weight:500">SI Right</td>
+            <td style="padding:6px 10px;text-align:center;font-weight:700">${valStr(siR_high)}</td>
+            <td style="padding:6px 10px;text-align:center">${badge(siR_high, siThresh, 'si')}</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(0,0,0,0.05)">
+            <td style="padding:6px 10px;font-weight:500">SI Left</td>
+            <td style="padding:6px 10px;text-align:center;font-weight:700">${valStr(siL_high)}</td>
+            <td style="padding:6px 10px;text-align:center">${badge(siL_high, siThresh, 'si')}</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px;font-weight:500">LI</td>
+            <td style="padding:6px 10px;text-align:center;font-weight:700">${valStr(liHigh)}</td>
+            <td style="padding:6px 10px;text-align:center">${badge(liHigh, thresholds.liLat, 'li')}</td>
+          </tr>
+        </tbody>
+      </table>
+      ${(() => {
+        const dom = (highR !== null && highL !== null) ? (highR > highL ? 'Right' : highR < highL ? 'Left' : null) : null;
+        const lat = liHigh !== null ? (liHigh >= thresholds.liLat ? 'Lateralized' : liHigh >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : null;
+        const side = dom || 'Indeterminate';
+        const color = lat === 'Lateralized' ? '#1B5E35' : lat === 'Borderline' ? '#7A4F00' : '#8B1A1A';
+        const bg = lat === 'Lateralized' ? 'rgba(27,94,53,0.08)' : lat === 'Borderline' ? 'rgba(122,79,0,0.08)' : 'rgba(139,26,26,0.08)';
+        return '<div style="margin-top:8px;padding:6px 10px;background:' + bg + ';border-radius:3px;font-size:11px;font-family:var(--mono)"><strong style="color:' + color + '">Lateralization: ' + side + '</strong>' + (lat ? ' <span style="color:var(--text-3)">(' + lat + ')</span>' : '') + '</div>';
+      })()}
+    </div>
+    ${(() => {
+      // Dominant side interpretation
+      const domAvg = (avgR !== null && avgL !== null) ? (avgR > avgL ? 'Right' : avgR < avgL ? 'Left' : 'Equal') : null;
+      const domHigh = (highR !== null && highL !== null) ? (highR > highL ? 'Right' : highR < highL ? 'Left' : 'Equal') : null;
+
+      if (!domAvg && !domHigh) return '';
+
+      let interpText = '';
+      if (domAvg && domHigh && domAvg === domHigh) {
+        const liResult = liAvg !== null && liAvg >= thresholds.liLat ? 'lateralized' : liAvg !== null && liAvg >= thresholds.liBorder ? 'borderline' : 'bilateral';
+        interpText = '<strong style="color:#1B5E35">' + domAvg + ' dominant</strong> — both methods agree. ';
+        if (liResult === 'lateralized') interpText += 'Lateralization is present by both average and highest value methods, supporting unilateral disease on the ' + domAvg.toLowerCase() + ' side.';
+        else if (liResult === 'borderline') interpText += 'Lateralization is borderline. Consider clinical correlation and additional testing.';
+        else interpText += 'No lateralization detected. Results suggest bilateral disease.';
+      } else if (domAvg && domHigh && domAvg !== domHigh) {
+        interpText = '<strong style="color:#7A4F00">Methods disagree</strong> — average method suggests <strong>' + domAvg + '</strong> dominant, highest value method suggests <strong>' + domHigh + '</strong> dominant. This discordance may indicate that a single outlier sample is driving the result. Interpret with caution and correlate clinically.';
+      } else {
+        const dom = domAvg || domHigh;
+        interpText = '<strong>' + dom + ' dominant</strong> — based on available data.';
+      }
+
+      return '<div style="margin-top:12px;padding:10px 14px;background:rgba(0,0,0,0.03);border-radius:4px;border-left:3px solid #1B5E35"><span style="font-family:var(--mono);font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:4px">Interpretation</span><span style="font-size:11px;color:var(--text);line-height:1.7">' + interpText + '</span></div>';
+    })()}
+  `;
+}
+
+// ══════════════════════════════════════════════
+// ADVANCED REPORT OPTIONS
+function openAdvancedReportOptions() {
+  document.getElementById('adv-report-overlay').style.display = 'flex';
+}
+function closeAdvancedReportOptions() {
+  document.getElementById('adv-report-overlay').style.display = 'none';
+}
+function toggleAdvLangSelector() {
+  const checked = document.getElementById('adv-opt-patient').checked;
+  document.getElementById('adv-lang-selector').style.display = checked ? 'block' : 'none';
+}
+function toggleAdvLangPill(btn) {
+  const isActive = btn.classList.contains('active');
+  if (btn.dataset.lang === 'en' && isActive) {
+    const others = document.querySelectorAll('.adv-lang-pill.active');
+    if (others.length <= 1) return;
+  }
+  btn.classList.toggle('active');
+  if (btn.classList.contains('active')) {
+    btn.style.background = '#1B5E35'; btn.style.borderColor = '#1B5E35'; btn.style.color = '#fff';
+  } else {
+    btn.style.background = 'transparent'; btn.style.borderColor = '#c2ddd3'; btn.style.color = '#555';
+  }
+}
+function confirmAdvancedReport() {
+  closeAdvancedReportOptions();
+  const wantComparison = document.getElementById('adv-opt-comparison').checked;
+  const wantSummary = document.getElementById('adv-opt-summary').checked;
+  const wantWorksheet = document.getElementById('adv-opt-worksheet').checked;
+  const wantPatient = document.getElementById('adv-opt-patient').checked;
+  const langs = Array.from(document.querySelectorAll('.adv-lang-pill.active')).map(b => b.dataset.lang);
+  if (!wantComparison && !wantSummary && !wantWorksheet && !wantPatient) return;
+  openAdvancedReport(wantComparison, wantSummary, wantWorksheet, wantPatient, langs);
+}
+
+function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet=true, wantPatient=false, langs=['en']) {
+  const cortIVC = avgCort('ivc');
+  const cortR = avgCort('right');
+  const cortL = avgCort('left');
+
+  // Average method
+  const avgR = avgAC('right');
+  const avgL = avgAC('left');
+  const siR_avg = (cortR !== null && cortIVC !== null && cortIVC !== 0) ? cortR / cortIVC : null;
+  const siL_avg = (cortL !== null && cortIVC !== null && cortIVC !== 0) ? cortL / cortIVC : null;
+  let liAvg = null;
+  if (avgR !== null && avgL !== null && Math.min(avgR, avgL) !== 0) liAvg = Math.max(avgR, avgL) / Math.min(avgR, avgL);
+
+  // Highest value method
+  function highestAC(side) {
+    const included = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && s.cort !== 0);
+    if (!included.length) return null;
+    return Math.max(...included.map(s => s.aldo / s.cort));
+  }
+  function highestCort(side) {
+    const included = state[side].filter(s => s.included && s.cort !== '' && parseFloat(s.cort) !== 0);
+    if (!included.length) return null;
+    return Math.max(...included.map(s => parseFloat(s.cort)));
+  }
+  const highR = highestAC('right');
+  const highL = highestAC('left');
+  const highCortR = highestCort('right');
+  const highCortL = highestCort('left');
+  const highCortIVC = highestCort('ivc');
+  const siR_high = (highCortR !== null && highCortIVC !== null && highCortIVC !== 0) ? highCortR / highCortIVC : null;
+  const siL_high = (highCortL !== null && highCortIVC !== null && highCortIVC !== 0) ? highCortL / highCortIVC : null;
+  let liHigh = null;
+  if (highR !== null && highL !== null && Math.min(highR, highL) !== 0) liHigh = Math.max(highR, highL) / Math.min(highR, highL);
+
+  const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+  function statusBadge(val, thresh, type) {
+    if (val === null) return '<span style="color:#888">—</span>';
+    let pass, label;
+    if (type === 'si') {
+      pass = val >= thresh;
+      label = pass ? 'Successful' : 'Unsuccessful';
+    } else if (type === 'li') {
+      if (val >= thresholds.liLat) { pass = true; label = 'Lateralized'; }
+      else if (val >= thresholds.liBorder) { pass = null; label = 'Borderline'; }
+      else { pass = false; label = 'Bilateral'; }
+    }
+    const color = pass === true ? '#1B5E35' : pass === null ? '#7A4F00' : '#8B1A1A';
+    const bg = pass === true ? '#E8F5EE' : pass === null ? '#FFF8E6' : '#FDEAEA';
+    return `<span style="display:inline-block;padding:3px 10px;border-radius:2px;font-size:9pt;font-weight:600;background:${bg};color:${color}">${label}</span>`;
+  }
+
+  function row(label, avgVal, highVal, thresh, type) {
+    return `<tr>
+      <td style="padding:10px 14px;border-bottom:1px solid #eee;font-size:10.5pt;font-weight:500">${label}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">${avgVal !== null ? fmt(avgVal) : '—'}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #eee;text-align:center">${statusBadge(avgVal, thresh, type)}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">${highVal !== null ? fmt(highVal) : '—'}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #eee;text-align:center">${statusBadge(highVal, thresh, type)}</td>
+    </tr>`;
+  }
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>AVS Advanced Report — ${dateStr}</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; font-size: 10pt; color: #1a1714; background: #fff; }
+  @media screen { body { background: #e8e5e0; } .page { max-width: 820px; margin: 24px auto; background: #fff; padding: 40px 48px; box-shadow: 0 2px 20px rgba(0,0,0,0.12); } .no-print { position: fixed; top: 16px; right: 16px; display: flex; gap: 10px; z-index: 99; } }
+  @page { size: letter portrait; margin: 0.5in; }
+  @media print { .no-print { display: none !important; } .page { padding: 0; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }
+  h1 { font-family: 'Libre Baskerville', serif; font-size: 20pt; font-weight: 700; letter-spacing: -0.02em; }
+  h2 { font-family: 'Libre Baskerville', serif; font-size: 13pt; font-weight: 700; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #1B5E35; color: #1B5E35; }
+  .pbtn { padding: 9px 18px; background: #1B5E35; color: #fff; border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .cbtn { padding: 9px 18px; background: #fff; color: #444; border: 1px solid #ccc; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
+  .note { background: #F7F5F0; border: 1px solid #E8E3D8; border-radius: 4px; padding: 14px 18px; margin-top: 20px; font-size: 9.5pt; color: #555; line-height: 1.7; }
+</style></head><body>
+<div class="no-print"><button class="cbtn" onclick="window.close()">✕ Close</button><button class="pbtn" onclick="window.print()">🖨 Print / Save as PDF</button></div>
+<div class="page">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #1B5E35">
+    <div>
+      <h1>Advanced AVS Report</h1>
+      <p style="font-size:9pt;color:#888;margin-top:4px;font-family:monospace;letter-spacing:0.05em">COMPARISON ANALYSIS — AVERAGE vs. HIGHEST VALUE</p>
+      <p style="font-size:9pt;color:#888;margin-top:4px">${dateStr} · ${timeStr}</p>
+      <div style="margin-top:6px;display:flex;gap:6px">
+        <span style="font-size:9pt;padding:3px 10px;background:#FDF3E3;color:#7A4F00;border-radius:2px;font-family:monospace">${protocol === 'stimulated' ? 'COSYNTROPIN-STIMULATED' : 'UNSTIMULATED'}</span>
+        <span style="font-size:9pt;padding:3px 10px;background:#E8F5EE;color:#1B5E35;border-radius:2px;font-family:monospace">ADVANCED ANALYSIS</span>
+      </div>
+    </div>
+    <div style="border:1px dashed #bbb;border-radius:4px;padding:14px 18px;min-width:220px;min-height:70px;display:flex;align-items:center;justify-content:center;background:#fafafa">
+      <span style="font-family:monospace;font-size:8pt;color:#ccc;letter-spacing:0.06em;text-transform:uppercase">Patient Label / MRN</span>
+    </div>
+  </div>
+
+  ${buildCustomThresholdsHTML()}
+
+  ${wantComparison ? `
+  <h2 style="border-bottom-color:#1B5E35;color:#1B5E35">Index Comparison</h2>
+  <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">Each index is calculated using two methods: (1) the <strong>average</strong> of all included sample A/C ratios, and (2) the single <strong>highest</strong> A/C ratio from included samples. Comparing both methods can help identify whether a single high-value sample drives lateralization.</p>
+
+  <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-radius:3px;overflow:hidden;margin-bottom:24px">
+    <thead>
+      <tr style="background:#f5f5f5">
+        <th style="padding:10px 14px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd" rowspan="2">Index</th>
+        <th style="padding:6px 14px;text-align:center;font-size:8pt;color:#1B5E35;text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid #ddd" colspan="2">Average Method</th>
+        <th style="padding:6px 14px;text-align:center;font-size:8pt;color:#7A4F00;text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid #ddd" colspan="2">Highest Value Method</th>
+      </tr>
+      <tr style="background:#f5f5f5">
+        <th style="padding:4px 14px;text-align:center;font-size:8pt;color:#888;border-bottom:2px solid #ddd">Value</th>
+        <th style="padding:4px 14px;text-align:center;font-size:8pt;color:#888;border-bottom:2px solid #ddd">Result</th>
+        <th style="padding:4px 14px;text-align:center;font-size:8pt;color:#888;border-bottom:2px solid #ddd">Value</th>
+        <th style="padding:4px 14px;text-align:center;font-size:8pt;color:#888;border-bottom:2px solid #ddd">Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${row('Selectivity Index — Right (SI)', siR_avg, siR_high, siThresh, 'si')}
+      ${row('Selectivity Index — Left (SI)', siL_avg, siL_high, siThresh, 'si')}
+      ${row('Lateralization Index (LI)', liAvg, liHigh, thresholds.liLat, 'li')}
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Note:</strong> The Average Method uses the mean of all included sample A/C ratios for each side. The Highest Value Method selects only the single highest A/C ratio from each side. In cases where multiple samples are drawn, these methods may yield different lateralization conclusions. Both should be interpreted in clinical context.
+  </div>
+  ` : ''}
+
+  ${wantSummary ? `
+  <div style="${wantComparison ? 'page-break-before:always;' : ''}">
+  <h2>Measured Values &amp; A/C Ratios</h2>
+  <h3 style="color:#2B3A8C;margin-bottom:6px">Inferior Vena Cava (IVC) — Peripheral Reference</h3>
+  <div style="border:1px solid #dde3f5;border-radius:3px;overflow:hidden;margin-bottom:18px">${buildSampleTableHTML('ivc', '#2B3A8C')}</div>
+  <h3 style="color:#1B4D3E;margin-bottom:6px">Right Adrenal Vein</h3>
+  <div style="border:1px solid #c2ddd3;border-radius:3px;overflow:hidden;margin-bottom:18px">${buildSampleTableHTML('right', '#1B4D3E')}</div>
+  <h3 style="color:#7A1F1F;margin-bottom:6px">Left Adrenal Vein</h3>
+  <div style="border:1px solid #dec4c4;border-radius:3px;overflow:hidden;margin-bottom:18px">${buildSampleTableHTML('left', '#7A1F1F')}</div>
+  </div>
+
+  <div style="page-break-before:always"></div>
+  <h2>Calculated Indices</h2>
+  <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-radius:3px;overflow:hidden">
+    <thead><tr style="background:#f5f5f5">
+      <th style="padding:8px 12px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Index</th>
+      <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Value</th>
+      <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Result</th>
+    </tr></thead>
+    <tbody>
+      ${[
+        { label: 'SI Right', val: siR_avg, result: siR_avg !== null ? (siR_avg >= siThresh ? 'Cannulated' : 'Not cannulated') : '—' },
+        { label: 'SI Left', val: siL_avg, result: siL_avg !== null ? (siL_avg >= siThresh ? 'Cannulated' : 'Not cannulated') : '—' },
+        { label: 'LI', val: liAvg, result: liAvg !== null ? (liAvg >= thresholds.liLat ? 'Lateralized' : liAvg >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : '—' },
+        { label: 'CSI', val: (() => { const csiVal = (avgAC('right') !== null && avgAC('left') !== null && avgAC('ivc') !== null && avgAC('ivc') !== 0) ? Math.min(avgAC('right'), avgAC('left')) / avgAC('ivc') : null; return csiVal; })(), result: (() => { const csiVal = (avgAC('right') !== null && avgAC('left') !== null && avgAC('ivc') !== null && avgAC('ivc') !== 0) ? Math.min(avgAC('right'), avgAC('left')) / avgAC('ivc') : null; return csiVal !== null ? (csiVal < thresholds.csi ? 'Suppressed' : 'Not suppressed') : '—'; })() },
+      ].map(r => '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:10pt">' + r.label + '</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">' + (r.val !== null ? fmt(r.val) : '—') + '</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:9pt;font-weight:600">' + r.result + '</td></tr>').join('')}
+    </tbody>
+  </table>
+
+  <div style="margin-top:20px">
+    <h2>Clinical Interpretation</h2>
+    ${(() => { const lines = getInterpretationText(siR_avg, siL_avg, siThresh, liAvg, (() => { const R = avgAC('right'), L = avgAC('left'), I = avgAC('ivc'); return (R !== null && L !== null && I !== null && I !== 0) ? Math.min(R,L)/I : null; })(), avgAC('right'), avgAC('left')); return lines.map(l => '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:' + l.bg + ';border-left:4px solid ' + l.color + ';border-radius:3px;margin-bottom:10px"><span style="font-size:16px;line-height:1.4;flex-shrink:0">' + l.icon + '</span><p style="font-size:10.5pt;line-height:1.7;color:#1a1714;margin:0">' + l.text + '</p></div>').join(''); })()}
+  </div>
+  ` : ''}
+
+  ${wantWorksheet ? `
+  <div style="page-break-before:always"></div>
+  <h2>Calculation Workup</h2>
+  <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">A/C ratios are calculated per sample (Aldosterone ÷ Cortisol). When multiple samples are included, ratios are averaged. All indices are derived from these averaged values.</p>
+  ${(() => {
+    const aldoUnit = units.aldo;
+    const cortUnit = units.cort;
+    function wsSection(side, label, color) {
+      const samples = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
+      if (!samples.length) return '<p style="color:#aaa;font-size:9pt;font-style:italic">No included samples for ' + label + '.</p>';
+      const rows = samples.map((s, i) => { const ac = parseFloat(s.aldo) / parseFloat(s.cort); const noteStr = s.note ? ' <span style="font-size:8pt;color:#888;font-style:italic">(' + s.note + ')</span>' : ''; return '<tr><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee">Sample ' + (i+1) + noteStr + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">' + parseFloat(s.aldo).toFixed(1) + ' ' + aldoUnit + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">' + parseFloat(s.cort).toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700;color:' + color + '">' + fmt(ac) + '</td></tr>'; }).join('');
+      return '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:' + color + ';text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">' + label + '</p><table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px"><thead><tr style="background:#f5f5f5"><th style="padding:6px 10px;text-align:left;font-size:8pt;color:#888">Sample</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888">ALDO</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888">CORTISOL</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888">A/C RATIO</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    }
+    return wsSection('ivc','Inferior Vena Cava (IVC)','#2B3A8C') + wsSection('right','Right Adrenal Vein','#1B4D3E') + wsSection('left','Left Adrenal Vein','#7A1F1F');
+  })()}
+  ` : ''}
+
+  ${wantPatient ? langs.map(lang => `
+  <div style="page-break-before:always"></div>
+  ${buildPatientSectionHTML(dateStr, lang, timeStr)}
+  `).join('') : ''}
+
+  <div style="margin-top:24px;text-align:center;font-size:8pt;color:#bbb">
+    AVS Calculator ${typeof APP_VERSION !== 'undefined' ? APP_VERSION : ''} · www.avsresults.com · Advanced Report
+  </div>
+</div>
+</body></html>`;
+
+  const win = window.open('', 'avs_advanced_report', 'width=860,height=800,scrollbars=yes');
+  if (!win) { alert('Pop-up blocked. Please allow pop-ups for avsresults.com.'); return; }
+  win.document.write(html);
+  win.document.close();
 }
 
 function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false, langs=['en']) {
@@ -2030,6 +2669,7 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
     </div>
   </div>
 
+  ${buildCustomThresholdsHTML()}
 
   <!-- CLINICAL SUMMARY: Measured Values + Indices + Interpretation -->
   ${wantSummary ? `
@@ -2083,7 +2723,7 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
       function sectionWorkup(side, label, color) {
         const samples = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
         if (!samples.length) return `<p style="color:#aaa;font-size:9pt;font-style:italic">No included samples for ${label}.</p>`;
-        const rows = samples.map((s, i) => { const ac = parseFloat(s.aldo) / parseFloat(s.cort); return `<tr><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee">Sample ${i+1}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.aldo).toFixed(1)} ${aldoUnit}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.cort).toFixed(2)} ${cortUnit}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.aldo).toFixed(1)} ÷ ${parseFloat(s.cort).toFixed(2)}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700;color:${color}">${fmt(ac)}</td></tr>`; }).join('');
+        const rows = samples.map((s, i) => { const ac = parseFloat(s.aldo) / parseFloat(s.cort); const noteStr = s.note ? ` <span style="font-size:8pt;color:#888;font-style:italic">(${s.note})</span>` : ''; return `<tr><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee">Sample ${i+1}${noteStr}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.aldo).toFixed(1)} ${aldoUnit}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.cort).toFixed(2)} ${cortUnit}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.aldo).toFixed(1)} ÷ ${parseFloat(s.cort).toFixed(2)}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700;color:${color}">${fmt(ac)}</td></tr>`; }).join('');
         const avgAldo = samples.reduce((sum, s) => sum + parseFloat(s.aldo), 0) / samples.length;
         const avgCortVal = samples.reduce((sum, s) => sum + parseFloat(s.cort), 0) / samples.length;
         const avgACVal = samples.reduce((sum, s) => sum + parseFloat(s.aldo)/parseFloat(s.cort), 0) / samples.length;
@@ -2136,7 +2776,7 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   ` : ''}
 
   <!-- PATIENT SUMMARY — one page per selected language -->
-  ${wantPatient ? langs.map(lang => `<div style="page-break-before:always"></div><div class="page" style="font-family:'DM Sans',sans-serif;font-size:11pt;color:#1a1714">${buildPatientSectionHTML(dateStr, lang)}</div>`).join('') : ''}
+  ${wantPatient ? langs.map(lang => `<div style="page-break-before:always"></div><div class="page" style="font-family:'DM Sans',sans-serif;font-size:11pt;color:#1a1714">${buildPatientSectionHTML(dateStr, lang, timeStr)}</div>`).join('') : ''}
 
 </div>
 
@@ -2144,29 +2784,14 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
 </body>
 </html>`;
 
-  const win = window.open('', '_blank', 'width=900,height=800,scrollbars=yes');
+  const win = window.open('', 'avs_report', 'width=900,height=800,scrollbars=yes');
   if (!win) {
     alert('Pop-up blocked. Please allow pop-ups for avsresults.com in your browser settings, then try again.');
     return;
   }
+  win.document.open();
   win.document.write(html);
   win.document.close();
-  win.addEventListener('load', () => {
-    win.addEventListener('beforeprint', () => {
-      const page = win.document.querySelector('.page');
-      if (!page) return;
-      const pageW = win.innerWidth || 816;
-      page.style.transform = 'none';
-      const scale = Math.min(pageW / page.scrollWidth, 1);
-      page.style.transformOrigin = 'top left';
-      page.style.transform = `scale(${scale})`;
-      page.style.width = (100 / scale) + '%';
-    });
-    win.addEventListener('afterprint', () => {
-      const page = win.document.querySelector('.page');
-      if (page) { page.style.transform = ''; page.style.width = ''; }
-    });
-  });
 }
 
 // ══════════════════════════════════════════════
@@ -2392,7 +3017,7 @@ const patientTranslations = {
 
 // ══════════════════════════════════════════════
 // PATIENT SUMMARY — shared helper
-function buildPatientSectionHTML(dateStr, lang='en') {
+function buildPatientSectionHTML(dateStr, lang='en', timeStr='') {
   const t = patientTranslations[lang] || patientTranslations['en'];
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
   const siThresh = protocol === 'stimulated' ? 3.0 : 2.0;
@@ -2494,9 +3119,9 @@ function openPatientReport() {
 .cbtn { padding: 9px 18px; background: #fff; color: #444; border: 1px solid #ccc; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
 </style></head><body>
 <div class="no-print"><button class="cbtn" onclick="window.close()">✕ Close</button><button class="pbtn" onclick="window.print()">🖨 Print / Save as PDF</button></div>
-<div class="page">${buildPatientSectionHTML(dateStr, 'en')}</div>
+<div class="page">${buildPatientSectionHTML(dateStr, 'en', timeStr)}</div>
 </body></html>`;
-  const win = window.open('', '_blank', 'width=820,height=800,scrollbars=yes');
+  const win = window.open('', 'avs_patient_report', 'width=820,height=800,scrollbars=yes');
   if (!win) {
     alert('Pop-up blocked. Please allow pop-ups for avsresults.com in your browser settings, then try again.');
     return;
@@ -2637,5 +3262,6 @@ resetTimer();
   </div>
 </div>
 
+<div id="print-report"></div>
 </body>
 </html>
