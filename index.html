@@ -3904,10 +3904,41 @@ function loadTestData(num) {
       right: [{aldo:95, cort:40}, {aldo:100, cort:38}, {aldo:90, cort:42}],
       left:  [{aldo:110, cort:50}, {aldo:115, cort:48}, {aldo:105, cort:52}],
     },
+    9: {
+      label: 'Test 9 — Custom thresholds: SI cutoff 2.5 flips Test 8 data from non-selective to borderline',
+      protocol: 'stimulated',
+      custom: { siUnstim: 2.0, siStim: 2.5, liLat: 4.0, liBorder: 2.0, csi: 1.0 },
+      ivc:   [{aldo:100, cort:20}, {aldo:100, cort:20}],
+      right: [{aldo:300, cort:50}, {aldo:320, cort:52}, {aldo:280, cort:48}],
+      left:  [{aldo:5000, cort:250}, {aldo:5200, cort:260}, {aldo:4800, cort:240}],
+    },
+    10: {
+      label: 'Test 10 — Custom thresholds: LI lateralized at 2.5 flips Test 4 borderline to lateralized',
+      protocol: 'stimulated',
+      custom: { siUnstim: 2.0, siStim: 3.0, liLat: 2.5, liBorder: 2.0, csi: 1.0 },
+      ivc:   [{aldo:50, cort:20}, {aldo:55, cort:22}],
+      right: [{aldo:1500, cort:400}, {aldo:1600, cort:450}, {aldo:1400, cort:380}],
+      left:  [{aldo:4000, cort:400}, {aldo:3800, cort:380}, {aldo:4200, cort:420}],
+    },
   };
   const s = scenarios[num || 1];
-  if (!s) { console.log('Available: loadTestData(1) through loadTestData(7)'); return; }
+  if (!s) { console.log('Available: loadTestData(1) through loadTestData(10)'); return; }
   setProtocol(s.protocol);
+  if (s.custom) {
+    // Switch to custom preset and apply thresholds
+    document.getElementById('threshold-preset').value = 'custom';
+    applyThresholdPreset('custom');
+    document.getElementById('thresh-si-unstim').value = s.custom.siUnstim;
+    document.getElementById('thresh-si-stim').value = s.custom.siStim;
+    document.getElementById('thresh-li-lat').value = s.custom.liLat;
+    document.getElementById('thresh-li-border').value = s.custom.liBorder;
+    document.getElementById('thresh-csi').value = s.custom.csi;
+    onCustomThreshold();
+  } else {
+    // Reset to ES 2016 defaults
+    document.getElementById('threshold-preset').value = 'es2016';
+    applyThresholdPreset('es2016');
+  }
   ['ivc','right','left'].forEach(side => {
     state[side] = s[side].map((d, i) => ({ id: i, aldo: d.aldo, cort: d.cort, included: true, note: '' }));
     buildAllRows(side);
