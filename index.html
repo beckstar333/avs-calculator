@@ -342,8 +342,8 @@
   #feedback-overlay.open { display: flex !important; }
   #print-options-overlay { display: none; }
   #print-options-overlay.open { display: flex !important; }
-  #changelog-overlay { display: none; }
-  #changelog-overlay.open { display: flex !important; }
+  #changelog-overlay, #validation-overlay { display: none; }
+  #changelog-overlay.open, #validation-overlay.open { display: flex !important; }
   #methods-overlay { display: none; }
   #methods-overlay.open { display: flex !important; }
   #citation-overlay { display: none; }
@@ -520,7 +520,7 @@
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     body { background: #fff; font-size: 11pt; }
-    header, .data-panel, .bottom-toolbar, .print-btn, .print-btn-header, .reset-btn, .add-row-bar, .protocol-toggle, .results-panel, .app, .designer-credit, .toolbar-right, .copy-results-btn, #print-options-overlay, #changelog-overlay, #methods-overlay, #citation-overlay, #feedback-overlay, #timeout-banner { display: none !important; }
+    header, .data-panel, .bottom-toolbar, .print-btn, .print-btn-header, .reset-btn, .add-row-bar, .protocol-toggle, .results-panel, .app, .designer-credit, .toolbar-right, .copy-results-btn, #print-options-overlay, #changelog-overlay, #validation-overlay, #methods-overlay, #citation-overlay, #feedback-overlay, #timeout-banner { display: none !important; }
     #print-report { display: block !important; position: static; }
     #print-report .page { max-width: 100%; padding: 0; box-shadow: none; margin: 0; }
   }
@@ -714,19 +714,6 @@
 
     <div class="session-timestamp" id="session-timestamp"></div>
 
-    <div id="summary-box" class="summary-box incomplete">
-      <div class="summary-icon"></div>
-      <div class="summary-text">Awaiting sample data — results will appear here once values are entered.</div>
-    </div>
-
-    <div class="dominant-box">
-      <div>
-        <div class="dominant-label">Dominant Side</div>
-        <div class="dominant-value" id="dominant-side">—</div>
-      </div>
-      <div class="li-big" id="li-big">—</div>
-    </div>
-
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Selectivity Index (SI)</span>
@@ -783,6 +770,23 @@
     </div>
 
     <div id="screen-interp" class="interp-section" style="display:none"></div>
+
+    <!-- Calculated Indices Table + Verdict -->
+    <div id="calc-indices-section" style="display:none;margin-top:16px"></div>
+
+    <!-- Patient Summary Preview -->
+    <div id="patient-preview-section" style="display:none;margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em">Patient Summary Preview</div>
+        <div style="display:flex;gap:6px">
+          <button id="patient-edit-btn" onclick="togglePatientEdit()" style="font-family:var(--mono);font-size:10px;padding:3px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text-2);cursor:pointer">Customize</button>
+          <button onclick="resetPatientPreview()" style="font-family:var(--mono);font-size:10px;padding:3px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text-3);cursor:pointer">Reset</button>
+        </div>
+      </div>
+      <p style="font-size:10px;color:var(--text-3);margin-bottom:6px;font-style:italic">This text appears on the printed patient report. Click "Customize" to edit the wording before printing.</p>
+      <div id="patient-preview-display" style="padding:14px 18px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-size:12px;line-height:1.8;color:var(--text)"></div>
+      <textarea id="patient-preview-edit" style="display:none;width:100%;min-height:120px;padding:14px 18px;border-radius:var(--radius);border:1px solid var(--accent);background:var(--surface);font-family:var(--sans);font-size:12px;line-height:1.8;color:var(--text);resize:vertical;outline:none"></textarea>
+    </div>
 
     <button class="copy-results-btn" id="copy-btn" onclick="copyResults()">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M1 8V2a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
@@ -914,6 +918,8 @@
     </a>
     <span style="margin-left:10px;opacity:0.4">·</span>
     <button onclick="openChangelog()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Changelog</button>
+    <span style="margin-left:6px;opacity:0.4">·</span>
+    <button onclick="openValidation()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Validation</button>
     <span style="margin-left:6px;opacity:0.4">·</span>
     <button onclick="openMethods()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Methods</button>
     <span style="margin-left:6px;opacity:0.4">·</span>
@@ -1131,7 +1137,24 @@
 
       <div style="margin-bottom:20px">
         <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
-          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#1A1714;background:#C8901A;color:#fff;padding:2px 8px;border-radius:2px">v1.6</span>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#1A1714;background:#C8901A;color:#fff;padding:2px 8px;border-radius:2px">v1.7</span>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">May 2026</span>
+        </div>
+        <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
+          <li>Classification engine — unified classify() function drives all verdicts from a single source of truth</li>
+          <li>Removed clinical recommendations — tool now reports findings only, leaves interpretation to clinicians</li>
+          <li>Customizable patient report — editable preview text carries through to printed patient summary</li>
+          <li>Advanced report parity — averages, index derivation, threshold column, and dual-method workup (average + highest value)</li>
+          <li>CSI interpretation now context-aware based on actual LI classification</li>
+          <li>Validation testing — 8 synthetic datasets covering all classification buckets, viewable from footer</li>
+          <li>Removed average aldosterone from workup summary rows (not used in any calculation)</li>
+          <li>Updated all patient-facing text across 6 languages to remove management advice</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#1A1714;background:#F0EDE6;padding:2px 8px;border-radius:2px">v1.6</span>
           <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">April 2026</span>
         </div>
         <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
@@ -1233,6 +1256,298 @@
   </div>
 </div>
 
+<!-- VALIDATION OVERLAY -->
+<div id="validation-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:6px;width:100%;max-width:600px;margin:20px;box-shadow:0 8px 40px rgba(0,0,0,0.2);overflow:hidden;max-height:85vh;display:flex;flex-direction:column">
+    <div style="background:#1A1714;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:#fff">Validation Testing</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#8C8680;letter-spacing:0.08em;text-transform:uppercase;margin-top:2px">Classification Engine - May 2026</div>
+      </div>
+      <button onclick="closeValidation()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1">✕</button>
+    </div>
+    <div style="padding:20px;overflow-y:auto">
+
+      <p style="font-size:12px;color:#3a3530;line-height:1.8;margin-bottom:16px">Eight test datasets were used to verify the classification logic across all four outcome categories (lateralized, borderline, bilateral, non-selective), CSI concordance/discordance, and protocol-dependent SI thresholds. All tests used the ES 2016 guideline thresholds.</p>
+
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Thresholds Used</div>
+      <div style="background:#F7F5F0;border:1px solid #E8E3D8;border-radius:4px;padding:10px 14px;margin-bottom:20px;font-size:11px;color:#3a3530;line-height:1.8">
+        SI cutoff: ≥ 3.0 (stimulated) / ≥ 2.0 (unstimulated)<br>
+        LI: ≥ 4.0 lateralized / 2.0-3.9 borderline / < 2.0 bilateral<br>
+        CSI: < 1.0 = contralateral suppression present
+      </div>
+
+      <table style="width:100%;border-collapse:collapse;font-size:11px;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:20px">
+        <thead>
+          <tr style="background:#f5f5f5">
+            <th style="padding:8px 10px;text-align:left;font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Test</th>
+            <th style="padding:8px 10px;text-align:left;font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Category</th>
+            <th style="padding:8px 10px;text-align:center;font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Expected</th>
+            <th style="padding:8px 10px;text-align:center;font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Actual</th>
+            <th style="padding:8px 10px;text-align:center;font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #eee">
+            <td style="padding:6px 10px;font-weight:600">1</td>
+            <td style="padding:6px 10px">Lateralized LEFT, CSI concordant</td>
+            <td style="padding:6px 10px;text-align:center">Lateralized LEFT</td>
+            <td style="padding:6px 10px;text-align:center">Lateralized LEFT</td>
+            <td style="padding:6px 10px;text-align:center"><span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">PASS</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid #eee">
+            <td style="padding:6px 10px;font-weight:600">2</td>
+            <td style="padding:6px 10px">Lateralized RIGHT, CSI discordant</td>
+            <td style="padding:6px 10px;text-align:center">Lateralized RIGHT</td>
+            <td style="padding:6px 10px;text-align:center">Lateralized RIGHT</td>
+            <td style="padding:6px 10px;text-align:center"><span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">PASS</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid #eee">
+            <td style="padding:6px 10px;font-weight:600">3</td>
+            <td style="padding:6px 10px">Borderline, CSI suppressed</td>
+            <td style="padding:6px 10px;text-align:center">Borderline</td>
+            <td style="padding:6px 10px;text-align:center">Borderline</td>
+            <td style="padding:6px 10px;text-align:center"><span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">PASS</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid #eee">
+            <td style="padding:6px 10px;font-weight:600">4</td>
+            <td style="padding:6px 10px">Borderline, CSI not suppressed</td>
+            <td style="padding:6px 10px;text-align:center">Borderline</td>
+            <td style="padding:6px 10px;text-align:center">Borderline</td>
+            <td style="padding:6px 10px;text-align:center"><span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">PASS</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid #eee">
+            <td style="padding:6px 10px;font-weight:600">5</td>
+            <td style="padding:6px 10px">Bilateral</td>
+            <td style="padding:6px 10px;text-align:center">Bilateral</td>
+            <td style="padding:6px 10px;text-align:center">Bilateral</td>
+            <td style="padding:6px 10px;text-align:center"><span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">PASS</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid #eee">
+            <td style="padding:6px 10px;font-weight:600">6</td>
+            <td style="padding:6px 10px">Non-selective (right side fails)</td>
+            <td style="padding:6px 10px;text-align:center">Non-selective</td>
+            <td style="padding:6px 10px;text-align:center">Non-selective</td>
+            <td style="padding:6px 10px;text-align:center"><span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">PASS</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid #eee">
+            <td style="padding:6px 10px;font-weight:600">7</td>
+            <td style="padding:6px 10px">Non-selective (both sides fail)</td>
+            <td style="padding:6px 10px;text-align:center">Non-selective</td>
+            <td style="padding:6px 10px;text-align:center">Non-selective</td>
+            <td style="padding:6px 10px;text-align:center"><span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">PASS</span></td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px;font-weight:600">8</td>
+            <td style="padding:6px 10px">Protocol toggle (same data)</td>
+            <td style="padding:6px 10px;text-align:center;font-size:10px">Stim: Non-sel<br>Unstim: Borderline</td>
+            <td style="padding:6px 10px;text-align:center;font-size:10px">Stim: Non-sel<br>Unstim: Borderline</td>
+            <td style="padding:6px 10px;text-align:center"><span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">PASS</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:4px;padding:12px 16px;font-size:12px;color:#1B5E35;font-weight:600;text-align:center">8 / 8 tests passed</div>
+
+      <div style="margin-top:16px">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">Test Dataset Details</div>
+
+        <details style="margin-bottom:6px;border:1px solid #eee;border-radius:4px;overflow:hidden">
+          <summary style="padding:8px 12px;font-size:11px;font-weight:600;color:#1A1714;cursor:pointer;background:#fafafa">Test 1 — Lateralized LEFT, CSI concordant</summary>
+          <div style="padding:10px 12px;font-size:10px;color:#3a3530;line-height:1.8;background:#fff">
+            <div style="font-family:monospace;font-size:9px;color:#888;margin-bottom:4px">Protocol: Cosyntropin-stimulated</div>
+            <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px">
+              <tr style="background:#f5f5f5"><th style="padding:3px 6px;text-align:left">Location</th><th style="padding:3px 6px;text-align:center">Sample</th><th style="padding:3px 6px;text-align:center">Aldo</th><th style="padding:3px 6px;text-align:center">Cortisol</th></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">60</td><td style="padding:3px 6px;text-align:center">20</td></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">60</td><td style="padding:3px 6px;text-align:center">22</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">250</td><td style="padding:3px 6px;text-align:center">250</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">280</td><td style="padding:3px 6px;text-align:center">270</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">230</td><td style="padding:3px 6px;text-align:center">230</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">9000</td><td style="padding:3px 6px;text-align:center">400</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">8500</td><td style="padding:3px 6px;text-align:center">380</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">9500</td><td style="padding:3px 6px;text-align:center">420</td></tr>
+            </table>
+            <div style="font-family:monospace;font-size:10px;line-height:1.8">
+              IVC avg A/C: 2.86 | Right avg A/C: 1.01 | Left avg A/C: 22.50<br>
+              SI Right: 11.90 ✓ | SI Left: 19.05 ✓<br>
+              LI: 22.22 | CSI: 0.35 (suppressed)<br>
+              <strong>Classification: Lateralized LEFT</strong>
+            </div>
+          </div>
+        </details>
+
+        <details style="margin-bottom:6px;border:1px solid #eee;border-radius:4px;overflow:hidden">
+          <summary style="padding:8px 12px;font-size:11px;font-weight:600;color:#1A1714;cursor:pointer;background:#fafafa">Test 2 — Lateralized RIGHT, CSI discordant</summary>
+          <div style="padding:10px 12px;font-size:10px;color:#3a3530;line-height:1.8;background:#fff">
+            <div style="font-family:monospace;font-size:9px;color:#888;margin-bottom:4px">Protocol: Cosyntropin-stimulated</div>
+            <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px">
+              <tr style="background:#f5f5f5"><th style="padding:3px 6px;text-align:left">Location</th><th style="padding:3px 6px;text-align:center">Sample</th><th style="padding:3px 6px;text-align:center">Aldo</th><th style="padding:3px 6px;text-align:center">Cortisol</th></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">100</td><td style="padding:3px 6px;text-align:center">25</td></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">95</td><td style="padding:3px 6px;text-align:center">25</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">8000</td><td style="padding:3px 6px;text-align:center">300</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">8500</td><td style="padding:3px 6px;text-align:center">325</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">7800</td><td style="padding:3px 6px;text-align:center">290</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">1200</td><td style="padding:3px 6px;text-align:center">250</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">1100</td><td style="padding:3px 6px;text-align:center">230</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">1300</td><td style="padding:3px 6px;text-align:center">270</td></tr>
+            </table>
+            <div style="font-family:monospace;font-size:10px;line-height:1.8">
+              IVC avg A/C: 3.90 | Right avg A/C: 26.57 | Left avg A/C: 4.80<br>
+              SI Right: 12.20 ✓ | SI Left: 10.00 ✓<br>
+              LI: 5.54 | CSI: 1.23 (not suppressed)<br>
+              <strong>Classification: Lateralized RIGHT</strong>
+            </div>
+          </div>
+        </details>
+
+        <details style="margin-bottom:6px;border:1px solid #eee;border-radius:4px;overflow:hidden">
+          <summary style="padding:8px 12px;font-size:11px;font-weight:600;color:#1A1714;cursor:pointer;background:#fafafa">Test 3 — Borderline, CSI suppressed</summary>
+          <div style="padding:10px 12px;font-size:10px;color:#3a3530;line-height:1.8;background:#fff">
+            <div style="font-family:monospace;font-size:9px;color:#888;margin-bottom:4px">Protocol: Cosyntropin-stimulated</div>
+            <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px">
+              <tr style="background:#f5f5f5"><th style="padding:3px 6px;text-align:left">Location</th><th style="padding:3px 6px;text-align:center">Sample</th><th style="padding:3px 6px;text-align:center">Aldo</th><th style="padding:3px 6px;text-align:center">Cortisol</th></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">100</td><td style="padding:3px 6px;text-align:center">20</td></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">100</td><td style="padding:3px 6px;text-align:center">20</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">750</td><td style="padding:3px 6px;text-align:center">250</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">780</td><td style="padding:3px 6px;text-align:center">260</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">720</td><td style="padding:3px 6px;text-align:center">240</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">3600</td><td style="padding:3px 6px;text-align:center">400</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">3700</td><td style="padding:3px 6px;text-align:center">410</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">3500</td><td style="padding:3px 6px;text-align:center">390</td></tr>
+            </table>
+            <div style="font-family:monospace;font-size:10px;line-height:1.8">
+              IVC avg A/C: 5.00 | Right avg A/C: 3.00 | Left avg A/C: 9.00<br>
+              SI Right: 12.50 ✓ | SI Left: 20.00 ✓<br>
+              LI: 3.00 | CSI: 0.60 (suppressed)<br>
+              <strong>Classification: Borderline</strong>
+            </div>
+          </div>
+        </details>
+
+        <details style="margin-bottom:6px;border:1px solid #eee;border-radius:4px;overflow:hidden">
+          <summary style="padding:8px 12px;font-size:11px;font-weight:600;color:#1A1714;cursor:pointer;background:#fafafa">Test 4 — Borderline, CSI not suppressed</summary>
+          <div style="padding:10px 12px;font-size:10px;color:#3a3530;line-height:1.8;background:#fff">
+            <div style="font-family:monospace;font-size:9px;color:#888;margin-bottom:4px">Protocol: Cosyntropin-stimulated</div>
+            <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px">
+              <tr style="background:#f5f5f5"><th style="padding:3px 6px;text-align:left">Location</th><th style="padding:3px 6px;text-align:center">Sample</th><th style="padding:3px 6px;text-align:center">Aldo</th><th style="padding:3px 6px;text-align:center">Cortisol</th></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">50</td><td style="padding:3px 6px;text-align:center">20</td></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">55</td><td style="padding:3px 6px;text-align:center">22</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">1500</td><td style="padding:3px 6px;text-align:center">400</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">1600</td><td style="padding:3px 6px;text-align:center">450</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">1400</td><td style="padding:3px 6px;text-align:center">380</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">4000</td><td style="padding:3px 6px;text-align:center">400</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">3800</td><td style="padding:3px 6px;text-align:center">380</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">4200</td><td style="padding:3px 6px;text-align:center">420</td></tr>
+            </table>
+            <div style="font-family:monospace;font-size:10px;line-height:1.8">
+              IVC avg A/C: 2.50 | Right avg A/C: 3.66 | Left avg A/C: 10.00<br>
+              SI Right: 19.52 ✓ | SI Left: 19.05 ✓<br>
+              LI: 2.73 | CSI: 1.47 (not suppressed)<br>
+              <strong>Classification: Borderline</strong>
+            </div>
+          </div>
+        </details>
+
+        <details style="margin-bottom:6px;border:1px solid #eee;border-radius:4px;overflow:hidden">
+          <summary style="padding:8px 12px;font-size:11px;font-weight:600;color:#1A1714;cursor:pointer;background:#fafafa">Test 5 — Bilateral</summary>
+          <div style="padding:10px 12px;font-size:10px;color:#3a3530;line-height:1.8;background:#fff">
+            <div style="font-family:monospace;font-size:9px;color:#888;margin-bottom:4px">Protocol: Cosyntropin-stimulated</div>
+            <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px">
+              <tr style="background:#f5f5f5"><th style="padding:3px 6px;text-align:left">Location</th><th style="padding:3px 6px;text-align:center">Sample</th><th style="padding:3px 6px;text-align:center">Aldo</th><th style="padding:3px 6px;text-align:center">Cortisol</th></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">80</td><td style="padding:3px 6px;text-align:center">18</td></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">75</td><td style="padding:3px 6px;text-align:center">20</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">5000</td><td style="padding:3px 6px;text-align:center">350</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">5200</td><td style="padding:3px 6px;text-align:center">380</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">4800</td><td style="padding:3px 6px;text-align:center">320</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">5500</td><td style="padding:3px 6px;text-align:center">360</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">6000</td><td style="padding:3px 6px;text-align:center">400</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">5800</td><td style="padding:3px 6px;text-align:center">380</td></tr>
+            </table>
+            <div style="font-family:monospace;font-size:10px;line-height:1.8">
+              IVC avg A/C: 4.10 | Right avg A/C: 14.32 | Left avg A/C: 15.18<br>
+              SI Right: 18.42 ✓ | SI Left: 20.00 ✓<br>
+              LI: 1.06 | CSI: 3.49 (not suppressed)<br>
+              <strong>Classification: Bilateral</strong>
+            </div>
+          </div>
+        </details>
+
+        <details style="margin-bottom:6px;border:1px solid #eee;border-radius:4px;overflow:hidden">
+          <summary style="padding:8px 12px;font-size:11px;font-weight:600;color:#1A1714;cursor:pointer;background:#fafafa">Test 6 — Non-selective (right side fails)</summary>
+          <div style="padding:10px 12px;font-size:10px;color:#3a3530;line-height:1.8;background:#fff">
+            <div style="font-family:monospace;font-size:9px;color:#888;margin-bottom:4px">Protocol: Cosyntropin-stimulated</div>
+            <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px">
+              <tr style="background:#f5f5f5"><th style="padding:3px 6px;text-align:left">Location</th><th style="padding:3px 6px;text-align:center">Sample</th><th style="padding:3px 6px;text-align:center">Aldo</th><th style="padding:3px 6px;text-align:center">Cortisol</th></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">100</td><td style="padding:3px 6px;text-align:center">25</td></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">90</td><td style="padding:3px 6px;text-align:center">25</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">110</td><td style="padding:3px 6px;text-align:center">30</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">105</td><td style="padding:3px 6px;text-align:center">28</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">95</td><td style="padding:3px 6px;text-align:center">32</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">4000</td><td style="padding:3px 6px;text-align:center">300</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">4200</td><td style="padding:3px 6px;text-align:center">320</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">3800</td><td style="padding:3px 6px;text-align:center">280</td></tr>
+            </table>
+            <div style="font-family:monospace;font-size:10px;line-height:1.8">
+              IVC avg A/C: 3.80 | Right avg A/C: 3.46 | Left avg A/C: 13.34<br>
+              SI Right: 1.20 ✗ | SI Left: 12.00 ✓<br>
+              <strong>Classification: Non-selective (right side)</strong>
+            </div>
+          </div>
+        </details>
+
+        <details style="margin-bottom:6px;border:1px solid #eee;border-radius:4px;overflow:hidden">
+          <summary style="padding:8px 12px;font-size:11px;font-weight:600;color:#1A1714;cursor:pointer;background:#fafafa">Test 7 — Non-selective (both sides fail)</summary>
+          <div style="padding:10px 12px;font-size:10px;color:#3a3530;line-height:1.8;background:#fff">
+            <div style="font-family:monospace;font-size:9px;color:#888;margin-bottom:4px">Protocol: Cosyntropin-stimulated</div>
+            <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px">
+              <tr style="background:#f5f5f5"><th style="padding:3px 6px;text-align:left">Location</th><th style="padding:3px 6px;text-align:center">Sample</th><th style="padding:3px 6px;text-align:center">Aldo</th><th style="padding:3px 6px;text-align:center">Cortisol</th></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">80</td><td style="padding:3px 6px;text-align:center">30</td></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">85</td><td style="padding:3px 6px;text-align:center">28</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">95</td><td style="padding:3px 6px;text-align:center">40</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">100</td><td style="padding:3px 6px;text-align:center">38</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">90</td><td style="padding:3px 6px;text-align:center">42</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">110</td><td style="padding:3px 6px;text-align:center">50</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">115</td><td style="padding:3px 6px;text-align:center">48</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">105</td><td style="padding:3px 6px;text-align:center">52</td></tr>
+            </table>
+            <div style="font-family:monospace;font-size:10px;line-height:1.8">
+              IVC avg A/C: 2.85 | Right avg A/C: 2.38 | Left avg A/C: 2.21<br>
+              SI Right: 1.38 ✗ | SI Left: 1.72 ✗<br>
+              <strong>Classification: Non-selective (both sides)</strong>
+            </div>
+          </div>
+        </details>
+
+        <details style="margin-bottom:6px;border:1px solid #eee;border-radius:4px;overflow:hidden">
+          <summary style="padding:8px 12px;font-size:11px;font-weight:600;color:#1A1714;cursor:pointer;background:#fafafa">Test 8 — Protocol toggle (same data, different classification)</summary>
+          <div style="padding:10px 12px;font-size:10px;color:#3a3530;line-height:1.8;background:#fff">
+            <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px">
+              <tr style="background:#f5f5f5"><th style="padding:3px 6px;text-align:left">Location</th><th style="padding:3px 6px;text-align:center">Sample</th><th style="padding:3px 6px;text-align:center">Aldo</th><th style="padding:3px 6px;text-align:center">Cortisol</th></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">100</td><td style="padding:3px 6px;text-align:center">20</td></tr>
+              <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">100</td><td style="padding:3px 6px;text-align:center">20</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">300</td><td style="padding:3px 6px;text-align:center">50</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">320</td><td style="padding:3px 6px;text-align:center">52</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">280</td><td style="padding:3px 6px;text-align:center">48</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">5000</td><td style="padding:3px 6px;text-align:center">250</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">5200</td><td style="padding:3px 6px;text-align:center">260</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">4800</td><td style="padding:3px 6px;text-align:center">240</td></tr>
+            </table>
+            <div style="font-family:monospace;font-size:10px;line-height:1.8">
+              SI Right: 2.50 | SI Left: 12.50 | LI: 3.34 | CSI: 1.20<br><br>
+              <strong>Cosyntropin-stimulated</strong> (SI cutoff ≥ 3.0): SI Right fails → <strong>Non-selective</strong><br>
+              <strong>Unstimulated</strong> (SI cutoff ≥ 2.0): SI Right passes → <strong>Borderline</strong>
+            </div>
+          </div>
+        </details>
+
+      </div>
+
+      <p style="font-size:10px;color:#8C867E;margin-top:12px;line-height:1.6">Test datasets used synthetic values within typical clinical ranges for AVS. Validated against ES 2016 guideline thresholds.</p>
+
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════════════════════
      PRINT REPORT WINDOW (opened separately)
 ════════════════════════════════════════════════ -->
@@ -1252,6 +1567,35 @@ const PRESETS = {
 };
 
 const thresholds = { siUnstim: 2.0, siStim: 3.0, liLat: 4.0, liBorder: 2.0, csi: 1.0 };
+
+// ── Classification ──
+function classify(siR, siL, siThresh, li, csi, R, L) {
+  // Division by zero or missing data
+  if (siR === null && siL === null) return null;
+
+  const domSide = (R !== null && L !== null) ? (R >= L ? 'right' : 'left') : null;
+  const nondomSide = domSide === 'right' ? 'left' : 'right';
+
+  // Non-selective check
+  const rightOK = siR !== null && siR >= siThresh;
+  const leftOK = siL !== null && siL >= siThresh;
+  if (!rightOK || !leftOK) {
+    const failingSide = !rightOK && !leftOK ? 'right and left sides' : (!rightOK ? 'right side' : 'left side');
+    return { classification: 'non_selective', domSide, failingSide, siR, siL, siThresh, li, csi };
+  }
+
+  if (li === null) return null;
+
+  // Lateralization
+  if (li >= thresholds.liLat) {
+    return { classification: 'lateralized', domSide, siR, siL, siThresh, li, csi };
+  }
+  if (li >= thresholds.liBorder) {
+    const csiSupports = csi !== null && csi < thresholds.csi;
+    return { classification: 'borderline', domSide, siR, siL, siThresh, li, csi, csiSupports };
+  }
+  return { classification: 'bilateral', domSide, siR, siL, siThresh, li, csi };
+}
 
 function applyThresholdPreset(value) {
   const isCustom = value === 'custom';
@@ -1551,8 +1895,10 @@ function calculate() {
   if (R !== null && L !== null && Math.min(R, L) !== 0) li = Math.max(R, L) / Math.min(R, L);
   renderIndexVal('li-val', li);
   const liBig = document.getElementById('li-big');
-  liBig.textContent = li !== null ? fmt(li) : '—';
-  liBig.className = 'li-big' + (li !== null ? ' has-val' : '');
+  if (liBig) {
+    liBig.textContent = li !== null ? fmt(li) : '—';
+    liBig.className = 'li-big' + (li !== null ? ' has-val' : '');
+  }
 
   // Update LI card threshold label dynamically
   document.getElementById('li-thresh-text').textContent = `≥ ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${(thresholds.liLat - 0.1).toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`;
@@ -1566,12 +1912,14 @@ function calculate() {
   renderPill('li-status', liStatus, liLabel);
 
   const domEl = document.getElementById('dominant-side');
-  if (R !== null && L !== null) {
-    if (R > L) { domEl.textContent = 'Right'; domEl.className = 'dominant-value right-dom'; }
-    else if (L > R) { domEl.textContent = 'Left'; domEl.className = 'dominant-value left-dom'; }
-    else { domEl.textContent = 'Equal'; domEl.className = 'dominant-value bilateral'; }
-  } else { domEl.textContent = '—'; domEl.className = 'dominant-value'; }
-  domEl.classList.remove('updated'); void domEl.offsetWidth; domEl.classList.add('updated');
+  if (domEl) {
+    if (R !== null && L !== null) {
+      if (R > L) { domEl.textContent = 'Right'; domEl.className = 'dominant-value right-dom'; }
+      else if (L > R) { domEl.textContent = 'Left'; domEl.className = 'dominant-value left-dom'; }
+      else { domEl.textContent = 'Equal'; domEl.className = 'dominant-value bilateral'; }
+    } else { domEl.textContent = '—'; domEl.className = 'dominant-value'; }
+    domEl.classList.remove('updated'); void domEl.offsetWidth; domEl.classList.add('updated');
+  }
 
   let csi = null;
   if (R !== null && L !== null && IVC !== null && IVC !== 0) csi = Math.min(R, L) / IVC;
@@ -1581,15 +1929,28 @@ function calculate() {
   if (csi !== null) { csiStatus = csi < thresholds.csi ? 'pass' : 'fail'; csiLabel = csi < thresholds.csi ? 'Suppressed' : 'Not suppressed'; }
   renderPill('csi-status', csiStatus, csiLabel);
 
-  renderSummary(siR, siL, siThresh, li, csi, R, L);
+  const cls = classify(siR, siL, siThresh, li, csi, R, L);
+
+  // Update dominant side label with significance
+  const domEl2 = document.getElementById('dominant-side');
+  if (domEl2 && cls && cls.classification === 'bilateral' && R !== null && L !== null) {
+    const side = R > L ? 'Left' : R < L ? 'Left' : 'Equal';
+    domEl2.innerHTML = (R > L ? 'Right' : L > R ? 'Left' : 'Equal') + ' <span style="font-size:9px;color:var(--text-3);font-weight:400">(not significant)</span>';
+  } else if (domEl2 && cls && cls.classification === 'non_selective') {
+    domEl2.innerHTML = (R !== null && L !== null ? (R > L ? 'Right' : L > R ? 'Left' : 'Equal') : '—') + ' <span style="font-size:9px;color:var(--text-3);font-weight:400">(non-selective)</span>';
+  }
+
+  renderSummary(siR, siL, siThresh, li, csi, R, L, cls);
   updateBadges();
   updateDomBox(R, L);
-  updateScreenInterp(siR, siL, siThresh, li, csi, R, L);
+  updateScreenInterp(siR, siL, siThresh, li, csi, R, L, cls);
   updateAdvancedCalc();
+  updateCalcIndicesTable(siR, siL, siThresh, li, csi, R, L, cls);
 }
 
-function renderSummary(siR, siL, siThresh, li, csi, R, L) {
+function renderSummary(siR, siL, siThresh, li, csi, R, L, cls) {
   const box = document.getElementById('summary-box');
+  if (!box) return;
   if (siR === null && siL === null) {
     box.className = 'summary-box incomplete';
     box.innerHTML = '<div class="summary-icon"></div><div class="summary-text">Awaiting sample data — results will appear here once values are entered.</div>';
@@ -1610,12 +1971,12 @@ function renderSummary(siR, siL, siThresh, li, csi, R, L) {
   }
   const domSide = R > L ? 'Right' : 'Left';
   if (li >= thresholds.liLat) {
-    const csiText = csi !== null ? (csi < thresholds.csi ? ' Contralateral suppression is present.' : ' No contralateral suppression detected — consider further evaluation.') : '';
+    const csiText = csi !== null ? (csi < thresholds.csi ? ' Contralateral suppression is present.' : ' No contralateral suppression detected.') : '';
     box.className = 'summary-box success';
     box.innerHTML = `<div class="summary-icon">✔</div><div class="summary-text"><strong>Bilateral cannulation successful.</strong> Lateralization confirmed to the <strong>${domSide}</strong> side (LI = ${fmt(li)}).${csiText}</div>`;
   } else if (li >= thresholds.liBorder) {
     box.className = 'summary-box warning';
-    box.innerHTML = `<div class="summary-icon">⚠</div><div class="summary-text"><strong>Bilateral cannulation successful.</strong> Borderline lateralization detected (LI = ${fmt(li)}), with a trend toward the <strong>${domSide}</strong> side. Clinical correlation is recommended.</div>`;
+    box.innerHTML = `<div class="summary-icon">⚠</div><div class="summary-text"><strong>Bilateral cannulation successful.</strong> Borderline lateralization detected (LI = ${fmt(li)}), with a trend toward the <strong>${domSide}</strong> side.</div>`;
   } else {
     box.className = 'summary-box error';
     box.innerHTML = `<div class="summary-icon">✘</div><div class="summary-text"><strong>Bilateral cannulation successful.</strong> No significant lateralization detected (LI = ${fmt(li)}). Findings are consistent with <strong>bilateral adrenal hyperplasia</strong>.</div>`;
@@ -1745,7 +2106,7 @@ function updateDomBox(R, L) {
 }
 
 // ── On-screen interpretation ──
-function updateScreenInterp(siR, siL, siThresh, li, csi, R, L) {
+function updateScreenInterp(siR, siL, siThresh, li, csi, R, L, cls) {
   const el = document.getElementById('screen-interp');
   if (!el) return;
   if (siR === null && siL === null) { el.style.display = 'none'; return; }
@@ -1757,6 +2118,148 @@ function updateScreenInterp(siR, siL, siThresh, li, csi, R, L) {
       <span class="interp-icon">${l.icon}</span>
       <span style="font-size:11px;line-height:1.6;color:#1A1714">${l.text}</span>
     </div>`).join('');
+}
+
+function updateCalcIndicesTable(siR, siL, siThresh, li, csi, R, L, cls) {
+  const el = document.getElementById('calc-indices-section');
+  if (!el) return;
+  if (!cls) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+
+  const c = cls.classification;
+
+  // Verdict callout only
+  const domLabel = cls.domSide === 'right' ? 'RIGHT' : 'LEFT';
+  let verdictHTML = '';
+
+  if (c === 'lateralized') {
+    const csiText = csi !== null ? (csi < thresholds.csi
+      ? `CSI of ${fmt(csi)} demonstrates contralateral suppression, supporting unilateral disease.`
+      : `CSI of ${fmt(csi)} does not demonstrate contralateral suppression.`) : '';
+    verdictHTML = `
+      <div style="margin-top:14px;padding:14px 18px;border-radius:var(--radius);border-left:4px solid var(--success);background:var(--success-bg)">
+        <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--success);margin-bottom:6px">&#10003; LATERALIZED TO ${domLabel}</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.7">LI of ${fmt(li)} meets the lateralization threshold (≥ ${thresholds.liLat.toFixed(1)}). Selectivity confirmed bilaterally (SI right ${fmt(siR)}, left ${fmt(siL)}). ${csiText}</div>
+      </div>`;
+  } else if (c === 'borderline') {
+    const csiNote = cls.csiSupports
+      ? `<div style="font-size:10px;color:var(--warn);margin-top:8px;font-style:italic">Contralateral suppression supports lateralization to ${cls.domSide} despite borderline LI.</div>` : '';
+    verdictHTML = `
+      <div style="margin-top:14px;padding:14px 18px;border-radius:var(--radius);border-left:4px solid var(--accent);background:var(--warn-bg)">
+        <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--warn);margin-bottom:6px">&#128269; BORDERLINE</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.7">LI of ${fmt(li)} falls in the borderline range (${thresholds.liBorder.toFixed(1)} to < ${thresholds.liLat.toFixed(1)}). Selectivity confirmed bilaterally (SI right ${fmt(siR)}, left ${fmt(siL)}).</div>
+        ${csiNote}
+      </div>`;
+  } else if (c === 'bilateral') {
+    verdictHTML = `
+      <div style="margin-top:14px;padding:14px 18px;border-radius:var(--radius);border-left:4px solid var(--border-strong);background:var(--surface2)">
+        <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:6px">— BILATERAL</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.7">LI of ${fmt(li)} is below the bilateral threshold (< ${thresholds.liBorder.toFixed(1)}). Selectivity confirmed bilaterally (SI right ${fmt(siR)}, left ${fmt(siL)}). Pattern consistent with bilateral aldosterone production.</div>
+      </div>`;
+  } else if (c === 'non_selective') {
+    verdictHTML = `
+      <div style="margin-top:14px;padding:14px 18px;border-radius:var(--radius);border-left:4px solid var(--fail);background:var(--fail-bg)">
+        <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--fail);margin-bottom:6px">&#9888; NON-SELECTIVE — UNINTERPRETABLE</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.7">Selectivity not achieved on the ${cls.failingSide} (SI cutoff ≥ ${siThresh.toFixed(1)}). Lateralization cannot be interpreted from this study.</div>
+      </div>`;
+  }
+
+  el.innerHTML = verdictHTML;
+
+  // Update patient preview
+  updatePatientPreview(cls);
+}
+
+let patientPreviewCustomized = false;
+
+function getPatientPreviewText(cls) {
+  if (!cls) return '';
+  const c = cls.classification;
+  const domLabel = cls.domSide === 'right' ? 'right' : 'left';
+
+  if (c === 'lateralized') {
+    return `YOUR RESULTS POINT TO ONE GLAND\n\nYour results show that one of your adrenal glands - the ${domLabel} - is producing significantly more aldosterone than the other. This pattern often points to a single gland as the source of the problem. Treatment decisions will be made by your doctor.`;
+  } else if (c === 'borderline') {
+    return `THE RESULTS ARE NOT FULLY CLEAR YET\n\nThere is a possible tendency for one adrenal gland to be more active than the other, but the difference is not large enough to be certain. Further clinical decisions will be made by your doctor.`;
+  } else if (c === 'bilateral') {
+    return `YOUR RESULTS SUGGEST BOTH GLANDS ARE INVOLVED\n\nYour results show that both adrenal glands are producing aldosterone at similar levels. This pattern is most consistent with both glands being involved rather than just one. Further clinical decisions will be made by your doctor.`;
+  } else if (c === 'non_selective') {
+    return `THE SAMPLES NEED TO BE RECHECKED\n\nThe blood samples did not capture enough hormone from one or both adrenal glands for a reliable comparison. This sometimes happens because the small adrenal veins can be difficult to access. Further clinical decisions will be made by your doctor.`;
+  }
+  return '';
+}
+
+function updatePatientPreview(cls) {
+  const section = document.getElementById('patient-preview-section');
+  const display = document.getElementById('patient-preview-display');
+  const edit = document.getElementById('patient-preview-edit');
+  if (!section || !display) return;
+
+  if (!cls) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+
+  const text = getPatientPreviewText(cls);
+  display.innerHTML = text.replace(/\n/g, '<br>');
+
+  if (!patientPreviewCustomized) {
+    edit.value = text;
+  }
+}
+
+function togglePatientEdit() {
+  const display = document.getElementById('patient-preview-display');
+  const edit = document.getElementById('patient-preview-edit');
+  const btn = document.getElementById('patient-edit-btn');
+  const isEditing = edit.style.display !== 'none';
+
+  if (isEditing) {
+    // Save edits
+    patientPreviewCustomized = true;
+    display.innerHTML = edit.value.replace(/\n/g, '<br>');
+    display.style.display = 'block';
+    edit.style.display = 'none';
+    btn.textContent = 'Customize';
+  } else {
+    // Open editor
+    if (!patientPreviewCustomized) {
+      edit.value = display.innerText;
+    }
+    display.style.display = 'none';
+    edit.style.display = 'block';
+    edit.focus();
+    btn.textContent = 'Done';
+  }
+}
+
+function resetPatientPreview() {
+  patientPreviewCustomized = false;
+  const display = document.getElementById('patient-preview-display');
+  const edit = document.getElementById('patient-preview-edit');
+  const btn = document.getElementById('patient-edit-btn');
+  // Regenerate from current classification
+  const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
+  const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
+  const cortR = avgCort('right'), cortL = avgCort('left'), cortIVC = avgCort('ivc');
+  const siR = (cortR !== null && cortIVC !== null && cortIVC !== 0) ? cortR / cortIVC : null;
+  const siL = (cortL !== null && cortIVC !== null && cortIVC !== 0) ? cortL / cortIVC : null;
+  let li = null;
+  if (R !== null && L !== null && Math.min(R,L) !== 0) li = Math.max(R,L) / Math.min(R,L);
+  let csi = null;
+  if (R !== null && L !== null && IVC !== null && IVC !== 0) csi = Math.min(R,L) / IVC;
+  const cls = classify(siR, siL, siThresh, li, csi, R, L);
+  const text = getPatientPreviewText(cls);
+  display.innerHTML = text.replace(/\n/g, '<br>');
+  edit.value = text;
+  display.style.display = 'block';
+  edit.style.display = 'none';
+  btn.textContent = 'Customize';
+}
+
+function getCustomPatientText() {
+  if (patientPreviewCustomized) {
+    return document.getElementById('patient-preview-edit').value;
+  }
+  return null;
 }
 
 function toggleLangSelector() {
@@ -1835,6 +2338,12 @@ function openChangelog() {
 }
 function closeChangelog() {
   document.getElementById('changelog-overlay').classList.remove('open');
+}
+function openValidation() {
+  document.getElementById('validation-overlay').classList.add('open');
+}
+function closeValidation() {
+  document.getElementById('validation-overlay').classList.remove('open');
 }
 function openMethods() {
   document.getElementById('methods-overlay').classList.add('open');
@@ -2001,7 +2510,7 @@ function getInterpretationText(siR, siL, siThresh, li, csi, R, L) {
   if (rightOK && leftOK) {
     lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Bilateral adrenal vein cannulation was technically successful. Both the right adrenal vein (SI = ${fmt(siR)}) and left adrenal vein (SI = ${fmt(siL)}) exceeded the ${protLabel} selectivity threshold of ≥${siThresh.toFixed(1)}, confirming adequate catheter position and sample validity.` });
   } else if (!rightOK && !leftOK) {
-    lines.push({ icon: '✘', color: '#8B1A1A', bg: '#FDEAEA', text: `Bilateral cannulation was unsuccessful. Neither the right adrenal vein (SI = ${siR !== null ? fmt(siR) : 'no data'}) nor the left adrenal vein (SI = ${siL !== null ? fmt(siL) : 'no data'}) met the ${protLabel} selectivity threshold of ≥${siThresh.toFixed(1)}. The AVS results cannot be interpreted. Repeat sampling should be considered.` });
+    lines.push({ icon: '✘', color: '#8B1A1A', bg: '#FDEAEA', text: `Bilateral cannulation was unsuccessful. Neither the right adrenal vein (SI = ${siR !== null ? fmt(siR) : 'no data'}) nor the left adrenal vein (SI = ${siL !== null ? fmt(siL) : 'no data'}) met the ${protLabel} selectivity threshold of ≥${siThresh.toFixed(1)}. The AVS results cannot be interpreted.` });
     return lines;
   } else if (!rightOK) {
     lines.push({ icon: '✘', color: '#8B1A1A', bg: '#FDEAEA', text: `Right adrenal vein cannulation was unsuccessful (SI = ${siR !== null ? fmt(siR) : 'no data'}), falling below the ${protLabel} threshold of ≥${siThresh.toFixed(1)}. The left adrenal vein was successfully cannulated (SI = ${fmt(siL)}). Lateralization cannot be determined without bilateral successful cannulation.` });
@@ -2018,19 +2527,19 @@ function getInterpretationText(siR, siL, siThresh, li, csi, R, L) {
   }
 
   if (li >= thresholds.liLat) {
-    lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Aldosterone hypersecretion is lateralized to the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). A value ≥ ${thresholds.liLat.toFixed(1)} is the threshold for confirmed lateralization per the selected guideline, supporting a diagnosis of unilateral primary aldosteronism. Unilateral adrenalectomy of the ${domSide} adrenal gland would be expected to result in biochemical cure or significant improvement in hypertension and hypokalemia.` });
+    lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Aldosterone hypersecretion is lateralized to the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). A value ≥ ${thresholds.liLat.toFixed(1)} is the threshold for confirmed lateralization per the selected guideline.` });
   } else if (li >= thresholds.liBorder) {
-    lines.push({ icon: '⚠', color: '#7A4F00', bg: '#FFF8E6', text: `Borderline lateralization was identified, with a trend toward the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). Values between ${thresholds.liBorder.toFixed(1)} and ${(thresholds.liLat - 0.1).toFixed(1)} are indeterminate per the selected guideline. Clinical correlation with patient history, imaging findings, and biochemical data is strongly recommended before proceeding with adrenalectomy.` });
+    lines.push({ icon: '⚠', color: '#7A4F00', bg: '#FFF8E6', text: `Borderline lateralization was identified, with a trend toward the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). Values between ${thresholds.liBorder.toFixed(1)} and ${(thresholds.liLat - 0.1).toFixed(1)} are indeterminate per the selected guideline.` });
   } else {
-    lines.push({ icon: '✘', color: '#8B1A1A', bg: '#FDEAEA', text: `No significant lateralization of aldosterone excess was identified (Lateralization Index = ${fmt(li)}). A value below ${thresholds.liBorder.toFixed(1)} is consistent with <strong>bilateral adrenal hyperplasia (idiopathic hyperaldosteronism)</strong>. Surgical intervention is unlikely to be beneficial. Medical management with a mineralocorticoid receptor antagonist (e.g., spironolactone or eplerenone) is typically the recommended approach.` });
+    lines.push({ icon: '✘', color: '#8B1A1A', bg: '#FDEAEA', text: `No significant lateralization of aldosterone excess was identified (Lateralization Index = ${fmt(li)}). A value below ${thresholds.liBorder.toFixed(1)} is consistent with <strong>bilateral adrenal hyperplasia (idiopathic hyperaldosteronism)</strong>.` });
   }
 
   // CSI
   if (csi !== null) {
     if (csi < thresholds.csi) {
-      lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Contralateral suppression is present (CSI = ${fmt(csi)}). The contralateral (${domSide === 'right' ? 'left' : 'right'}) adrenal gland demonstrates suppressed aldosterone production relative to the IVC, with a CSI below ${thresholds.csi.toFixed(1)}. This further supports unilateral disease and the appropriateness of surgical intervention.` });
+      lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Contralateral suppression is present (CSI = ${fmt(csi)}). The contralateral (${domSide === 'right' ? 'left' : 'right'}) adrenal gland demonstrates suppressed aldosterone production relative to the IVC.` });
     } else {
-      lines.push({ icon: '⚠', color: '#7A4F00', bg: '#FFF8E6', text: `Contralateral suppression is absent (CSI = ${fmt(csi)}). The contralateral adrenal gland does not demonstrate expected suppression relative to the IVC. In the context of a lateralized LI, this finding should be interpreted cautiously and correlated with other clinical data.` });
+      lines.push({ icon: '⚠', color: '#7A4F00', bg: '#FFF8E6', text: `Contralateral suppression is absent (CSI = ${fmt(csi)}). The contralateral adrenal gland does not demonstrate suppression relative to the IVC.` });
     }
   }
 
@@ -2194,6 +2703,7 @@ function updateAdvancedCalc() {
   function valStr(v) { return v !== null ? fmt(v) : '—'; }
 
   el.innerHTML = `
+    <p style="font-size:10px;color:var(--text-3);margin-bottom:12px;line-height:1.5">Each index is calculated using two methods. Comparing both can help identify whether a single high-value sample is driving the lateralization result.</p>
     <div style="margin-bottom:14px">
       <div style="font-family:var(--mono);font-size:9px;font-weight:600;color:#1B5E35;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Method 1: Average of All Values</div>
       <p style="font-size:10px;color:var(--text-3);margin-bottom:8px;line-height:1.5">All included sample A/C ratios are averaged for each side. This is the standard calculation method.</p>
@@ -2216,20 +2726,29 @@ function updateAdvancedCalc() {
             <td style="padding:6px 10px;text-align:center;font-weight:700">${valStr(siL_avg)}</td>
             <td style="padding:6px 10px;text-align:center">${badge(siL_avg, siThresh, 'si')}</td>
           </tr>
-          <tr>
+          <tr style="border-bottom:1px solid rgba(0,0,0,0.05)">
             <td style="padding:6px 10px;font-weight:500">LI</td>
             <td style="padding:6px 10px;text-align:center;font-weight:700">${valStr(liAvg)}</td>
             <td style="padding:6px 10px;text-align:center">${badge(liAvg, thresholds.liLat, 'li')}</td>
           </tr>
+          <tr>
+            <td style="padding:6px 10px;font-weight:500">CSI</td>
+            <td style="padding:6px 10px;text-align:center;font-weight:700">${(() => { const IVC = avgAC('ivc'); if (avgR !== null && avgL !== null && IVC !== null && IVC !== 0) return valStr(Math.min(avgR,avgL)/IVC); return '—'; })()}</td>
+            <td style="padding:6px 10px;text-align:center">${(() => { const IVC = avgAC('ivc'); if (avgR !== null && avgL !== null && IVC !== null && IVC !== 0) { const c = Math.min(avgR,avgL)/IVC; return c < thresholds.csi ? '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">Suppressed</span>' : '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(139,26,26,0.1);color:#8B1A1A">Not suppressed</span>'; } return '<span style="color:var(--text-3)">—</span>'; })()}</td>
+          </tr>
         </tbody>
       </table>
       ${(() => {
-        const dom = (avgR !== null && avgL !== null) ? (avgR > avgL ? 'Right' : avgR < avgL ? 'Left' : null) : null;
-        const lat = liAvg !== null ? (liAvg >= thresholds.liLat ? 'Lateralized' : liAvg >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : null;
-        const side = dom || 'Indeterminate';
-        const color = lat === 'Lateralized' ? '#1B5E35' : lat === 'Borderline' ? '#7A4F00' : '#8B1A1A';
-        const bg = lat === 'Lateralized' ? 'rgba(27,94,53,0.08)' : lat === 'Borderline' ? 'rgba(122,79,0,0.08)' : 'rgba(139,26,26,0.08)';
-        return '<div style="margin-top:8px;padding:6px 10px;background:' + bg + ';border-radius:3px;font-size:11px;font-family:var(--mono)"><strong style="color:' + color + '">Lateralization: ' + side + '</strong>' + (lat ? ' <span style="color:var(--text-3)">(' + lat + ')</span>' : '') + '</div>';
+        const IVC = avgAC('ivc');
+        const csiAvg = (avgR !== null && avgL !== null && IVC !== null && IVC !== 0) ? Math.min(avgR,avgL)/IVC : null;
+        const clsAvg = classify(siR_avg, siL_avg, siThresh, liAvg, csiAvg, avgR, avgL);
+        if (!clsAvg) return '';
+        const c = clsAvg.classification;
+        const dom = clsAvg.domSide === 'right' ? 'Right' : 'Left';
+        const color = c === 'lateralized' ? '#1B5E35' : c === 'borderline' ? '#7A4F00' : c === 'bilateral' ? '#8B1A1A' : '#8B1A1A';
+        const bg = c === 'lateralized' ? 'rgba(27,94,53,0.08)' : c === 'borderline' ? 'rgba(122,79,0,0.08)' : c === 'bilateral' ? 'rgba(139,26,26,0.08)' : 'rgba(139,26,26,0.08)';
+        const label = c === 'lateralized' ? 'Lateralized → ' + dom : c === 'borderline' ? 'Borderline' : c === 'bilateral' ? 'Bilateral' : 'Non-Selective';
+        return '<div style="margin-top:8px;padding:6px 10px;background:' + bg + ';border-radius:3px;font-size:11px;font-family:var(--mono)"><strong style="color:' + color + '">Classification: ' + label + '</strong></div>';
       })()}
     </div>
 
@@ -2255,20 +2774,29 @@ function updateAdvancedCalc() {
             <td style="padding:6px 10px;text-align:center;font-weight:700">${valStr(siL_high)}</td>
             <td style="padding:6px 10px;text-align:center">${badge(siL_high, siThresh, 'si')}</td>
           </tr>
-          <tr>
+          <tr style="border-bottom:1px solid rgba(0,0,0,0.05)">
             <td style="padding:6px 10px;font-weight:500">LI</td>
             <td style="padding:6px 10px;text-align:center;font-weight:700">${valStr(liHigh)}</td>
             <td style="padding:6px 10px;text-align:center">${badge(liHigh, thresholds.liLat, 'li')}</td>
           </tr>
+          <tr>
+            <td style="padding:6px 10px;font-weight:500">CSI</td>
+            <td style="padding:6px 10px;text-align:center;font-weight:700">${(() => { const IVC = avgAC('ivc'); if (highR !== null && highL !== null && IVC !== null && IVC !== 0) return valStr(Math.min(highR,highL)/IVC); return '—'; })()}</td>
+            <td style="padding:6px 10px;text-align:center">${(() => { const IVC = avgAC('ivc'); if (highR !== null && highL !== null && IVC !== null && IVC !== 0) { const c = Math.min(highR,highL)/IVC; return c < thresholds.csi ? '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">Suppressed</span>' : '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(139,26,26,0.1);color:#8B1A1A">Not suppressed</span>'; } return '<span style="color:var(--text-3)">—</span>'; })()}</td>
+          </tr>
         </tbody>
       </table>
       ${(() => {
-        const dom = (highR !== null && highL !== null) ? (highR > highL ? 'Right' : highR < highL ? 'Left' : null) : null;
-        const lat = liHigh !== null ? (liHigh >= thresholds.liLat ? 'Lateralized' : liHigh >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : null;
-        const side = dom || 'Indeterminate';
-        const color = lat === 'Lateralized' ? '#1B5E35' : lat === 'Borderline' ? '#7A4F00' : '#8B1A1A';
-        const bg = lat === 'Lateralized' ? 'rgba(27,94,53,0.08)' : lat === 'Borderline' ? 'rgba(122,79,0,0.08)' : 'rgba(139,26,26,0.08)';
-        return '<div style="margin-top:8px;padding:6px 10px;background:' + bg + ';border-radius:3px;font-size:11px;font-family:var(--mono)"><strong style="color:' + color + '">Lateralization: ' + side + '</strong>' + (lat ? ' <span style="color:var(--text-3)">(' + lat + ')</span>' : '') + '</div>';
+        const IVC = avgAC('ivc');
+        const csiHigh = (highR !== null && highL !== null && IVC !== null && IVC !== 0) ? Math.min(highR,highL)/IVC : null;
+        const clsHigh = classify(siR_high, siL_high, siThresh, liHigh, csiHigh, highR, highL);
+        if (!clsHigh) return '';
+        const c = clsHigh.classification;
+        const dom = clsHigh.domSide === 'right' ? 'Right' : 'Left';
+        const color = c === 'lateralized' ? '#1B5E35' : c === 'borderline' ? '#7A4F00' : c === 'bilateral' ? '#8B1A1A' : '#8B1A1A';
+        const bg = c === 'lateralized' ? 'rgba(27,94,53,0.08)' : c === 'borderline' ? 'rgba(122,79,0,0.08)' : c === 'bilateral' ? 'rgba(139,26,26,0.08)' : 'rgba(139,26,26,0.08)';
+        const label = c === 'lateralized' ? 'Lateralized → ' + dom : c === 'borderline' ? 'Borderline' : c === 'bilateral' ? 'Bilateral' : 'Non-Selective';
+        return '<div style="margin-top:8px;padding:6px 10px;background:' + bg + ';border-radius:3px;font-size:11px;font-family:var(--mono)"><strong style="color:' + color + '">Classification: ' + label + '</strong></div>';
       })()}
     </div>
     ${(() => {
@@ -2278,18 +2806,29 @@ function updateAdvancedCalc() {
 
       if (!domAvg && !domHigh) return '';
 
+      const IVC = avgAC('ivc');
+      const csiAvgI = (avgR !== null && avgL !== null && IVC !== null && IVC !== 0) ? Math.min(avgR,avgL)/IVC : null;
+      const clsAvgI = classify(siR_avg, siL_avg, siThresh, liAvg, csiAvgI, avgR, avgL);
+      const csiHighI = (highR !== null && highL !== null && IVC !== null && IVC !== 0) ? Math.min(highR,highL)/IVC : null;
+      const clsHighI = classify(siR_high, siL_high, siThresh, liHigh, csiHighI, highR, highL);
+      const cAvg = clsAvgI ? clsAvgI.classification : null;
+      const cHigh = clsHighI ? clsHighI.classification : null;
+
       let interpText = '';
+      const classLabel = { lateralized: 'Lateralized', borderline: 'Borderline', bilateral: 'Bilateral', non_selective: 'Non-Selective' };
+
       if (domAvg && domHigh && domAvg === domHigh) {
-        const liResult = liAvg !== null && liAvg >= thresholds.liLat ? 'lateralized' : liAvg !== null && liAvg >= thresholds.liBorder ? 'borderline' : 'bilateral';
-        interpText = '<strong style="color:#1B5E35">' + domAvg + ' dominant</strong> — both methods agree. ';
-        if (liResult === 'lateralized') interpText += 'Lateralization is present by both average and highest value methods, supporting unilateral disease on the ' + domAvg.toLowerCase() + ' side.';
-        else if (liResult === 'borderline') interpText += 'Lateralization is borderline. Consider clinical correlation and additional testing.';
-        else interpText += 'No lateralization detected. Results suggest bilateral disease.';
+        if (cAvg === cHigh) {
+          interpText = '<strong style="color:#1B5E35">' + domAvg + ' dominant</strong> — both methods agree. Classification: <strong>' + (classLabel[cAvg] || '—') + '</strong> by both methods.';
+        } else {
+          interpText = '<strong style="color:#7A4F00">' + domAvg + ' dominant</strong> — both methods agree on dominant side, but classification differs: average method → <strong>' + (classLabel[cAvg] || '—') + '</strong>, highest value method → <strong>' + (classLabel[cHigh] || '—') + '</strong>. A single high-value sample may be influencing the result.';
+        }
       } else if (domAvg && domHigh && domAvg !== domHigh) {
-        interpText = '<strong style="color:#7A4F00">Methods disagree</strong> — average method suggests <strong>' + domAvg + '</strong> dominant, highest value method suggests <strong>' + domHigh + '</strong> dominant. This discordance may indicate that a single outlier sample is driving the result. Interpret with caution and correlate clinically.';
+        interpText = '<strong style="color:#7A4F00">Methods disagree</strong> — average method suggests <strong>' + domAvg + '</strong> (' + (classLabel[cAvg] || '—') + '), highest value method suggests <strong>' + domHigh + '</strong> (' + (classLabel[cHigh] || '—') + '). This discordance may indicate that a single outlier sample is driving the result. Interpret with caution and correlate clinically.';
       } else {
         const dom = domAvg || domHigh;
-        interpText = '<strong>' + dom + ' dominant</strong> — based on available data.';
+        const cls = cAvg || cHigh;
+        interpText = '<strong>' + dom + ' dominant</strong> — ' + (classLabel[cls] || '—') + ', based on available data.';
       }
 
       return '<div style="margin-top:12px;padding:10px 14px;background:rgba(0,0,0,0.03);border-radius:4px;border-left:3px solid #1B5E35"><span style="font-family:var(--mono);font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:4px">Interpretation</span><span style="font-size:11px;color:var(--text);line-height:1.7">' + interpText + '</span></div>';
@@ -2479,15 +3018,28 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
     <thead><tr style="background:#f5f5f5">
       <th style="padding:8px 12px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Index</th>
       <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Value</th>
+      <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Threshold</th>
       <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Result</th>
     </tr></thead>
     <tbody>
-      ${[
-        { label: 'SI Right', val: siR_avg, result: siR_avg !== null ? (siR_avg >= siThresh ? 'Cannulated' : 'Not cannulated') : '—' },
-        { label: 'SI Left', val: siL_avg, result: siL_avg !== null ? (siL_avg >= siThresh ? 'Cannulated' : 'Not cannulated') : '—' },
-        { label: 'LI', val: liAvg, result: liAvg !== null ? (liAvg >= thresholds.liLat ? 'Lateralized' : liAvg >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : '—' },
-        { label: 'CSI', val: (() => { const csiVal = (avgAC('right') !== null && avgAC('left') !== null && avgAC('ivc') !== null && avgAC('ivc') !== 0) ? Math.min(avgAC('right'), avgAC('left')) / avgAC('ivc') : null; return csiVal; })(), result: (() => { const csiVal = (avgAC('right') !== null && avgAC('left') !== null && avgAC('ivc') !== null && avgAC('ivc') !== 0) ? Math.min(avgAC('right'), avgAC('left')) / avgAC('ivc') : null; return csiVal !== null ? (csiVal < thresholds.csi ? 'Suppressed' : 'Not suppressed') : '—'; })() },
-      ].map(r => '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:10pt">' + r.label + '</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">' + (r.val !== null ? fmt(r.val) : '—') + '</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:9pt;font-weight:600">' + r.result + '</td></tr>').join('')}
+      ${(() => {
+        const csiVal = (avgAC('right') !== null && avgAC('left') !== null && avgAC('ivc') !== null && avgAC('ivc') !== 0) ? Math.min(avgAC('right'), avgAC('left')) / avgAC('ivc') : null;
+        const domSide = (avgR !== null && avgL !== null) ? (avgR > avgL ? 'Right' : 'Left') : null;
+        const rows = [
+          { label: 'Selectivity Index — Right (SI)', val: siR_avg, thresh: '≥ ' + siThresh.toFixed(1) + ' (' + (protocol === 'stimulated' ? 'stimulated' : 'unstimulated') + ')', interp: siR_avg === null ? '—' : siR_avg >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
+          { label: 'Selectivity Index — Left (SI)', val: siL_avg, thresh: '≥ ' + siThresh.toFixed(1) + ' (' + (protocol === 'stimulated' ? 'stimulated' : 'unstimulated') + ')', interp: siL_avg === null ? '—' : siL_avg >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
+          { label: 'Lateralization Index (LI)', val: liAvg, thresh: '≥ ' + thresholds.liLat.toFixed(1) + ' lateralized | ' + thresholds.liBorder.toFixed(1) + '–' + (thresholds.liLat-0.1).toFixed(1) + ' borderline | < ' + thresholds.liBorder.toFixed(1) + ' bilateral', interp: liAvg === null ? '—' : liAvg >= thresholds.liLat ? 'Lateralized → ' + domSide : liAvg >= thresholds.liBorder ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
+          { label: 'Contralateral Suppression (CSI)', val: csiVal, thresh: '< ' + thresholds.csi.toFixed(1) + ' = suppression present', interp: csiVal === null ? '—' : csiVal < thresholds.csi ? 'Contralateral suppression present' : 'No contralateral suppression' },
+        ];
+        return rows.map(r => {
+          const pass = r.interp.includes('Successful') || r.interp.includes('Lateralized →') || r.interp.includes('suppression present');
+          const warn = r.interp.includes('Borderline');
+          const fail = r.interp !== '—' && !pass && !warn;
+          const statusColor = pass ? '#1B5E35' : warn ? '#7A4F00' : fail ? '#8B1A1A' : '#888';
+          const statusBg = pass ? '#E8F5EE' : warn ? '#FFF8E6' : fail ? '#FDEAEA' : '#f5f5f5';
+          return '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:10pt">' + r.label + '</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">' + (r.val !== null ? fmt(r.val) : '—') + '</td><td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:9pt;color:#666;text-align:center">' + r.thresh + '</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center"><span style="display:inline-block;padding:3px 10px;border-radius:2px;font-size:9pt;font-weight:600;background:' + statusBg + ';color:' + statusColor + '">' + r.interp + '</span></td></tr>';
+        }).join('');
+      })()}
     </tbody>
   </table>
 
@@ -2500,17 +3052,94 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
   ${wantWorksheet ? `
   <div style="page-break-before:always"></div>
   <h2>Calculation Workup</h2>
-  <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">A/C ratios are calculated per sample (Aldosterone ÷ Cortisol). When multiple samples are included, ratios are averaged. All indices are derived from these averaged values.</p>
   ${(() => {
     const aldoUnit = units.aldo;
     const cortUnit = units.cort;
-    function wsSection(side, label, color) {
-      const samples = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
-      if (!samples.length) return '<p style="color:#aaa;font-size:9pt;font-style:italic">No included samples for ' + label + '.</p>';
-      const rows = samples.map((s, i) => { const ac = parseFloat(s.aldo) / parseFloat(s.cort); const noteStr = s.note ? ' <span style="font-size:8pt;color:#888;font-style:italic">(' + s.note + ')</span>' : ''; return '<tr><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee">Sample ' + (i+1) + noteStr + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">' + parseFloat(s.aldo).toFixed(1) + ' ' + aldoUnit + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">' + parseFloat(s.cort).toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700;color:' + color + '">' + fmt(ac) + '</td></tr>'; }).join('');
-      return '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:' + color + ';text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">' + label + '</p><table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px"><thead><tr style="background:#f5f5f5"><th style="padding:6px 10px;text-align:left;font-size:8pt;color:#888">Sample</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888">ALDO</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888">CORTISOL</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888">A/C RATIO</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    const thd = '<thead><tr style="background:#f5f5f5"><th style="padding:6px 10px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Sample</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;letter-spacing:0.05em">ALDO (' + aldoUnit + ')</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;letter-spacing:0.05em">CORTISOL (' + cortUnit + ')</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Calculation</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">A/C Ratio</th></tr></thead>';
+    const derivHead = '<table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden"><thead><tr style="background:#f5f5f5"><th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:18%">Index</th><th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Formula &amp; Values</th><th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:14%">Result</th></tr></thead><tbody>';
+    function derivRow(label, formula, result, isLast) {
+      if (result !== null) return '<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + '">' + label + '</td><td style="padding:8px 12px;font-size:9.5pt;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + 'font-family:monospace;color:#555">' + formula + '</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + 'text-align:center;font-family:monospace">' + fmt(result) + '</td></tr>';
+      return '<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + '">' + label + '</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + 'font-style:italic">Insufficient data</td></tr>';
     }
-    return wsSection('ivc','Inferior Vena Cava (IVC)','#2B3A8C') + wsSection('right','Right Adrenal Vein','#1B4D3E') + wsSection('left','Left Adrenal Vein','#7A1F1F');
+
+    function sampleRows(side) {
+      return state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
+    }
+
+    // ─── METHOD 1: AVERAGE ───
+    function avgSection(side, label, color) {
+      const samples = sampleRows(side);
+      if (!samples.length) return '<p style="color:#aaa;font-size:9pt;font-style:italic">No included samples for ' + label + '.</p>';
+      const rows = samples.map((s, i) => { const ac = parseFloat(s.aldo) / parseFloat(s.cort); const noteStr = s.note ? ' <span style="font-size:8pt;color:#888;font-style:italic">(' + s.note + ')</span>' : ''; return '<tr><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee">Sample ' + (i+1) + noteStr + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">' + parseFloat(s.aldo).toFixed(1) + ' ' + aldoUnit + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">' + parseFloat(s.cort).toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;color:#555">' + parseFloat(s.aldo).toFixed(1) + ' ÷ ' + parseFloat(s.cort).toFixed(2) + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700;color:' + color + '">' + fmt(ac) + '</td></tr>'; }).join('');
+      const avgCortVal = samples.reduce((sum, s) => sum + parseFloat(s.cort), 0) / samples.length;
+      const avgACVal = samples.reduce((sum, s) => sum + parseFloat(s.aldo)/parseFloat(s.cort), 0) / samples.length;
+      const sumRow = samples.length > 1
+        ? '<tr style="background:#f0f0f0;border-top:2px solid #ddd"><td style="padding:6px 10px;font-size:8.5pt;color:#555;font-style:italic;font-weight:600">Average (' + samples.length + ' samples)</td><td style="padding:6px 10px"></td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">' + avgCortVal.toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;text-align:center;font-size:8.5pt;color:#888;font-style:italic">averaged per sample</td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:10pt;font-weight:700;color:' + color + '">' + fmt(avgACVal) + '</td></tr>'
+        : '<tr style="background:#f0f0f0;border-top:2px solid #ddd"><td style="padding:6px 10px;font-size:8.5pt;color:#555;font-style:italic;font-weight:600">Used in calculations</td><td style="padding:6px 10px"></td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">' + avgCortVal.toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;text-align:center;font-size:8.5pt;color:#888;font-style:italic">single sample</td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:10pt;font-weight:700;color:' + color + '">' + fmt(avgACVal) + '</td></tr>';
+      return '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:' + color + ';text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">' + label + '</p><table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px">' + thd + '<tbody>' + rows + sumRow + '</tbody></table>';
+    }
+
+    // ─── METHOD 2: HIGHEST VALUE ───
+    function highSection(side, label, color) {
+      const samples = sampleRows(side);
+      if (!samples.length) return '<p style="color:#aaa;font-size:9pt;font-style:italic">No included samples for ' + label + '.</p>';
+      const acValues = samples.map((s, i) => ({ idx: i, aldo: parseFloat(s.aldo), cort: parseFloat(s.cort), ac: parseFloat(s.aldo) / parseFloat(s.cort), note: s.note }));
+      const highest = acValues.reduce((best, cur) => cur.ac > best.ac ? cur : best);
+      const rows = acValues.map(s => {
+        const isHighest = s === highest;
+        const noteStr = s.note ? ' <span style="font-size:8pt;color:#888;font-style:italic">(' + s.note + ')</span>' : '';
+        const bold = isHighest ? 'font-weight:700;' : 'color:#aaa;';
+        return '<tr><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;' + bold + '">Sample ' + (s.idx+1) + noteStr + (isHighest ? ' <span style="font-size:7pt;padding:1px 5px;background:' + color + ';color:#fff;border-radius:2px;margin-left:4px">HIGHEST</span>' : '') + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;' + bold + '">' + s.aldo.toFixed(1) + ' ' + aldoUnit + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;' + bold + '">' + s.cort.toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;' + (isHighest ? 'color:#555;' : 'color:#ccc;') + '">' + s.aldo.toFixed(1) + ' ÷ ' + s.cort.toFixed(2) + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700;color:' + (isHighest ? color : '#ccc') + '">' + fmt(s.ac) + '</td></tr>';
+      }).join('');
+      const sumRow = '<tr style="background:#f0f0f0;border-top:2px solid #ddd"><td style="padding:6px 10px;font-size:8.5pt;color:#555;font-style:italic;font-weight:600">Highest value used</td><td style="padding:6px 10px"></td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">' + highest.cort.toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;text-align:center;font-size:8.5pt;color:#888;font-style:italic">highest A/C ratio</td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:10pt;font-weight:700;color:' + color + '">' + fmt(highest.ac) + '</td></tr>';
+      return '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:' + color + ';text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">' + label + '</p><table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px">' + thd + '<tbody>' + rows + sumRow + '</tbody></table>';
+    }
+
+    // Average method values
+    const ivcAC = avgAC('ivc'), rightAC = avgAC('right'), leftAC = avgAC('left');
+    const cortIVCw = avgCort('ivc'), cortRw = avgCort('right'), cortLw = avgCort('left');
+    const domAvg = (rightAC !== null && leftAC !== null) ? (rightAC > leftAC ? 'Right' : 'Left') : '—';
+    const contraAvg = (rightAC !== null && leftAC !== null) ? Math.min(rightAC, leftAC) : null;
+    const higherAvg = (rightAC !== null && leftAC !== null) ? Math.max(rightAC, leftAC) : null;
+    const siRavg = (cortRw !== null && cortIVCw !== null && cortIVCw !== 0) ? cortRw/cortIVCw : null;
+    const siLavg = (cortLw !== null && cortIVCw !== null && cortIVCw !== 0) ? cortLw/cortIVCw : null;
+    const liAvgW  = (higherAvg !== null && contraAvg !== null && contraAvg !== 0) ? higherAvg/contraAvg : null;
+    const csiAvgW = (contraAvg !== null && ivcAC !== null && ivcAC !== 0) ? contraAvg/ivcAC : null;
+
+    // Highest method values
+    function hAC(side) { const s = sampleRows(side); if (!s.length) return null; return Math.max(...s.map(x => parseFloat(x.aldo)/parseFloat(x.cort))); }
+    function hCort(side) { const s = sampleRows(side); if (!s.length) return null; return Math.max(...s.map(x => parseFloat(x.cort))); }
+    const hR = hAC('right'), hL = hAC('left'), hCortR = hCort('right'), hCortL = hCort('left'), hCortIVC = hCort('ivc');
+    const domHigh = (hR !== null && hL !== null) ? (hR > hL ? 'Right' : 'Left') : '—';
+    const contraHigh = (hR !== null && hL !== null) ? Math.min(hR, hL) : null;
+    const higherHigh = (hR !== null && hL !== null) ? Math.max(hR, hL) : null;
+    const siRhigh = (hCortR !== null && hCortIVC !== null && hCortIVC !== 0) ? hCortR/hCortIVC : null;
+    const siLhigh = (hCortL !== null && hCortIVC !== null && hCortIVC !== 0) ? hCortL/hCortIVC : null;
+    const liHighW  = (higherHigh !== null && contraHigh !== null && contraHigh !== 0) ? higherHigh/contraHigh : null;
+    const csiHighW = (contraHigh !== null && ivcAC !== null && ivcAC !== 0) ? contraHigh/ivcAC : null;
+
+    return '<h3 style="font-size:11pt;color:#1B5E35;margin-bottom:4px;border-bottom:1px solid #c2ddd3;padding-bottom:4px">Method 1: Average of All Included Values</h3>' +
+      '<p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">All included sample A/C ratios are averaged for each site. This is the standard calculation method.</p>' +
+      avgSection('ivc','Inferior Vena Cava (IVC)','#2B3A8C') + avgSection('right','Right Adrenal Vein','#1B4D3E') + avgSection('left','Left Adrenal Vein','#7A1F1F') +
+      '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:#1B5E35;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Index Derivation — Average Method</p>' +
+      derivHead +
+      derivRow('SI — Right', 'Avg Right Cortisol ÷ Avg IVC Cortisol = ' + (cortRw !== null ? fmt(cortRw) : '—') + ' ÷ ' + (cortIVCw !== null ? fmt(cortIVCw) : '—'), siRavg, false) +
+      derivRow('SI — Left', 'Avg Left Cortisol ÷ Avg IVC Cortisol = ' + (cortLw !== null ? fmt(cortLw) : '—') + ' ÷ ' + (cortIVCw !== null ? fmt(cortIVCw) : '—'), siLavg, false) +
+      derivRow('LI', domAvg + ' A/C ÷ Contralateral A/C = ' + (higherAvg !== null ? fmt(higherAvg) : '—') + ' ÷ ' + (contraAvg !== null ? fmt(contraAvg) : '—'), liAvgW, false) +
+      derivRow('CSI', 'Contralateral A/C ÷ IVC A/C = ' + (contraAvg !== null ? fmt(contraAvg) : '—') + ' ÷ ' + (ivcAC !== null ? fmt(ivcAC) : '—'), csiAvgW, true) +
+      '</tbody></table>' +
+
+      '<div style="page-break-before:always"></div>' +
+      '<h3 style="font-size:11pt;color:#7A4F00;margin-bottom:4px;border-bottom:1px solid #e8d5a0;padding-bottom:4px">Method 2: Highest Single Value</h3>' +
+      '<p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">Only the single highest A/C ratio from each site is used. This can reveal whether a single sample drives lateralization.</p>' +
+      highSection('ivc','Inferior Vena Cava (IVC)','#2B3A8C') + highSection('right','Right Adrenal Vein','#1B4D3E') + highSection('left','Left Adrenal Vein','#7A1F1F') +
+      '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:#7A4F00;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Index Derivation — Highest Value Method</p>' +
+      derivHead +
+      derivRow('SI — Right', 'Highest Right Cortisol ÷ Highest IVC Cortisol = ' + (hCortR !== null ? fmt(hCortR) : '—') + ' ÷ ' + (hCortIVC !== null ? fmt(hCortIVC) : '—'), siRhigh, false) +
+      derivRow('SI — Left', 'Highest Left Cortisol ÷ Highest IVC Cortisol = ' + (hCortL !== null ? fmt(hCortL) : '—') + ' ÷ ' + (hCortIVC !== null ? fmt(hCortIVC) : '—'), siLhigh, false) +
+      derivRow('LI', domHigh + ' A/C ÷ Contralateral A/C = ' + (higherHigh !== null ? fmt(higherHigh) : '—') + ' ÷ ' + (contraHigh !== null ? fmt(contraHigh) : '—'), liHighW, false) +
+      derivRow('CSI', 'Contralateral A/C ÷ IVC A/C = ' + (contraHigh !== null ? fmt(contraHigh) : '—') + ' ÷ ' + (ivcAC !== null ? fmt(ivcAC) : '—'), csiHighW, true) +
+      '</tbody></table>';
   })()}
   ` : ''}
 
@@ -2726,20 +3355,19 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
         const samples = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
         if (!samples.length) return `<p style="color:#aaa;font-size:9pt;font-style:italic">No included samples for ${label}.</p>`;
         const rows = samples.map((s, i) => { const ac = parseFloat(s.aldo) / parseFloat(s.cort); const noteStr = s.note ? ` <span style="font-size:8pt;color:#888;font-style:italic">(${s.note})</span>` : ''; return `<tr><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee">Sample ${i+1}${noteStr}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.aldo).toFixed(1)} ${aldoUnit}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.cort).toFixed(2)} ${cortUnit}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${parseFloat(s.aldo).toFixed(1)} ÷ ${parseFloat(s.cort).toFixed(2)}</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700;color:${color}">${fmt(ac)}</td></tr>`; }).join('');
-        const avgAldo = samples.reduce((sum, s) => sum + parseFloat(s.aldo), 0) / samples.length;
         const avgCortVal = samples.reduce((sum, s) => sum + parseFloat(s.cort), 0) / samples.length;
         const avgACVal = samples.reduce((sum, s) => sum + parseFloat(s.aldo)/parseFloat(s.cort), 0) / samples.length;
         const summaryRows = samples.length > 1
           ? `<tr class="summary-row" style="background:#f0f0f0;border-top:2px solid #ddd">
               <td style="padding:6px 10px;font-size:8.5pt;color:#555;font-style:italic;font-weight:600">Average (${samples.length} samples)</td>
-              <td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">${avgAldo.toFixed(1)} ${aldoUnit}</td>
+              <td style="padding:6px 10px"></td>
               <td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">${avgCortVal.toFixed(2)} ${cortUnit}</td>
               <td style="padding:6px 10px;text-align:center;font-size:8.5pt;color:#888;font-style:italic">averaged per sample</td>
               <td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:10pt;font-weight:700;color:${color}">${fmt(avgACVal)}</td>
             </tr>`
           : `<tr class="summary-row" style="background:#f0f0f0;border-top:2px solid #ddd">
               <td style="padding:6px 10px;font-size:8.5pt;color:#555;font-style:italic;font-weight:600">Used in calculations</td>
-              <td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">${avgAldo.toFixed(1)} ${aldoUnit}</td>
+              <td style="padding:6px 10px"></td>
               <td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">${avgCortVal.toFixed(2)} ${cortUnit}</td>
               <td style="padding:6px 10px;text-align:center;font-size:8.5pt;color:#888;font-style:italic">single sample</td>
               <td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:10pt;font-weight:700;color:${color}">${fmt(avgACVal)}</td>
@@ -2817,19 +3445,19 @@ const patientTranslations = {
     lateralTitle: 'One adrenal gland appears to be the source',
     lateralText: (side) => `The results show that your <strong>${side} adrenal gland</strong> is producing significantly more aldosterone than the other side. This pattern is called <em>lateralization</em> and suggests that the problem is coming from a single gland.`,
     lateralCSIText: (opp) => `Additionally, the <strong>${opp} adrenal gland</strong> appears to have reduced activity, which further supports that the problem is coming from one side.`,
-    lateralCSIWarnText: 'Your care team will also review whether both glands show signs of activity and will factor this into the overall recommendation.',
+    lateralCSIWarnText: '',
     rightSide: 'right', leftSide: 'left',
     borderlineTitle: 'The results are not fully clear yet',
     borderlineText: 'There is a <em>possible</em> tendency for one adrenal gland to be more active than the other, but the difference is not large enough to be certain. Your doctor will review these results carefully along with your other test results, your health history, and any imaging scans before making a recommendation.',
     bilateralTitle: 'Both adrenal glands appear to be involved equally',
-    bilateralText: 'The results suggest that <strong>both adrenal glands</strong> are contributing to the overproduction of aldosterone equally. When this is the case, it is called <em>bilateral hyperplasia</em>. Surgery is generally not recommended for this pattern — instead, it is typically managed with medication.',
+    bilateralText: 'The results suggest that <strong>both adrenal glands</strong> are contributing to the overproduction of aldosterone equally. When this is the case, it is called <em>bilateral hyperplasia</em>. Your doctor will review the full picture — including your scans, lab work, and overall health — before recommending next steps.',
     nextTitle: 'What happens next?',
     nextNoData: 'Please follow up with your care team to discuss when your results will be available.',
     nextFail: 'Your doctor will discuss whether additional testing or a repeat procedure is recommended. In some cases, other imaging or tests may be used to help guide decisions.',
     nextNoLI: 'Your care team is reviewing the results and will discuss next steps with you, including treatment options.',
-    nextLateral: (side) => `Your doctor may discuss the possibility of surgery to remove the overactive ${side} adrenal gland. This is called a <strong>unilateral adrenalectomy</strong>. Many patients who have this surgery see significant improvement in their blood pressure and may be able to reduce or stop blood pressure medications. Your care team will help you understand all your options.`,
+    nextLateral: (side) => `Your doctor will discuss treatment options. Surgery to remove the overactive ${side} adrenal gland is called a <strong>unilateral adrenalectomy</strong>. Many patients who have this surgery see significant improvement in their blood pressure and may be able to reduce or stop blood pressure medications. Your care team will help you understand all your options.`,
     nextBorderline: 'Your care team will review the full picture — including your scans, lab work, and overall health — before making a recommendation. Additional follow-up or repeat testing may be suggested.',
-    nextBilateral: 'Since both glands appear to be involved, your doctor will likely recommend <strong>medication</strong> to manage your aldosterone levels. Common medications used for this condition include spironolactone or eplerenone. These are generally very effective and many patients do well with this approach.',
+    nextBilateral: 'Your doctor will review your results and make a treatment recommendation. Since both glands appear to be involved, your doctor may recommend <strong>medication</strong> to manage your aldosterone levels. Further discussion with your doctor to understand your options will be the next step.',
     importantTitle: 'Important:',
     importantText: 'This summary is meant to help you understand your test results in plain language. Please do not change or stop any of your medications without first speaking with your doctor or care team. Your provider will review all of your results with you and discuss the best plan for your individual situation.',
     footer: 'AVS Calculator — Patient-Friendly Summary',
@@ -2853,19 +3481,19 @@ const patientTranslations = {
     lateralTitle: 'Una glándula suprarrenal parece ser la fuente',
     lateralText: (side) => `Los resultados muestran que su <strong>glándula suprarrenal ${side}</strong> está produciendo significativamente más aldosterona que el otro lado. Este patrón se llama <em>lateralización</em> y sugiere que el problema proviene de una sola glándula.`,
     lateralCSIText: (opp) => `Además, la <strong>glándula suprarrenal ${opp}</strong> parece tener actividad reducida, lo que refuerza aún más que el problema proviene de un solo lado.`,
-    lateralCSIWarnText: 'Su equipo médico también revisará si ambas glándulas muestran signos de actividad y lo tendrá en cuenta en la recomendación general.',
+    lateralCSIWarnText: '',
     rightSide: 'derecha', leftSide: 'izquierda',
     borderlineTitle: 'Los resultados aún no son completamente claros',
     borderlineText: 'Existe una tendencia <em>posible</em> de que una glándula suprarrenal sea más activa que la otra, pero la diferencia no es suficientemente grande para ser definitiva. Su médico revisará estos resultados cuidadosamente junto con sus otros resultados, su historial médico y cualquier imagen antes de hacer una recomendación.',
     bilateralTitle: 'Ambas glándulas suprarrenales parecen estar igualmente involucradas',
-    bilateralText: 'Los resultados sugieren que <strong>ambas glándulas suprarrenales</strong> están contribuyendo igualmente a la sobreproducción de aldosterona. Cuando esto ocurre, se llama <em>hiperplasia bilateral</em>. Generalmente no se recomienda cirugía para este patrón — en cambio, se trata típicamente con medicamentos.',
+    bilateralText: 'Los resultados sugieren que <strong>ambas glándulas suprarrenales</strong> están contribuyendo igualmente a la sobreproducción de aldosterona. Cuando esto ocurre, se llama <em>hiperplasia bilateral</em>. Su médico revisará el panorama completo — incluyendo sus imágenes, análisis de laboratorio y salud general — antes de recomendar los próximos pasos.',
     nextTitle: '¿Qué sucede ahora?',
     nextNoData: 'Por favor, haga seguimiento con su equipo médico para saber cuándo estarán disponibles sus resultados.',
     nextFail: 'Su médico discutirá si se recomienda realizar pruebas adicionales o repetir el procedimiento. En algunos casos, se pueden usar otras imágenes o pruebas para ayudar a guiar las decisiones.',
     nextNoLI: 'Su equipo médico está revisando los resultados y discutirá los próximos pasos con usted, incluyendo las opciones de tratamiento.',
-    nextLateral: (side) => `Su médico puede discutir la posibilidad de una cirugía para extirpar la glándula suprarrenal ${side} hiperactiva. Esto se llama <strong>adrenalectomía unilateral</strong>. Muchos pacientes que se someten a esta cirugía ven una mejora significativa en su presión arterial y pueden reducir o dejar los medicamentos para la presión. Su equipo médico le ayudará a entender todas sus opciones.`,
+    nextLateral: (side) => `Su médico discutirá las opciones de tratamiento. La cirugía para extirpar la glándula suprarrenal ${side} hiperactiva se llama <strong>adrenalectomía unilateral</strong>. Muchos pacientes que se someten a esta cirugía ven una mejora significativa en su presión arterial y pueden reducir o dejar los medicamentos para la presión. Su equipo médico le ayudará a entender todas sus opciones.`,
     nextBorderline: 'Su equipo médico revisará el panorama completo — incluyendo sus imágenes, análisis de laboratorio y salud general — antes de hacer una recomendación. Se puede sugerir seguimiento adicional o pruebas repetidas.',
-    nextBilateral: 'Dado que ambas glándulas parecen estar involucradas, su médico probablemente recomendará <strong>medicamentos</strong> para controlar sus niveles de aldosterona. Los medicamentos comunes para esta condición incluyen espironolactona o eplerenona. Generalmente son muy efectivos y muchos pacientes responden bien a este enfoque.',
+    nextBilateral: 'Su médico revisará sus resultados y hará una recomendación de tratamiento. Dado que ambas glándulas parecen estar involucradas, su médico puede recomendar <strong>medicamentos</strong> para controlar sus niveles de aldosterona. La discusión con su médico para entender sus opciones será el próximo paso.',
     importantTitle: 'Importante:',
     importantText: 'Este resumen está diseñado para ayudarle a comprender sus resultados en términos sencillos. Por favor, no cambie ni suspenda ninguno de sus medicamentos sin antes hablar con su médico o equipo de atención. Su proveedor revisará todos sus resultados con usted y discutirá el mejor plan para su situación individual.',
     footer: 'Calculadora AVS — Resumen para el Paciente',
@@ -2889,19 +3517,19 @@ const patientTranslations = {
     lateralTitle: '한쪽 부신이 원인인 것으로 보입니다',
     lateralText: (side) => `결과에 따르면 <strong>${side} 부신</strong>이 반대쪽보다 훨씬 더 많은 알도스테론을 분비하고 있습니다. 이 패턴을 <em>편측화</em>라고 하며, 문제가 한쪽 샘에서 비롯되고 있음을 시사합니다.`,
     lateralCSIText: (opp) => `또한 <strong>${opp} 부신</strong>의 활성이 감소된 것으로 나타나, 문제가 한쪽에서 비롯된다는 것을 더욱 뒷받침합니다.`,
-    lateralCSIWarnText: '의료진은 양쪽 부신 모두에서 활성 징후가 있는지도 검토하여 전체 권고안에 반영할 것입니다.',
+    lateralCSIWarnText: '',
     rightSide: '우측', leftSide: '좌측',
     borderlineTitle: '결과가 아직 명확하지 않습니다',
     borderlineText: '한쪽 부신이 더 활성화될 <em>가능성</em>이 있지만, 차이가 확실하다고 할 만큼 크지는 않습니다. 담당 의사가 다른 검사 결과, 병력, 영상 검사 등을 종합적으로 검토한 후 권고안을 제시할 것입니다.',
     bilateralTitle: '양쪽 부신이 동등하게 관련된 것으로 보입니다',
-    bilateralText: '결과는 <strong>양쪽 부신</strong>이 동등하게 알도스테론 과다 분비에 기여하고 있음을 시사합니다. 이 경우를 <em>양측성 과증식</em>이라고 합니다. 이 패턴에는 일반적으로 수술이 권장되지 않으며, 보통 약물로 관리합니다.',
+    bilateralText: '결과는 <strong>양쪽 부신</strong>이 동등하게 알도스테론 과다 분비에 기여하고 있음을 시사합니다. 이 경우를 <em>양측성 과증식</em>이라고 합니다. 담당 의사가 영상 검사, 혈액 검사, 전반적인 건강 상태 등을 종합적으로 검토한 후 다음 단계를 권고할 것입니다.',
     nextTitle: '앞으로 어떻게 되나요?',
     nextNoData: '결과가 언제 제공될지 담당 의료진에게 문의하시기 바랍니다.',
     nextFail: '담당 의사가 추가 검사나 시술 반복이 필요한지 상담해 드릴 것입니다. 경우에 따라 결정을 돕기 위해 다른 영상 검사나 테스트가 활용될 수 있습니다.',
     nextNoLI: '의료진이 결과를 검토하고 있으며, 치료 옵션을 포함한 다음 단계에 대해 상담해 드릴 것입니다.',
-    nextLateral: (side) => `담당 의사가 과활성화된 ${side} 부신 제거 수술 가능성에 대해 논의할 수 있습니다. 이를 <strong>일측 부신 절제술</strong>이라고 합니다. 이 수술을 받은 많은 환자들이 혈압이 크게 개선되고 혈압약을 줄이거나 중단할 수 있게 됩니다. 의료진이 모든 옵션을 이해하는 데 도움을 드릴 것입니다.`,
+    nextLateral: (side) => `담당 의사가 치료 옵션에 대해 논의할 것입니다. 과활성화된 ${side} 부신을 제거하는 수술을 <strong>일측 부신 절제술</strong>이라고 합니다. 이 수술을 받은 많은 환자들이 혈압이 크게 개선되고 혈압약을 줄이거나 중단할 수 있게 됩니다. 의료진이 모든 옵션을 이해하는 데 도움을 드릴 것입니다.`,
     nextBorderline: '의료진은 영상 검사, 혈액 검사, 전반적인 건강 상태 등을 종합적으로 검토한 후 권고안을 제시할 것입니다. 추가 추적 관찰이나 재검사가 권장될 수 있습니다.',
-    nextBilateral: '양쪽 부신이 모두 관련된 것으로 보이므로, 담당 의사는 알도스테론 수치를 조절하기 위한 <strong>약물 치료</strong>를 권고할 가능성이 높습니다. 이 질환에 흔히 사용되는 약물로는 스피로노락톤이나 에플레레논이 있습니다. 일반적으로 매우 효과적이며 많은 환자들이 좋은 결과를 보입니다.',
+    nextBilateral: '담당 의사가 결과를 검토하고 치료를 권고할 것입니다. 양쪽 부신이 모두 관련된 것으로 보이므로, 담당 의사는 알도스테론 수치를 조절하기 위한 <strong>약물 치료</strong>를 권고할 수 있습니다. 옵션을 이해하기 위한 의사와의 추가 상담이 다음 단계가 될 것입니다.',
     importantTitle: '중요:',
     importantText: '이 요약은 검사 결과를 쉬운 언어로 이해하는 데 도움을 드리기 위한 것입니다. 의사나 의료진과 먼저 상의하지 않고 어떠한 약도 변경하거나 중단하지 마십시오. 의료진이 모든 결과를 함께 검토하고 개인 상황에 맞는 최적의 계획을 논의해 드릴 것입니다.',
     footer: 'AVS 계산기 — 환자용 요약',
@@ -2925,19 +3553,19 @@ const patientTranslations = {
     lateralTitle: 'به نظر می‌رسد یک غده آدرنال منشأ مشکل است',
     lateralText: (side) => `نتایج نشان می‌دهد که <strong>غده آدرنال ${side}</strong> شما به طور قابل توجهی آلدوسترون بیشتری نسبت به طرف دیگر تولید می‌کند. این الگو <em>جانبی‌سازی</em> نامیده می‌شود و نشان می‌دهد که مشکل از یک غده ناشی می‌شود.`,
     lateralCSIText: (opp) => `علاوه بر این، <strong>غده آدرنال ${opp}</strong> به نظر می‌رسد فعالیت کاهش یافته‌ای داشته باشد که بیشتر تأیید می‌کند مشکل از یک طرف است.`,
-    lateralCSIWarnText: 'تیم درمانی شما همچنین بررسی خواهد کرد که آیا هر دو غده نشانه‌هایی از فعالیت دارند و این را در توصیه کلی در نظر خواهند گرفت.',
+    lateralCSIWarnText: '',
     rightSide: 'راست', leftSide: 'چپ',
     borderlineTitle: 'نتایج هنوز کاملاً روشن نیست',
     borderlineText: 'یک تمایل <em>احتمالی</em> وجود دارد که یک غده آدرنال فعال‌تر از دیگری باشد، اما تفاوت به اندازه کافی برای اطمینان نیست. پزشک شما این نتایج را با دقت همراه با سایر نتایج آزمایش، سابقه سلامتی و هر گونه اسکن تصویربرداری قبل از ارائه توصیه بررسی خواهد کرد.',
     bilateralTitle: 'به نظر می‌رسد هر دو غده آدرنال به طور مساوی درگیر هستند',
-    bilateralText: 'نتایج نشان می‌دهد که <strong>هر دو غده آدرنال</strong> به طور مساوی در تولید بیش از حد آلدوسترون نقش دارند. در این صورت به آن <em>هیپرپلازی دو طرفه</em> می‌گویند. جراحی معمولاً برای این الگو توصیه نمی‌شود — در عوض، معمولاً با دارو کنترل می‌شود.',
+    bilateralText: 'نتایج نشان می‌دهد که <strong>هر دو غده آدرنال</strong> به طور مساوی در تولید بیش از حد آلدوسترون نقش دارند. در این صورت به آن <em>هیپرپلازی دو طرفه</em> می‌گویند. پزشک شما تصویر کامل — از جمله اسکن‌ها، آزمایشات خون و سلامت کلی — را قبل از توصیه مراحل بعدی بررسی خواهد کرد.',
     nextTitle: 'بعد چه اتفاقی می‌افتد؟',
     nextNoData: 'لطفاً با تیم درمانی خود پیگیری کنید تا بدانید نتایج چه زمانی در دسترس خواهند بود.',
     nextFail: 'پزشک شما درباره اینکه آیا آزمایش‌های بیشتر یا تکرار روش توصیه می‌شود صحبت خواهد کرد. در برخی موارد، سایر تصویربرداری‌ها یا آزمایش‌ها ممکن است برای کمک به تصمیم‌گیری استفاده شوند.',
     nextNoLI: 'تیم درمانی شما در حال بررسی نتایج است و درباره مراحل بعدی از جمله گزینه‌های درمانی با شما صحبت خواهد کرد.',
-    nextLateral: (side) => `پزشک شما ممکن است درباره امکان جراحی برای برداشتن غده آدرنال ${side} بیش‌فعال صحبت کند. این <strong>آدرنالکتومی یک‌طرفه</strong> نامیده می‌شود. بسیاری از بیمارانی که این جراحی را انجام می‌دهند بهبود قابل توجهی در فشار خون خود می‌بینند و ممکن است بتوانند داروهای فشار خون را کاهش دهند یا قطع کنند. تیم درمانی شما به شما کمک خواهد کرد تا همه گزینه‌های خود را بفهمید.`,
+    nextLateral: (side) => `پزشک شما گزینه‌های درمانی را با شما مطرح خواهد کرد. جراحی برای برداشتن غده آدرنال ${side} بیش‌فعال <strong>آدرنالکتومی یک‌طرفه</strong> نامیده می‌شود. بسیاری از بیمارانی که این جراحی را انجام می‌دهند بهبود قابل توجهی در فشار خون خود می‌بینند و ممکن است بتوانند داروهای فشار خون را کاهش دهند یا قطع کنند. تیم درمانی شما به شما کمک خواهد کرد تا همه گزینه‌های خود را بفهمید.`,
     nextBorderline: 'تیم درمانی شما تصویر کامل — از جمله اسکن‌ها، آزمایشات خون و سلامت کلی — را قبل از ارائه توصیه بررسی خواهد کرد. پیگیری بیشتر یا آزمایش مجدد ممکن است پیشنهاد شود.',
-    nextBilateral: 'از آنجایی که هر دو غده به نظر می‌رسد درگیر هستند، پزشک شما احتمالاً <strong>دارو</strong> را برای کنترل سطح آلدوسترون توصیه خواهد کرد. داروهای رایج مورد استفاده برای این وضعیت شامل اسپیرونولاکتون یا اپلرنون است. این داروها معمولاً بسیار مؤثر هستند و بسیاری از بیماران با این رویکرد نتایج خوبی کسب می‌کنند.',
+    nextBilateral: 'پزشک شما نتایج را بررسی کرده و توصیه درمانی ارائه خواهد کرد. از آنجایی که هر دو غده به نظر می‌رسد درگیر هستند، پزشک شما ممکن است <strong>دارو</strong> را برای کنترل سطح آلدوسترون توصیه کند. گفتگوی بیشتر با پزشک برای درک گزینه‌های شما مرحله بعدی خواهد بود.',
     importantTitle: 'مهم:',
     importantText: 'این خلاصه برای کمک به شما در درک نتایج آزمایشتان به زبان ساده است. لطفاً بدون اینکه ابتدا با پزشک یا تیم درمانی خود صحبت کنید، هیچ دارویی را تغییر ندهید یا قطع نکنید. پزشک شما تمام نتایج را با شما بررسی کرده و بهترین برنامه را برای وضعیت فردی شما مورد بحث قرار خواهد داد.',
     footer: 'ماشین حساب AVS — خلاصه برای بیمار',
@@ -2961,19 +3589,19 @@ const patientTranslations = {
     lateralTitle: 'Источником проблемы, по всей видимости, является один надпочечник',
     lateralText: (side) => `Результаты показывают, что ваш <strong>${side} надпочечник</strong> вырабатывает значительно больше альдостерона, чем другой. Этот паттерн называется <em>латерализацией</em> и свидетельствует о том, что проблема исходит из одной железы.`,
     lateralCSIText: (opp) => `Кроме того, <strong>${opp} надпочечник</strong>, по всей видимости, имеет сниженную активность, что дополнительно подтверждает, что проблема исходит с одной стороны.`,
-    lateralCSIWarnText: 'Ваша медицинская команда также проверит, проявляют ли обе железы признаки активности, и учтёт это в общей рекомендации.',
+    lateralCSIWarnText: '',
     rightSide: 'правый', leftSide: 'левый',
     borderlineTitle: 'Результаты пока не полностью ясны',
     borderlineText: 'Существует <em>возможная</em> тенденция к тому, что один надпочечник более активен, чем другой, однако разница недостаточно велика для уверенного заключения. Ваш врач тщательно изучит эти результаты вместе с другими анализами, историей болезни и результатами визуализации, прежде чем давать рекомендации.',
     bilateralTitle: 'По всей видимости, оба надпочечника задействованы в равной мере',
-    bilateralText: 'Результаты свидетельствуют о том, что <strong>оба надпочечника</strong> в равной мере участвуют в избыточной выработке альдостерона. В таком случае это называется <em>двусторонней гиперплазией</em>. Хирургическое вмешательство при этом паттерне, как правило, не рекомендуется — вместо этого состояние обычно контролируется с помощью медикаментов.',
+    bilateralText: 'Результаты свидетельствуют о том, что <strong>оба надпочечника</strong> в равной мере участвуют в избыточной выработке альдостерона. В таком случае это называется <em>двусторонней гиперплазией</em>. Ваш врач изучит полную картину — включая результаты визуализации, лабораторные данные и общее состояние здоровья — прежде чем рекомендовать дальнейшие шаги.',
     nextTitle: 'Что будет дальше?',
     nextNoData: 'Пожалуйста, свяжитесь со своей медицинской командой, чтобы уточнить, когда будут готовы результаты.',
     nextFail: 'Ваш врач обсудит, рекомендуется ли дополнительное обследование или повторная процедура. В ряде случаев для помощи в принятии решений могут использоваться другие методы визуализации или анализы.',
     nextNoLI: 'Ваша медицинская команда изучает результаты и обсудит с вами дальнейшие шаги, включая варианты лечения.',
-    nextLateral: (side) => `Ваш врач может обсудить возможность операции по удалению гиперактивного ${side} надпочечника. Это называется <strong>односторонней адреналэктомией</strong>. Многие пациенты после этой операции отмечают значительное улучшение артериального давления и могут снизить дозу или полностью отменить препараты от давления. Ваша медицинская команда поможет вам разобраться во всех доступных вариантах.`,
+    nextLateral: (side) => `Ваш врач обсудит варианты лечения. Операция по удалению гиперактивного ${side} надпочечника называется <strong>односторонней адреналэктомией</strong>. Многие пациенты после этой операции отмечают значительное улучшение артериального давления и могут снизить дозу или полностью отменить препараты от давления. Ваша медицинская команда поможет вам разобраться во всех доступных вариантах.`,
     nextBorderline: 'Ваша медицинская команда изучит полную картину — включая результаты визуализации, лабораторные данные и общее состояние здоровья — прежде чем давать рекомендации. Возможно, будет предложено дополнительное наблюдение или повторное обследование.',
-    nextBilateral: 'Поскольку, по всей видимости, задействованы обе железы, ваш врач, скорее всего, порекомендует <strong>медикаментозное лечение</strong> для контроля уровня альдостерона. Распространённые препараты для этого состояния включают спиронолактон или эплеренон. Как правило, они весьма эффективны, и многие пациенты хорошо реагируют на такой подход.',
+    nextBilateral: 'Ваш врач изучит результаты и даст рекомендации по лечению. Поскольку, по всей видимости, задействованы обе железы, ваш врач может порекомендовать <strong>медикаментозное лечение</strong> для контроля уровня альдостерона. Дальнейшее обсуждение с врачом для понимания ваших вариантов будет следующим шагом.',
     importantTitle: 'Важно:',
     importantText: 'Это резюме предназначено для того, чтобы помочь вам понять результаты анализов простым языком. Пожалуйста, не изменяйте и не прекращайте приём каких-либо лекарств, не проконсультировавшись предварительно с врачом или медицинской командой. Ваш врач обсудит с вами все результаты и предложит оптимальный план лечения для вашей конкретной ситуации.',
     footer: 'Калькулятор AVS — Резюме для пациента',
@@ -2997,19 +3625,19 @@ const patientTranslations = {
     lateralTitle: '一侧肾上腺似乎是病变来源',
     lateralText: (side) => `结果显示，您的<strong>${side}肾上腺</strong>产生的醛固酮明显多于另一侧。这种模式称为<em>侧位化</em>，提示问题来源于单侧腺体。`,
     lateralCSIText: (opp) => `此外，<strong>${opp}肾上腺</strong>的活性似乎有所降低，进一步支持问题来源于单侧的判断。`,
-    lateralCSIWarnText: '您的医疗团队还将评估两侧腺体是否均有活动迹象，并将其纳入整体建议中。',
+    lateralCSIWarnText: '',
     rightSide: '右侧', leftSide: '左侧',
     borderlineTitle: '结果尚不完全明确',
     borderlineText: '一侧肾上腺<em>可能</em>比另一侧更活跃，但差异尚不足以作出确定性判断。您的医生将结合其他检查结果、病史及影像学检查，仔细审阅这些结果后再给出建议。',
     bilateralTitle: '两侧肾上腺似乎同等受累',
-    bilateralText: '结果提示<strong>两侧肾上腺</strong>对醛固酮过度分泌的贡献程度相当。这种情况称为<em>双侧增生</em>。通常不建议对此类情况进行手术治疗，而是采用药物管理。',
+    bilateralText: '结果提示<strong>两侧肾上腺</strong>对醛固酮过度分泌的贡献程度相当。这种情况称为<em>双侧增生</em>。您的医生将综合评估全面情况——包括影像学检查、实验室结果及整体健康状况——再建议下一步方案。',
     nextTitle: '接下来会发生什么？',
     nextNoData: '请与您的医疗团队保持联系，了解结果何时可以获得。',
     nextFail: '您的医生将讨论是否建议进行进一步检查或重复检查。在某些情况下，可能会使用其他影像学检查或化验来辅助决策。',
     nextNoLI: '您的医疗团队正在审阅结果，并将与您讨论下一步计划，包括治疗方案。',
-    nextLateral: (side) => `您的医生可能会与您讨论通过手术切除${side}过度活跃肾上腺的可能性。这种手术称为<strong>单侧肾上腺切除术</strong>。许多接受此手术的患者血压得到显著改善，并可能减少或停用降压药物。您的医疗团队将帮助您了解所有可用选项。`,
+    nextLateral: (side) => `您的医生将与您讨论治疗方案。切除${side}过度活跃肾上腺的手术称为<strong>单侧肾上腺切除术</strong>。许多接受此手术的患者血压得到显著改善，并可能减少或停用降压药物。您的医疗团队将帮助您了解所有可用选项。`,
     nextBorderline: '您的医疗团队将综合评估全面情况——包括影像学检查、实验室结果及整体健康状况——再给出建议。可能会建议进一步随访或复查。',
-    nextBilateral: '由于两侧腺体似乎均受累，您的医生很可能会建议使用<strong>药物</strong>控制醛固酮水平。常用药物包括螺内酯或依普利酮。这些药物通常非常有效，许多患者对此方案反应良好。',
+    nextBilateral: '您的医生将审阅结果并提出治疗建议。由于两侧腺体似乎均受累，您的医生可能会建议使用<strong>药物</strong>控制醛固酮水平。与医生进一步讨论以了解您的选项将是下一步。',
     importantTitle: '重要提示：',
     importantText: '本摘要旨在帮助您以通俗语言理解检查结果。在未与医生或医疗团队沟通之前，请勿自行更改或停用任何药物。您的医生将与您一起审阅所有结果，并针对您的具体情况讨论最佳治疗方案。',
     footer: 'AVS 计算器 — 患者友好摘要',
@@ -3043,28 +3671,50 @@ function buildPatientSectionHTML(dateStr, lang='en', timeStr='') {
     <p style="font-size:11pt;color:#3a3530;line-height:1.8;margin-top:10px">${t.whatIsP2}</p>
   </div>`;
 
+  // Use classification for patient copy
+  const cls = classify(siR, siL, siThresh, li, csi, R, L);
+  const c = cls ? cls.classification : null;
+
   let cannulationCard = '';
   if (siR === null && siL === null) {
     cannulationCard = `<div class="patient-card" style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.noDataTitle}</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">${t.noDataText}</p></div>`;
-  } else if (rightOK && leftOK) {
-    cannulationCard = `<div class="patient-card" style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">✅</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.successTitle}</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">${t.successText}</p></div>`;
+  } else if (c === 'non_selective') {
+    cannulationCard = `<div class="patient-card" style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">📋</div><h3 style="font-size:13pt;color:#5C564E;margin-bottom:10px;font-family:'Libre Baskerville',serif">THE PROCEDURE WAS PERFORMED</h3><p style="font-size:11pt;color:#3a3530;line-height:1.8">Blood samples were collected from your adrenal veins, but the samples from one or both sides may not have captured enough hormone for a reliable comparison. This is sometimes due to the small size and position of the adrenal veins. Your care team will review the results and decide on next steps.</p></div>`;
   } else {
-    const which = !rightOK && !leftOK ? t.eitherVein : (!rightOK ? t.rightVein : t.leftVein);
-    cannulationCard = `<div class="patient-card" style="background:#FDEAEA;border:1px solid #e8b4b4;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#8B1A1A;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.failTitle}</h3><p style="font-size:11pt;color:#5a1010;line-height:1.8">${t.failText(which)}</p></div>`;
+    cannulationCard = `<div class="patient-card" style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">✅</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.successTitle}</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">${t.successText}</p></div>`;
   }
   cards += cannulationCard;
 
-  if (rightOK && leftOK && li !== null) {
+  // Use customized patient preview text if available, otherwise fall back to defaults
+  const customText = getCustomPatientText();
+
+  if (c && c !== 'non_selective' && li !== null) {
     let findingCard = '';
-    if (li >= 4) {
-      const csiText = csi !== null ? (csi < 1 ? `<p style="font-size:11pt;color:#1a3d28;line-height:1.8;margin-top:10px">${t.lateralCSIText(contraSideLabel)}</p>` : `<p style="font-size:11pt;color:#5a3e00;line-height:1.8;margin-top:10px">${t.lateralCSIWarnText}</p>`) : '';
-      findingCard = `<div class="patient-card" style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🎯</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.lateralTitle}</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">${t.lateralText(domSideLabel)}</p>${csiText}</div>`;
-    } else if (li >= 2) {
-      findingCard = `<div class="patient-card" style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🔍</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.borderlineTitle}</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">${t.borderlineText}</p></div>`;
-    } else {
-      findingCard = `<div class="patient-card" style="background:#EBF0FA;border:1px solid #b0c0e8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚖️</div><h3 style="font-size:13pt;color:#2B3A8C;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.bilateralTitle}</h3><p style="font-size:11pt;color:#1a2560;line-height:1.8">${t.bilateralText}</p></div>`;
+    const styles = { lateralized: { bg: '#E8F5EE', border: '#a8d4b8', icon: '✅', hColor: '#1B5E35', pColor: '#1a3d28' }, borderline: { bg: '#FFF8E6', border: '#e8d5a0', icon: '🔍', hColor: '#7A4F00', pColor: '#5a3e00' }, bilateral: { bg: '#F7F5F0', border: '#D8D3C8', icon: 'ℹ️', hColor: '#5C564E', pColor: '#3a3530' } };
+    const s = styles[c];
+    if (customText) {
+      const lines = customText.split('\n').filter(l => l.trim());
+      const heading = lines[0] || '';
+      const body = lines.slice(1).join(' ').trim();
+      findingCard = `<div class="patient-card" style="background:${s.bg};border:1px solid ${s.border};border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">${s.icon}</div><h3 style="font-size:13pt;color:${s.hColor};margin-bottom:10px;font-family:'Libre Baskerville',serif">${heading}</h3><p style="font-size:11pt;color:${s.pColor};line-height:1.8">${body}</p></div>`;
+    } else if (c === 'lateralized') {
+      findingCard = `<div class="patient-card" style="background:${s.bg};border:1px solid ${s.border};border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">${s.icon}</div><h3 style="font-size:13pt;color:${s.hColor};margin-bottom:10px;font-family:'Libre Baskerville',serif">YOUR RESULTS POINT TO ONE GLAND</h3><p style="font-size:11pt;color:${s.pColor};line-height:1.8">Your results show that one of your adrenal glands — the ${domSideLabel} — is producing significantly more aldosterone than the other. This pattern often points to a single gland as the source of the problem. Your doctor will review the full picture — including your scans, lab work, and overall health — before recommending next steps.</p></div>`;
+    } else if (c === 'borderline') {
+      findingCard = `<div class="patient-card" style="background:${s.bg};border:1px solid ${s.border};border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">${s.icon}</div><h3 style="font-size:13pt;color:${s.hColor};margin-bottom:10px;font-family:'Libre Baskerville',serif">THE RESULTS ARE NOT FULLY CLEAR YET</h3><p style="font-size:11pt;color:${s.pColor};line-height:1.8">${t.borderlineText}</p></div>`;
+    } else if (c === 'bilateral') {
+      findingCard = `<div class="patient-card" style="background:${s.bg};border:1px solid ${s.border};border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">${s.icon}</div><h3 style="font-size:13pt;color:${s.hColor};margin-bottom:10px;font-family:'Libre Baskerville',serif">YOUR RESULTS SUGGEST BOTH GLANDS ARE INVOLVED</h3><p style="font-size:11pt;color:${s.pColor};line-height:1.8">Your results show that both adrenal glands are producing aldosterone at similar levels. This pattern is most consistent with both glands being involved rather than just one. Your doctor will review the full picture — including your scans, lab work, and overall health — before recommending next steps.</p></div>`;
     }
     cards += findingCard;
+  } else if (c === 'non_selective') {
+    const nsStyles = { bg: '#FDEAEA', border: '#e8b4b4', icon: '⚠️', hColor: '#8B1A1A', pColor: '#5a1010' };
+    if (customText) {
+      const lines = customText.split('\n').filter(l => l.trim());
+      const heading = lines[0] || '';
+      const body = lines.slice(1).join(' ').trim();
+      cards += `<div class="patient-card" style="background:${nsStyles.bg};border:1px solid ${nsStyles.border};border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">${nsStyles.icon}</div><h3 style="font-size:13pt;color:${nsStyles.hColor};margin-bottom:10px;font-family:'Libre Baskerville',serif">${heading}</h3><p style="font-size:11pt;color:${nsStyles.pColor};line-height:1.8">${body}</p></div>`;
+    } else {
+      cards += `<div class="patient-card" style="background:${nsStyles.bg};border:1px solid ${nsStyles.border};border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">${nsStyles.icon}</div><h3 style="font-size:13pt;color:${nsStyles.hColor};margin-bottom:10px;font-family:'Libre Baskerville',serif">THE SAMPLES NEED TO BE RECHECKED</h3><p style="font-size:11pt;color:${nsStyles.pColor};line-height:1.8">The blood samples did not capture enough hormone from one or both adrenal glands for a reliable comparison. This sometimes happens because the small adrenal veins can be difficult to access. Your doctor will decide on the next steps.</p></div>`;
+    }
   }
 
   let nextSteps = '';
@@ -3198,6 +3848,70 @@ function resetTimer() {
   document.addEventListener(evt, resetTimer, { passive: true });
 });
 resetTimer();
+
+// ── Test data loader (call loadTestData(1) through loadTestData(7) from browser console) ──
+function loadTestData(num) {
+  const scenarios = {
+    1: {
+      label: 'Test 1 — Lateralized left, concordant CSI',
+      protocol: 'stimulated',
+      ivc:   [{aldo:60, cort:20}, {aldo:60, cort:22}],
+      right: [{aldo:250, cort:250}, {aldo:280, cort:270}, {aldo:230, cort:230}],
+      left:  [{aldo:9000, cort:400}, {aldo:8500, cort:380}, {aldo:9500, cort:420}],
+    },
+    2: {
+      label: 'Test 2 — Lateralized right, discordant CSI',
+      protocol: 'stimulated',
+      ivc:   [{aldo:100, cort:25}, {aldo:95, cort:25}],
+      right: [{aldo:8000, cort:300}, {aldo:8500, cort:325}, {aldo:7800, cort:290}],
+      left:  [{aldo:1200, cort:250}, {aldo:1100, cort:230}, {aldo:1300, cort:270}],
+    },
+    3: {
+      label: 'Test 3 — Borderline, rescue note triggers',
+      protocol: 'stimulated',
+      ivc:   [{aldo:100, cort:20}, {aldo:100, cort:20}],
+      right: [{aldo:750, cort:250}, {aldo:780, cort:260}, {aldo:720, cort:240}],
+      left:  [{aldo:3600, cort:400}, {aldo:3700, cort:410}, {aldo:3500, cort:390}],
+    },
+    4: {
+      label: 'Test 4 — Borderline, no rescue note',
+      protocol: 'stimulated',
+      ivc:   [{aldo:50, cort:20}, {aldo:55, cort:22}],
+      right: [{aldo:1500, cort:400}, {aldo:1600, cort:450}, {aldo:1400, cort:380}],
+      left:  [{aldo:4000, cort:400}, {aldo:3800, cort:380}, {aldo:4200, cort:420}],
+    },
+    5: {
+      label: 'Test 5 — Bilateral',
+      protocol: 'stimulated',
+      ivc:   [{aldo:80, cort:18}, {aldo:75, cort:20}],
+      right: [{aldo:5000, cort:350}, {aldo:5200, cort:380}, {aldo:4800, cort:320}],
+      left:  [{aldo:5500, cort:360}, {aldo:6000, cort:400}, {aldo:5800, cort:380}],
+    },
+    6: {
+      label: 'Test 6 — Non-selective, one side fails',
+      protocol: 'stimulated',
+      ivc:   [{aldo:100, cort:25}, {aldo:90, cort:25}],
+      right: [{aldo:110, cort:30}, {aldo:105, cort:28}, {aldo:95, cort:32}],
+      left:  [{aldo:4000, cort:300}, {aldo:4200, cort:320}, {aldo:3800, cort:280}],
+    },
+    7: {
+      label: 'Test 7 — Non-selective, both sides fail',
+      protocol: 'stimulated',
+      ivc:   [{aldo:80, cort:30}, {aldo:85, cort:28}],
+      right: [{aldo:95, cort:40}, {aldo:100, cort:38}, {aldo:90, cort:42}],
+      left:  [{aldo:110, cort:50}, {aldo:115, cort:48}, {aldo:105, cort:52}],
+    },
+  };
+  const s = scenarios[num || 1];
+  if (!s) { console.log('Available: loadTestData(1) through loadTestData(7)'); return; }
+  setProtocol(s.protocol);
+  ['ivc','right','left'].forEach(side => {
+    state[side] = s[side].map((d, i) => ({ id: i, aldo: d.aldo, cort: d.cort, included: true, note: '' }));
+    buildAllRows(side);
+  });
+  calculate();
+  console.log(s.label);
+}
 </script>
 
 <!-- Session timeout warning banner -->
