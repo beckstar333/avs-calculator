@@ -744,7 +744,7 @@
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Lateralization Index (LI)</span>
-        <span class="index-thresh" id="li-thresh-label"><span id="li-thresh-text">≥ 4.0 lateralized | 2.0–3.9 borderline | < 2.0 bilateral</span></span>
+        <span class="index-thresh" id="li-thresh-label"><span id="li-thresh-text">> 4.0 lateralized | 3.0–4.0 borderline | < 3.0 bilateral</span></span>
       </div>
       <div class="index-body">
         <div class="index-row">
@@ -842,25 +842,25 @@
       </div>
       <div class="ref-item">
         <span class="ref-key">SI (cosyntropin-stimulated)</span>
-        <span class="ref-val" id="ref-si-stim" style="display:flex;align-items:center;gap:6px">≥ 3.0
+        <span class="ref-val" id="ref-si-stim" style="display:flex;align-items:center;gap:6px">≥ 5.0
           <input type="number" id="thresh-si-stim" class="thresh-custom-input" min="1" max="10" step="0.1" value="5.0" oninput="onCustomThreshold()" style="display:none">
         </span>
       </div>
       <div class="ref-item">
         <span class="ref-key">LI lateralized</span>
-        <span class="ref-val" id="ref-li-lat" style="display:flex;align-items:center;gap:6px">≥ 4.0
+        <span class="ref-val" id="ref-li-lat" style="display:flex;align-items:center;gap:6px">> 4.0
           <input type="number" id="thresh-li-lat" class="thresh-custom-input" min="1" max="20" step="0.1" value="4.0" oninput="onCustomThreshold()" style="display:none">
         </span>
       </div>
       <div class="ref-item">
         <span class="ref-key">LI borderline</span>
-        <span class="ref-val" id="ref-li-border" style="display:flex;align-items:center;gap:6px">≥ 2.0
+        <span class="ref-val" id="ref-li-border" style="display:flex;align-items:center;gap:6px">≥ 3.0
           <input type="number" id="thresh-li-border" class="thresh-custom-input" min="1" max="20" step="0.1" value="3.0" oninput="onCustomThreshold()" style="display:none">
         </span>
       </div>
       <div class="ref-item">
         <span class="ref-key">LI bilateral <span style="font-size:8px;color:var(--text-3);font-weight:400;font-style:italic">(derived from borderline)</span></span>
-        <span class="ref-val" id="ref-li-bilat">&lt; 2.0</span>
+        <span class="ref-val" id="ref-li-bilat">&lt; 3.0</span>
       </div>
       <div class="ref-item">
         <span class="ref-key">CSI suppression</span>
@@ -876,7 +876,7 @@
       <ol style="padding-left:16px;margin:0;list-style-position:outside">
         <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
           <strong>Adler GK, Stowasser M, Correa RR, et al.</strong> Primary Aldosteronism: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab.</em> 2025;110(9):2453–2495. <a href="https://doi.org/10.1210/clinem/dgaf284" target="_blank" style="color:#2B3A8C">doi:10.1210/clinem/dgaf284</a>
-          <div style="font-size:10px;color:#8C867E;margin-top:2px">Most recent Endocrine Society clinical practice guideline. Primary source for SI, LI, and CSI thresholds used in this calculator (SI ≥2.0/5.0, LI ≥4.0, borderline 3.0–4.0, CSI &lt;1.0).</div>
+          <div style="font-size:10px;color:#8C867E;margin-top:2px">Most recent Endocrine Society clinical practice guideline. Primary source for SI, LI, and CSI thresholds used in this calculator (SI ≥2.0/5.0, LI >4.0, borderline 3.0–4.0, CSI &lt;1.0).</div>
         </li>
         <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
           <strong>Funder JW, Carey RM, Mantero F, et al.</strong> The Management of Primary Aldosteronism: Case Detection, Diagnosis, and Treatment: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab.</em> 2016;101(5):1889–1916.
@@ -1274,7 +1274,7 @@
       <div style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Thresholds Used</div>
       <div style="background:#F7F5F0;border:1px solid #E8E3D8;border-radius:4px;padding:10px 14px;margin-bottom:20px;font-size:11px;color:#3a3530;line-height:1.8">
         SI cutoff: ≥ 5.0 (stimulated) / ≥ 2.0 (unstimulated)<br>
-        LI: ≥ 4.0 lateralized / 3.0-3.9 borderline / < 3.0 bilateral<br>
+        LI: > 4.0 lateralized / 3.0–4.0 borderline / < 3.0 bilateral<br>
         CSI: < 1.0 = contralateral suppression present
       </div>
 
@@ -1588,7 +1588,7 @@ function classify(siR, siL, siThresh, li, csi, R, L) {
   if (li === null) return null;
 
   // Lateralization
-  if (li >= thresholds.liLat) {
+  if (li > thresholds.liLat) {
     return { classification: 'lateralized', domSide, siR, siL, siThresh, li, csi };
   }
   if (li >= thresholds.liBorder) {
@@ -1658,7 +1658,7 @@ function updateRefPanel() {
   }
   setRefText('ref-si-unstim',  `≥ ${thresholds.siUnstim.toFixed(1)} `);
   setRefText('ref-si-stim',    `≥ ${thresholds.siStim.toFixed(1)} `);
-  setRefText('ref-li-lat',     `≥ ${thresholds.liLat.toFixed(1)} `);
+  setRefText('ref-li-lat',     `> ${thresholds.liLat.toFixed(1)} `);
   setRefText('ref-li-border',  `≥ ${thresholds.liBorder.toFixed(1)} `);
   document.getElementById('ref-li-bilat').textContent  = `< ${thresholds.liBorder.toFixed(1)}`;
   setRefText('ref-csi',        `< ${thresholds.csi.toFixed(1)} `);
@@ -1831,7 +1831,7 @@ function updateBanner() {
     bg.style.color = isCustom ? '#7A4F00' : '';
   }
   if (bs) bs.textContent = 'SI ≥ ' + siThresh.toFixed(1);
-  if (bl) bl.textContent = 'LI ≥ ' + thresholds.liLat.toFixed(1);
+  if (bl) bl.textContent = 'LI > ' + thresholds.liLat.toFixed(1);
   if (bc) bc.textContent = 'CSI < ' + thresholds.csi.toFixed(1);
 }
 
@@ -1902,11 +1902,11 @@ function calculate() {
   }
 
   // Update LI card threshold label dynamically
-  document.getElementById('li-thresh-text').textContent = `≥ ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${(thresholds.liLat - 0.1).toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`;
+  document.getElementById('li-thresh-text').textContent = `> ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${thresholds.liLat.toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`;
 
   let liStatus = null, liLabel = 'No data';
   if (li !== null) {
-    if (li >= thresholds.liLat) { liStatus = 'pass'; liLabel = 'Lateralized'; }
+    if (li > thresholds.liLat) { liStatus = 'pass'; liLabel = 'Lateralized'; }
     else if (li >= thresholds.liBorder) { liStatus = 'warn'; liLabel = 'Borderline'; }
     else { liStatus = 'fail'; liLabel = 'Bilateral'; }
   }
@@ -1971,7 +1971,7 @@ function renderSummary(siR, siL, siThresh, li, csi, R, L, cls) {
     return;
   }
   const domSide = R > L ? 'Right' : 'Left';
-  if (li >= thresholds.liLat) {
+  if (li > thresholds.liLat) {
     const csiText = csi !== null ? (csi < thresholds.csi ? ' Contralateral suppression is present.' : ' No contralateral suppression detected.') : '';
     box.className = 'summary-box success';
     box.innerHTML = `<div class="summary-icon">✔</div><div class="summary-text"><strong>Bilateral cannulation successful.</strong> Lateralization confirmed to the <strong>${domSide}</strong> side (LI = ${fmt(li)}).${csiText}</div>`;
@@ -2000,7 +2000,7 @@ function copyResults() {
   lines.push('');
   lines.push(`SI Right:  ${siR !== null ? fmt(siR) : '—'}  (threshold ≥ ${siThresh.toFixed(1)}) — ${siR !== null ? (siR >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}`);
   lines.push(`SI Left:   ${siL !== null ? fmt(siL) : '—'}  (threshold ≥ ${siThresh.toFixed(1)}) — ${siL !== null ? (siL >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}`);
-  lines.push(`LI:        ${li  !== null ? fmt(li)  : '—'}  — ${li !== null ? (li >= thresholds.liLat ? 'Lateralized' : li >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}`);
+  lines.push(`LI:        ${li  !== null ? fmt(li)  : '—'}  — ${li !== null ? (li > thresholds.liLat ? 'Lateralized' : li >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}`);
   lines.push(`CSI:       ${csi !== null ? fmt(csi) : '—'}  — ${csi !== null ? (csi < thresholds.csi ? 'Suppressed' : 'Not suppressed') : 'No data'}`);
   lines.push('');
   lines.push(`Generated by AVS Calculator ${APP_VERSION} — avsresults.com`);
@@ -2140,7 +2140,7 @@ function updateCalcIndicesTable(siR, siL, siThresh, li, csi, R, L, cls) {
     verdictHTML = `
       <div style="margin-top:14px;padding:14px 18px;border-radius:var(--radius);border-left:4px solid var(--success);background:var(--success-bg)">
         <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--success);margin-bottom:6px">&#10003; LATERALIZED TO ${domLabel}</div>
-        <div style="font-size:11px;color:var(--text);line-height:1.7">LI of ${fmt(li)} meets the lateralization threshold (≥ ${thresholds.liLat.toFixed(1)}). Selectivity confirmed bilaterally (SI right ${fmt(siR)}, left ${fmt(siL)}). ${csiText}</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.7">LI of ${fmt(li)} meets the lateralization threshold (> ${thresholds.liLat.toFixed(1)}). Selectivity confirmed bilaterally (SI right ${fmt(siR)}, left ${fmt(siL)}). ${csiText}</div>
       </div>`;
   } else if (c === 'borderline') {
     const csiNote = cls.csiSupports
@@ -2148,7 +2148,7 @@ function updateCalcIndicesTable(siR, siL, siThresh, li, csi, R, L, cls) {
     verdictHTML = `
       <div style="margin-top:14px;padding:14px 18px;border-radius:var(--radius);border-left:4px solid var(--accent);background:var(--warn-bg)">
         <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--warn);margin-bottom:6px">&#128269; BORDERLINE</div>
-        <div style="font-size:11px;color:var(--text);line-height:1.7">LI of ${fmt(li)} falls in the borderline range (${thresholds.liBorder.toFixed(1)} to < ${thresholds.liLat.toFixed(1)}). Selectivity confirmed bilaterally (SI right ${fmt(siR)}, left ${fmt(siL)}).</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.7">LI of ${fmt(li)} falls in the borderline range (${thresholds.liBorder.toFixed(1)} to ${thresholds.liLat.toFixed(1)}). Selectivity confirmed bilaterally (SI right ${fmt(siR)}, left ${fmt(siL)}).</div>
         ${csiNote}
       </div>`;
   } else if (c === 'bilateral') {
@@ -2527,8 +2527,8 @@ function getInterpretationText(siR, siL, siThresh, li, csi, R, L) {
     return lines;
   }
 
-  if (li >= thresholds.liLat) {
-    lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Aldosterone hypersecretion is lateralized to the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). A value ≥ ${thresholds.liLat.toFixed(1)} is the threshold for confirmed lateralization per the selected guideline.` });
+  if (li > thresholds.liLat) {
+    lines.push({ icon: '✔', color: '#1B5E35', bg: '#E8F5EE', text: `Aldosterone hypersecretion is lateralized to the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). A value > ${thresholds.liLat.toFixed(1)} is the threshold for confirmed lateralization per the selected guideline.` });
   } else if (li >= thresholds.liBorder) {
     lines.push({ icon: '⚠', color: '#7A4F00', bg: '#FFF8E6', text: `Borderline lateralization was identified, with a trend toward the <strong>${domSide} adrenal gland</strong> (Lateralization Index = ${fmt(li)}). Values between ${thresholds.liBorder.toFixed(1)} and ${(thresholds.liLat - 0.1).toFixed(1)} are indeterminate per the selected guideline.` });
   } else {
@@ -2558,7 +2558,7 @@ function buildCustomThresholdsHTML() {
     <div style="font-size:9.5pt;color:#5a3e00;line-height:1.8">
       SI (unstimulated) ≥ ${thresholds.siUnstim.toFixed(1)} ·
       SI (stimulated) ≥ ${thresholds.siStim.toFixed(1)} ·
-      LI lateralized ≥ ${thresholds.liLat.toFixed(1)} ·
+      LI lateralized > ${thresholds.liLat.toFixed(1)} ·
       LI borderline ≥ ${thresholds.liBorder.toFixed(1)} ·
       CSI < ${thresholds.csi.toFixed(1)}
     </div>
@@ -2610,13 +2610,13 @@ function copyAdvancedResults() {
 AVERAGE METHOD (all included samples averaged):
   SI Right: ${v(siR_avg)} (threshold ≥${siThresh.toFixed(1)}) — ${siR_avg !== null ? (siR_avg >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}
   SI Left:  ${v(siL_avg)} (threshold ≥${siThresh.toFixed(1)}) — ${siL_avg !== null ? (siL_avg >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}
-  LI:       ${v(liAvg)} — ${liAvg !== null ? (liAvg >= thresholds.liLat ? 'Lateralized' : liAvg >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}
+  LI:       ${v(liAvg)} — ${liAvg !== null ? (liAvg > thresholds.liLat ? 'Lateralized' : liAvg >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}
   Dominant: ${domAvg}
 
 HIGHEST VALUE METHOD (single highest A/C ratio per side):
   SI Right: ${v(siR_high)} (threshold ≥${siThresh.toFixed(1)}) — ${siR_high !== null ? (siR_high >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}
   SI Left:  ${v(siL_high)} (threshold ≥${siThresh.toFixed(1)}) — ${siL_high !== null ? (siL_high >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}
-  LI:       ${v(liHigh)} — ${liHigh !== null ? (liHigh >= thresholds.liLat ? 'Lateralized' : liHigh >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}
+  LI:       ${v(liHigh)} — ${liHigh !== null ? (liHigh > thresholds.liLat ? 'Lateralized' : liHigh >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}
   Dominant: ${domHigh}
 
 Methods ${domAvg === domHigh ? 'agree' : 'disagree'} on dominant side.`;
@@ -2692,7 +2692,7 @@ function updateAdvancedCalc() {
       pass = val >= thresh;
       label = pass ? 'Cannulated' : 'Not cannulated';
     } else {
-      if (val >= thresholds.liLat) { pass = true; label = 'Lateralized'; }
+      if (val > thresholds.liLat) { pass = true; label = 'Lateralized'; }
       else if (val >= thresholds.liBorder) { pass = null; label = 'Borderline'; }
       else { pass = false; label = 'Bilateral'; }
     }
@@ -2920,7 +2920,7 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
       pass = val >= thresh;
       label = pass ? 'Successful' : 'Unsuccessful';
     } else if (type === 'li') {
-      if (val >= thresholds.liLat) { pass = true; label = 'Lateralized'; }
+      if (val > thresholds.liLat) { pass = true; label = 'Lateralized'; }
       else if (val >= thresholds.liBorder) { pass = null; label = 'Borderline'; }
       else { pass = false; label = 'Bilateral'; }
     }
@@ -3032,7 +3032,7 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
         const rows = [
           { label: 'Selectivity Index — Right (SI)', val: siR_avg, thresh: '≥ ' + siThresh.toFixed(1) + ' (' + (protocol === 'stimulated' ? 'stimulated' : 'unstimulated') + ')', interp: siR_avg === null ? '—' : siR_avg >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
           { label: 'Selectivity Index — Left (SI)', val: siL_avg, thresh: '≥ ' + siThresh.toFixed(1) + ' (' + (protocol === 'stimulated' ? 'stimulated' : 'unstimulated') + ')', interp: siL_avg === null ? '—' : siL_avg >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
-          { label: 'Lateralization Index (LI)', val: liAvg, thresh: '≥ ' + thresholds.liLat.toFixed(1) + ' lateralized | ' + thresholds.liBorder.toFixed(1) + '–' + (thresholds.liLat-0.1).toFixed(1) + ' borderline | < ' + thresholds.liBorder.toFixed(1) + ' bilateral', interp: liAvg === null ? '—' : liAvg >= thresholds.liLat ? 'Lateralized → ' + domSide : liAvg >= thresholds.liBorder ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
+          { label: 'Lateralization Index (LI)', val: liAvg, thresh: '> ' + thresholds.liLat.toFixed(1) + ' lateralized | ' + thresholds.liBorder.toFixed(1) + '–' + thresholds.liLat.toFixed(1) + ' borderline | < ' + thresholds.liBorder.toFixed(1) + ' bilateral', interp: liAvg === null ? '—' : liAvg > thresholds.liLat ? 'Lateralized → ' + domSide : liAvg >= thresholds.liBorder ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
           { label: 'Contralateral Suppression (CSI)', val: csiVal, thresh: '< ' + thresholds.csi.toFixed(1) + ' = suppression present', interp: csiVal === null ? '—' : csiVal < thresholds.csi ? 'Contralateral suppression present' : 'No contralateral suppression' },
         ];
         return rows.map(r => {
@@ -3193,7 +3193,7 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   const indexRows = [
     { label: 'Selectivity Index — Right (SI)', value: siR, pass: siR !== null && siR >= siThresh, fail: siR !== null && siR < siThresh, thresh: `≥ ${siThresh.toFixed(1)} (${protocol === 'stimulated' ? 'stimulated' : 'unstimulated'})`, interp: siR === null ? '—' : siR >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
     { label: 'Selectivity Index — Left (SI)',  value: siL, pass: siL !== null && siL >= siThresh, fail: siL !== null && siL < siThresh, thresh: `≥ ${siThresh.toFixed(1)} (${protocol === 'stimulated' ? 'stimulated' : 'unstimulated'})`, interp: siL === null ? '—' : siL >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
-    { label: 'Lateralization Index (LI)',       value: li,  pass: li !== null && li >= thresholds.liLat, warn: li !== null && li >= thresholds.liBorder && li < thresholds.liLat, fail: li !== null && li < thresholds.liBorder, thresh: `≥ ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${(thresholds.liLat-0.1).toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`, interp: li === null ? '—' : li >= thresholds.liLat ? `Lateralized → ${domSide}` : li >= thresholds.liBorder ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
+    { label: 'Lateralization Index (LI)',       value: li,  pass: li !== null && li > thresholds.liLat, warn: li !== null && li >= thresholds.liBorder && li <= thresholds.liLat, fail: li !== null && li < thresholds.liBorder, thresh: `> ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${thresholds.liLat.toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`, interp: li === null ? '—' : li > thresholds.liLat ? `Lateralized → ${domSide}` : li >= thresholds.liBorder ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
     { label: 'Contralateral Suppression (CSI)', value: csi, pass: csi !== null && csi < thresholds.csi, fail: csi !== null && csi >= thresholds.csi, thresh: `< ${thresholds.csi.toFixed(1)} = suppression present`, interp: csi === null ? '—' : csi < thresholds.csi ? 'Contralateral suppression present' : 'No contralateral suppression' },
   ];
 
