@@ -571,7 +571,7 @@
 
 <div id="settings-banner" onclick="scrollToThresholds()" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 16px;background:var(--surface2);border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'">
   <span id="banner-protocol" style="font-family:var(--mono);font-size:10px;padding:3px 8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-2);font-weight:500">Unstimulated</span>
-  <span id="banner-guideline" style="font-family:var(--mono);font-size:10px;padding:3px 8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-2);font-weight:500">ES Guidelines 2016</span>
+  <span id="banner-guideline" style="font-family:var(--mono);font-size:10px;padding:3px 8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-2);font-weight:500">ES Guidelines 2025</span>
   <span style="font-family:var(--mono);font-size:10px;color:var(--text);padding:3px 10px;border:1px solid var(--border);border-radius:3px;background:var(--surface);font-weight:500">Change Threshold Settings ▸</span>
 </div>
 
@@ -710,9 +710,13 @@
 
   <!-- RIGHT: RESULTS -->
   <div class="results-panel">
-    <div class="panel-title">Results</div>
-
     <div class="session-timestamp" id="session-timestamp"></div>
+
+    <div style="margin-bottom:16px;padding:12px 14px;background:#F0EDE6;border:1px solid #D8D3C8;border-radius:4px;font-size:11px;color:#5C564E;line-height:1.6">
+      <strong style="color:#1A1714">Disclaimer:</strong> This tool is intended to support — not replace — clinical judgment. It does not provide medical advice, diagnosis, or treatment recommendations, and is not a substitute for consultation with a qualified healthcare provider. Threshold values may vary by institution and protocol. This calculator applies the most widely cited published guideline thresholds, and users may adjust thresholds to match institutional protocol. Results must always be interpreted by a qualified clinician in the context of the patient's full clinical picture, including imaging, biochemistry, comorbidities, and surgical candidacy. This calculator should not be used as the sole basis for clinical decision-making.
+    </div>
+
+    <div class="panel-title">Results</div>
 
     <div class="index-card">
       <div class="index-header">
@@ -820,7 +824,7 @@
       <div class="ref-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <span style="display:flex;align-items:center;gap:8px">Reference Thresholds <span style="flex:1;height:1px;background:var(--border);display:inline-block;width:20px"></span></span>
         <select id="threshold-preset" onchange="applyThresholdPreset(this.value)" style="font-family:var(--mono);font-size:9px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text-2);cursor:pointer;letter-spacing:0.03em">
-          <option value="es2016">ES Guidelines 2016</option>
+          <option value="es2025">ES Guidelines 2025</option>
           <option value="custom">Custom</option>
         </select>
       </div>
@@ -839,7 +843,7 @@
       <div class="ref-item">
         <span class="ref-key">SI (cosyntropin-stimulated)</span>
         <span class="ref-val" id="ref-si-stim" style="display:flex;align-items:center;gap:6px">≥ 3.0
-          <input type="number" id="thresh-si-stim" class="thresh-custom-input" min="1" max="10" step="0.1" value="3.0" oninput="onCustomThreshold()" style="display:none">
+          <input type="number" id="thresh-si-stim" class="thresh-custom-input" min="1" max="10" step="0.1" value="5.0" oninput="onCustomThreshold()" style="display:none">
         </span>
       </div>
       <div class="ref-item">
@@ -851,7 +855,7 @@
       <div class="ref-item">
         <span class="ref-key">LI borderline</span>
         <span class="ref-val" id="ref-li-border" style="display:flex;align-items:center;gap:6px">≥ 2.0
-          <input type="number" id="thresh-li-border" class="thresh-custom-input" min="1" max="20" step="0.1" value="2.0" oninput="onCustomThreshold()" style="display:none">
+          <input type="number" id="thresh-li-border" class="thresh-custom-input" min="1" max="20" step="0.1" value="3.0" oninput="onCustomThreshold()" style="display:none">
         </span>
       </div>
       <div class="ref-item">
@@ -864,23 +868,23 @@
           <input type="number" id="thresh-csi" class="thresh-custom-input" min="0.1" max="5" step="0.1" value="1.0" oninput="onCustomThreshold()" style="display:none">
         </span>
       </div>
-      <div style="margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--text-3);text-align:right" id="ref-guideline-label">ES Guidelines 2016</div>
+      <div style="margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--text-3);text-align:right" id="ref-guideline-label">ES Guidelines 2025</div>
     </div>
 
     <div class="ref-section" style="margin-top:24px">
       <div class="ref-title">References</div>
       <ol style="padding-left:16px;margin:0;list-style-position:outside">
         <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
-          <strong>Funder JW, Carey RM, Mantero F, et al.</strong> The Management of Primary Aldosteronism: Case Detection, Diagnosis, and Treatment: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab.</em> 2016;101(5):1889–1916.
-          <div style="font-size:10px;color:#8C867E;margin-top:2px">Endocrine Society clinical practice guideline for primary aldosteronism management. Discusses AVS lateralization criteria; specific numeric cutoffs for SI, LI, and CSI are detailed in Rossi et al. (2014) below.</div>
+          <strong>Adler GK, Stowasser M, Correa RR, et al.</strong> Primary Aldosteronism: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab.</em> 2025;110(9):2453–2495. <a href="https://doi.org/10.1210/clinem/dgaf284" target="_blank" style="color:#2B3A8C">doi:10.1210/clinem/dgaf284</a>
+          <div style="font-size:10px;color:#8C867E;margin-top:2px">Most recent Endocrine Society clinical practice guideline. Primary source for SI, LI, and CSI thresholds used in this calculator (SI ≥2.0/5.0, LI ≥4.0, borderline 3.0–4.0, CSI &lt;1.0).</div>
         </li>
         <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
-          <strong>Adler GK, Stowasser M, Correa RR, et al.</strong> Primary Aldosteronism: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab.</em> 2025;110(9):2453–2495. <a href="https://doi.org/10.1210/clinem/dgaf284" target="_blank" style="color:#2B3A8C">doi:10.1210/clinem/dgaf284</a>
-          <div style="font-size:10px;color:#8C867E;margin-top:2px">Most recent Endocrine Society update reaffirming AVS as gold standard for lateralization.</div>
+          <strong>Funder JW, Carey RM, Mantero F, et al.</strong> The Management of Primary Aldosteronism: Case Detection, Diagnosis, and Treatment: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab.</em> 2016;101(5):1889–1916.
+          <div style="font-size:10px;color:#8C867E;margin-top:2px">Prior Endocrine Society guideline for primary aldosteronism management. Superseded by Adler et al. 2025.</div>
         </li>
         <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
           <strong>Rossi GP, Auchus RJ, Brown M, et al.</strong> An Expert Consensus Statement on the Use of Adrenal Vein Sampling for the Subtyping of Primary Aldosteronism. <em>Hypertension.</em> 2014;63(1):151–160. <a href="https://doi.org/10.1161/HYPERTENSIONAHA.113.02097" target="_blank" style="color:#2B3A8C">doi:10.1161/HYPERTENSIONAHA.113.02097</a>
-          <div style="font-size:10px;color:#8C867E;margin-top:2px">Primary source for SI, LI, and CSI numeric thresholds used in this calculator (SI ≥2.0/3.0, LI ≥4.0, CSI &lt;1.0).</div>
+          <div style="font-size:10px;color:#8C867E;margin-top:2px">Expert consensus on adrenal vein sampling methodology and interpretation criteria.</div>
         </li>
         <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:0;padding-left:4px">
           <strong>Vonend O, Ockenfels N, Gao X, et al.</strong> Clinical impact of strict criteria for selectivity and lateralization in adrenal vein sampling. <em>Eur J Endocrinol.</em> <a href="https://pubmed.ncbi.nlm.nih.gov/27376419/" target="_blank" style="color:#2B3A8C">PMID: 27376419</a>
@@ -902,9 +906,6 @@
       </div>
     </div>
 
-    <div style="margin-top:12px;padding:12px 14px;background:#F0EDE6;border:1px solid #D8D3C8;border-radius:4px;font-size:11px;color:#5C564E;line-height:1.6">
-      <strong style="color:#1A1714">Disclaimer:</strong> This tool is intended to support — not replace — clinical judgment. It does not provide medical advice, diagnosis, or treatment recommendations, and is not a substitute for consultation with a qualified healthcare provider. Threshold values may vary by institution and protocol. This calculator applies the most widely cited published guideline thresholds, and users may adjust thresholds to match institutional protocol. Results must always be interpreted by a qualified clinician in the context of the patient's full clinical picture, including imaging, biochemistry, comorbidities, and surgical candidacy. This calculator should not be used as the sole basis for clinical decision-making.
-    </div>
 
   </div>
 </div>
@@ -1235,7 +1236,7 @@
           <li>Unit conversion — aldosterone (pg/mL, ng/dL, pmol/L) and cortisol (µg/dL, nmol/L, ng/mL)</li>
           <li>Cosyntropin-stimulated protocol support</li>
           <li>Customizable threshold inputs</li>
-          <li>Guideline presets — ES 2016, Adler 2025, Rossi 2014</li>
+          <li>Guideline presets — ES 2025 (Adler et al.)</li>
         </ul>
       </div>
 
@@ -1268,12 +1269,12 @@
     </div>
     <div style="padding:20px;overflow-y:auto">
 
-      <p style="font-size:12px;color:#3a3530;line-height:1.8;margin-bottom:16px">Eight test datasets were used to verify the classification logic across all four outcome categories (lateralized, borderline, bilateral, non-selective), CSI concordance/discordance, and protocol-dependent SI thresholds. All tests used the ES 2016 guideline thresholds.</p>
+      <p style="font-size:12px;color:#3a3530;line-height:1.8;margin-bottom:16px">Eight test datasets were used to verify the classification logic across all four outcome categories (lateralized, borderline, bilateral, non-selective), CSI concordance/discordance, and protocol-dependent SI thresholds. All tests used the ES 2025 guideline thresholds.</p>
 
       <div style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Thresholds Used</div>
       <div style="background:#F7F5F0;border:1px solid #E8E3D8;border-radius:4px;padding:10px 14px;margin-bottom:20px;font-size:11px;color:#3a3530;line-height:1.8">
-        SI cutoff: ≥ 3.0 (stimulated) / ≥ 2.0 (unstimulated)<br>
-        LI: ≥ 4.0 lateralized / 2.0-3.9 borderline / < 2.0 bilateral<br>
+        SI cutoff: ≥ 5.0 (stimulated) / ≥ 2.0 (unstimulated)<br>
+        LI: ≥ 4.0 lateralized / 3.0-3.9 borderline / < 3.0 bilateral<br>
         CSI: < 1.0 = contralateral suppression present
       </div>
 
@@ -1432,17 +1433,17 @@
               <tr style="background:#f5f5f5"><th style="padding:3px 6px;text-align:left">Location</th><th style="padding:3px 6px;text-align:center">Sample</th><th style="padding:3px 6px;text-align:center">Aldo</th><th style="padding:3px 6px;text-align:center">Cortisol</th></tr>
               <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">50</td><td style="padding:3px 6px;text-align:center">20</td></tr>
               <tr><td style="padding:3px 6px">IVC</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">55</td><td style="padding:3px 6px;text-align:center">22</td></tr>
-              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">1500</td><td style="padding:3px 6px;text-align:center">400</td></tr>
-              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">1600</td><td style="padding:3px 6px;text-align:center">450</td></tr>
-              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">1400</td><td style="padding:3px 6px;text-align:center">380</td></tr>
-              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">4000</td><td style="padding:3px 6px;text-align:center">400</td></tr>
-              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">3800</td><td style="padding:3px 6px;text-align:center">380</td></tr>
-              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">4200</td><td style="padding:3px 6px;text-align:center">420</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">1500</td><td style="padding:3px 6px;text-align:center">450</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">1600</td><td style="padding:3px 6px;text-align:center">480</td></tr>
+              <tr><td style="padding:3px 6px">Right</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">1400</td><td style="padding:3px 6px;text-align:center">420</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">1</td><td style="padding:3px 6px;text-align:center">4400</td><td style="padding:3px 6px;text-align:center">400</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">2</td><td style="padding:3px 6px;text-align:center">4200</td><td style="padding:3px 6px;text-align:center">380</td></tr>
+              <tr><td style="padding:3px 6px">Left</td><td style="padding:3px 6px;text-align:center">3</td><td style="padding:3px 6px;text-align:center">4600</td><td style="padding:3px 6px;text-align:center">420</td></tr>
             </table>
             <div style="font-family:monospace;font-size:10px;line-height:1.8">
-              IVC avg A/C: 2.50 | Right avg A/C: 3.66 | Left avg A/C: 10.00<br>
-              SI Right: 19.52 ✓ | SI Left: 19.05 ✓<br>
-              LI: 2.73 | CSI: 1.47 (not suppressed)<br>
+              IVC avg A/C: 2.50 | Right avg A/C: 3.33 | Left avg A/C: 11.00<br>
+              SI Right: 21.43 ✓ | SI Left: 19.05 ✓<br>
+              LI: 3.30 | CSI: 1.33 (not suppressed)<br>
               <strong>Classification: Borderline</strong>
             </div>
           </div>
@@ -1534,7 +1535,7 @@
             </table>
             <div style="font-family:monospace;font-size:10px;line-height:1.8">
               SI Right: 2.50 | SI Left: 12.50 | LI: 3.34 | CSI: 1.20<br><br>
-              <strong>Cosyntropin-stimulated</strong> (SI cutoff ≥ 3.0): SI Right fails → <strong>Non-selective</strong><br>
+              <strong>Cosyntropin-stimulated</strong> (SI cutoff ≥ 5.0): SI Right fails → <strong>Non-selective</strong><br>
               <strong>Unstimulated</strong> (SI cutoff ≥ 2.0): SI Right passes → <strong>Borderline</strong>
             </div>
           </div>
@@ -1542,7 +1543,7 @@
 
       </div>
 
-      <p style="font-size:10px;color:#8C867E;margin-top:12px;line-height:1.6">Test datasets used synthetic values within typical clinical ranges for AVS. Validated against ES 2016 guideline thresholds.</p>
+      <p style="font-size:10px;color:#8C867E;margin-top:12px;line-height:1.6">Test datasets used synthetic values within typical clinical ranges for AVS. Validated against ES 2025 guideline thresholds.</p>
 
     </div>
   </div>
@@ -1563,10 +1564,10 @@ const units = { aldo: 'pg/mL', cort: 'µg/dL' };
 
 // ── Threshold State ──
 const PRESETS = {
-  es2016: { siUnstim: 2.0, siStim: 3.0, liLat: 4.0, liBorder: 2.0, csi: 1.0, label: 'ES Guidelines 2016' },
+  es2025: { siUnstim: 2.0, siStim: 5.0, liLat: 4.0, liBorder: 3.0, csi: 1.0, label: 'ES Guidelines 2025' },
 };
 
-const thresholds = { siUnstim: 2.0, siStim: 3.0, liLat: 4.0, liBorder: 2.0, csi: 1.0 };
+const thresholds = { siUnstim: 2.0, siStim: 5.0, liLat: 4.0, liBorder: 3.0, csi: 1.0 };
 
 // ── Classification ──
 function classify(siR, siL, siThresh, li, csi, R, L) {
@@ -1635,9 +1636,9 @@ function applyThresholdPreset(value) {
 
 function onCustomThreshold() {
   thresholds.siUnstim = parseFloat(document.getElementById('thresh-si-unstim').value) || 2.0;
-  thresholds.siStim   = parseFloat(document.getElementById('thresh-si-stim').value)   || 3.0;
+  thresholds.siStim   = parseFloat(document.getElementById('thresh-si-stim').value)   || 5.0;
   thresholds.liLat    = parseFloat(document.getElementById('thresh-li-lat').value)    || 4.0;
-  thresholds.liBorder = parseFloat(document.getElementById('thresh-li-border').value) || 2.0;
+  thresholds.liBorder = parseFloat(document.getElementById('thresh-li-border').value) || 3.0;
   thresholds.csi      = parseFloat(document.getElementById('thresh-csi').value)       || 1.0;
   updateRefPanel();
   updateBanner();
@@ -1824,7 +1825,7 @@ function updateBanner() {
   if (bg) {
     const presetEl = document.getElementById('threshold-preset');
     const isCustom = presetEl && presetEl.value === 'custom';
-    bg.textContent = isCustom ? 'Custom Thresholds' : 'ES Guidelines 2016';
+    bg.textContent = isCustom ? 'Custom Thresholds' : 'ES Guidelines 2025';
     bg.style.background = isCustom ? '#FFF8E6' : '';
     bg.style.borderColor = isCustom ? '#e8c97a' : '';
     bg.style.color = isCustom ? '#7A4F00' : '';
@@ -2962,7 +2963,7 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
       <p style="font-size:9pt;color:#888;margin-top:4px">${dateStr} · ${timeStr}</p>
       <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">
         <span style="font-size:9pt;padding:3px 10px;background:#FDF3E3;color:#7A4F00;border-radius:2px;font-family:monospace">${protocol === 'stimulated' ? 'COSYNTROPIN-STIMULATED' : 'UNSTIMULATED'}</span>
-        <span style="font-size:9pt;padding:3px 10px;background:${presetEl && presetEl.value === 'custom' ? '#FFF8E6' : '#EBF0FA'};color:${presetEl && presetEl.value === 'custom' ? '#7A4F00' : '#2B3A8C'};border-radius:2px;font-family:monospace">${presetEl && presetEl.value === 'custom' ? 'CUSTOM THRESHOLDS' : (presetEl ? presetEl.options[presetEl.selectedIndex].text : 'ES Guidelines 2016')}</span>
+        <span style="font-size:9pt;padding:3px 10px;background:${presetEl && presetEl.value === 'custom' ? '#FFF8E6' : '#EBF0FA'};color:${presetEl && presetEl.value === 'custom' ? '#7A4F00' : '#2B3A8C'};border-radius:2px;font-family:monospace">${presetEl && presetEl.value === 'custom' ? 'CUSTOM THRESHOLDS' : (presetEl ? presetEl.options[presetEl.selectedIndex].text : 'ES Guidelines 2025')}</span>
         <span style="font-size:9pt;padding:3px 10px;background:#E8F5EE;color:#1B5E35;border-radius:2px;font-family:monospace">ADVANCED ANALYSIS</span>
         <span style="font-size:9pt;padding:3px 10px;background:#F0EDE6;color:#555;border-radius:2px;font-family:monospace">AVS Calculator ${typeof APP_VERSION !== 'undefined' ? APP_VERSION : ''}</span>
       </div>
@@ -3178,7 +3179,7 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   const presetEl = document.getElementById('threshold-preset');
-  const presetLabel = presetEl ? presetEl.options[presetEl.selectedIndex].text : 'ES Guidelines 2016';
+  const presetLabel = presetEl ? presetEl.options[presetEl.selectedIndex].text : 'ES Guidelines 2025';
   const domSide = (R !== null && L !== null) ? (R > L ? 'Right' : 'Left') : null;
   const patientBar = '';
 
@@ -3753,7 +3754,7 @@ function openPatientReport() {
   const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   const presetEl = document.getElementById('threshold-preset');
-  const presetLabel = presetEl ? presetEl.options[presetEl.selectedIndex].text : 'ES Guidelines 2016';
+  const presetLabel = presetEl ? presetEl.options[presetEl.selectedIndex].text : 'ES Guidelines 2025';
   const reportHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Adrenal Vein Sampling Calculator — Patient Summary</title>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: 'DM Sans', sans-serif; font-size: 10pt; color: #1a1714; background: #fff; }
@@ -3790,7 +3791,7 @@ buildAllRows('ivc');
 buildAllRows('right');
 buildAllRows('left');
 calculate();
-applyThresholdPreset('es2016');
+applyThresholdPreset('es2025');
 initTimestamp();
 
 // ── Privacy: clear all fields on load ──
@@ -3880,8 +3881,8 @@ function loadTestData(num) {
       label: 'Test 4 — Borderline, no rescue note',
       protocol: 'stimulated',
       ivc:   [{aldo:50, cort:20}, {aldo:55, cort:22}],
-      right: [{aldo:1500, cort:400}, {aldo:1600, cort:450}, {aldo:1400, cort:380}],
-      left:  [{aldo:4000, cort:400}, {aldo:3800, cort:380}, {aldo:4200, cort:420}],
+      right: [{aldo:1500, cort:450}, {aldo:1600, cort:480}, {aldo:1400, cort:420}],
+      left:  [{aldo:4400, cort:400}, {aldo:4200, cort:380}, {aldo:4600, cort:420}],
     },
     5: {
       label: 'Test 5 — Bilateral',
@@ -3907,7 +3908,7 @@ function loadTestData(num) {
     9: {
       label: 'Test 9 — Custom thresholds: SI cutoff 2.5 flips Test 8 data from non-selective to borderline',
       protocol: 'stimulated',
-      custom: { siUnstim: 2.0, siStim: 2.5, liLat: 4.0, liBorder: 2.0, csi: 1.0 },
+      custom: { siUnstim: 2.0, siStim: 2.5, liLat: 4.0, liBorder: 3.0, csi: 1.0 },
       ivc:   [{aldo:100, cort:20}, {aldo:100, cort:20}],
       right: [{aldo:300, cort:50}, {aldo:320, cort:52}, {aldo:280, cort:48}],
       left:  [{aldo:5000, cort:250}, {aldo:5200, cort:260}, {aldo:4800, cort:240}],
@@ -3915,10 +3916,10 @@ function loadTestData(num) {
     10: {
       label: 'Test 10 — Custom thresholds: LI lateralized at 2.5 flips Test 4 borderline to lateralized',
       protocol: 'stimulated',
-      custom: { siUnstim: 2.0, siStim: 3.0, liLat: 2.5, liBorder: 2.0, csi: 1.0 },
+      custom: { siUnstim: 2.0, siStim: 5.0, liLat: 2.5, liBorder: 3.0, csi: 1.0 },
       ivc:   [{aldo:50, cort:20}, {aldo:55, cort:22}],
-      right: [{aldo:1500, cort:400}, {aldo:1600, cort:450}, {aldo:1400, cort:380}],
-      left:  [{aldo:4000, cort:400}, {aldo:3800, cort:380}, {aldo:4200, cort:420}],
+      right: [{aldo:1500, cort:450}, {aldo:1600, cort:480}, {aldo:1400, cort:420}],
+      left:  [{aldo:4400, cort:400}, {aldo:4200, cort:380}, {aldo:4600, cort:420}],
     },
   };
   const s = scenarios[num || 1];
@@ -3935,9 +3936,9 @@ function loadTestData(num) {
     document.getElementById('thresh-csi').value = s.custom.csi;
     onCustomThreshold();
   } else {
-    // Reset to ES 2016 defaults
-    document.getElementById('threshold-preset').value = 'es2016';
-    applyThresholdPreset('es2016');
+    // Reset to ES 2025 defaults
+    document.getElementById('threshold-preset').value = 'es2025';
+    applyThresholdPreset('es2025');
   }
   ['ivc','right','left'].forEach(side => {
     state[side] = s[side].map((d, i) => ({ id: i, aldo: d.aldo, cort: d.cort, included: true, note: '' }));
@@ -3985,7 +3986,7 @@ function loadTestData(num) {
       <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Multi-Sample Averaging</h3>
       <p style="margin-bottom:20px;font-size:12px;color:rgba(255,255,255,0.55)">When multiple samples are entered for a vein, A/C ratios are calculated for each sample individually (Aldo ÷ Cort per sample), then averaged across included samples. This preserves per-sample accuracy and is consistent with published multi-sample AVS methodology. Excluded samples are omitted from all averages.</p>
       <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Guideline References</h3>
-      <p style="font-size:12px;color:rgba(255,255,255,0.55);margin:0">Funder JW et al. J Clin Endocrinol Metab. 2016;101(5):1889–1916.<br>Adler GK et al. J Clin Endocrinol Metab. 2025;110(9):2453–2495.<br>Rossi GP et al. Hypertension. 2014;63(1):151–160.</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.55);margin:0">Adler GK et al. J Clin Endocrinol Metab. 2025;110(9):2453–2495.<br>Funder JW et al. J Clin Endocrinol Metab. 2016;101(5):1889–1916.<br>Rossi GP et al. Hypertension. 2014;63(1):151–160.</p>
     </div>
   </div>
 </div>
