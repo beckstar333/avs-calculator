@@ -318,6 +318,7 @@
 
   /* ── Input validation ── */
   .num-input.input-error { border-color: #8B1A1A !important; background: #FFF0F0; }
+  .num-input.input-warning { border-color: #C8901A !important; background: #FFFBEB; }
   @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
   .num-input.shaking { animation: shake 0.35s ease; }
 
@@ -589,8 +590,8 @@
       <div class="unit-group">
         <span class="unit-label">Aldosterone</span>
         <div class="unit-toggle" id="aldo-unit-toggle">
-          <button class="unit-btn active" onclick="setUnit('aldo','pg/mL')">pg/mL</button>
-          <button class="unit-btn" onclick="setUnit('aldo','ng/dL')">ng/dL</button>
+          <button class="unit-btn" onclick="setUnit('aldo','pg/mL')">pg/mL</button>
+          <button class="unit-btn active" onclick="setUnit('aldo','ng/dL')">ng/dL</button>
           <button class="unit-btn" onclick="setUnit('aldo','pmol/L')">pmol/L</button>
         </div>
       </div>
@@ -616,7 +617,7 @@
       <table class="sample-table">
         <thead><tr>
           <th>Sample</th>
-          <th style="text-align:right" class="th-aldo">Aldo (pg/mL)</th>
+          <th style="text-align:right" class="th-aldo">Aldo (ng/dL)</th>
           <th style="text-align:right" class="th-cort">Cortisol (µg/dL)</th>
           <th style="text-align:right">A/C Ratio</th>
           <th style="text-align:center">Incl.</th>
@@ -650,7 +651,7 @@
       <table class="sample-table">
         <thead><tr>
           <th>Sample</th>
-          <th style="text-align:right" class="th-aldo">Aldo (pg/mL)</th>
+          <th style="text-align:right" class="th-aldo">Aldo (ng/dL)</th>
           <th style="text-align:right" class="th-cort">Cortisol (µg/dL)</th>
           <th style="text-align:right">A/C Ratio</th>
           <th style="text-align:center">Incl.</th>
@@ -684,7 +685,7 @@
       <table class="sample-table">
         <thead><tr>
           <th>Sample</th>
-          <th style="text-align:right" class="th-aldo">Aldo (pg/mL)</th>
+          <th style="text-align:right" class="th-aldo">Aldo (ng/dL)</th>
           <th style="text-align:right" class="th-cort">Cortisol (µg/dL)</th>
           <th style="text-align:right">A/C Ratio</th>
           <th style="text-align:center">Incl.</th>
@@ -1560,7 +1561,7 @@ let protocol = 'unstimulated';
 const MAX_ROWS = 8;
 
 // ── Unit State ──
-const units = { aldo: 'pg/mL', cort: 'µg/dL' };
+const units = { aldo: 'ng/dL', cort: 'µg/dL' };
 
 // ── Threshold State ──
 const PRESETS = {
@@ -1675,6 +1676,8 @@ function setUnit(field, unit) {
   const cls = field === 'aldo' ? 'th-aldo' : 'th-cort';
   const label = field === 'aldo' ? 'Aldo' : 'Cortisol';
   document.querySelectorAll('.' + cls).forEach(th => { th.textContent = `${label} (${unit})`; });
+  // Re-evaluate plausibility on all entered values with the new unit
+  recheckAllPlausibility();
   // Update print report headers (stored as data)
   calculate();
 }
@@ -1742,7 +1745,10 @@ function addRow(side) {
 // ── Input handlers ──
 function handleInput(side, idx, field, value) {
   const el = document.getElementById(`${side}-${field}-${idx}`);
-  if (el) validateInput(el, value);
+  if (el) {
+    validateInput(el, value);
+    checkUnitPlausibility(el, field, value);
+  }
   state[side][idx][field] = value === '' ? '' : parseFloat(value);
   updateRowDisplay(side, idx);
   checkOutliers(side);
@@ -2069,6 +2075,54 @@ function validateInput(el, value) {
     el.classList.remove('input-error');
     return true;
   }
+}
+
+// Convert any unit to canonical (aldo: ng/dL, cort: µg/dL)
+const UNIT_TO_CANONICAL = {
+  aldo: { 'pg/mL': 0.1, 'ng/dL': 1, 'pmol/L': 1/27.7 },
+  cort: { 'µg/dL': 1, 'ng/mL': 0.1, 'nmol/L': 1/27.59 },
+};
+// Plausible canonical range across all AVS sites (IVC + adrenal vein, baseline or stimulated)
+const CANONICAL_RANGE = {
+  aldo: { lo: 0.5, hi: 15000 },   // ng/dL
+  cort: { lo: 1,   hi: 8000  },   // µg/dL
+};
+
+function checkUnitPlausibility(el, field, value) {
+  el.classList.remove('input-warning');
+  el.removeAttribute('title');
+  if (value === '' || isNaN(parseFloat(value))) return;
+  const v = parseFloat(value);
+  if (v <= 0) return;
+  const currentUnit = units[field];
+  const factor = UNIT_TO_CANONICAL[field][currentUnit];
+  const canonical = v * factor;
+  const { lo, hi } = CANONICAL_RANGE[field];
+  if (canonical >= lo && canonical <= hi) return;
+  // Out of range — see if another unit would fit
+  let suggestion = null;
+  for (const [u, f] of Object.entries(UNIT_TO_CANONICAL[field])) {
+    if (u === currentUnit) continue;
+    const altCanonical = v * f;
+    if (altCanonical >= lo && altCanonical <= hi) { suggestion = u; break; }
+  }
+  el.classList.add('input-warning');
+  const lbl = field === 'aldo' ? 'Aldosterone' : 'Cortisol';
+  const direction = canonical < lo ? 'low' : 'high';
+  el.title = suggestion
+    ? `${lbl} value of ${v} is unusually ${direction} for ${currentUnit}. Did you mean ${suggestion}?`
+    : `${lbl} value of ${v} is unusually ${direction} for ${currentUnit}. Please verify.`;
+}
+
+function recheckAllPlausibility() {
+  ['ivc','right','left'].forEach(side => {
+    state[side].forEach((s, i) => {
+      const a = document.getElementById(`${side}-aldo-${i}`);
+      const c = document.getElementById(`${side}-cort-${i}`);
+      if (a) checkUnitPlausibility(a, 'aldo', s.aldo);
+      if (c) checkUnitPlausibility(c, 'cort', s.cort);
+    });
+  });
 }
 
 // ── Outlier detection ──
@@ -2442,17 +2496,10 @@ const _fb = document.getElementById('feedback-overlay'); if (_fb) _fb.addEventLi
 
 // ── Reset ──
 function resetAll() {
-  ['right','left'].forEach(side => {
-    state[side] = Array.from({length: 3}, (_, i) => ({ id: i, aldo: '', cort: '', included: true }));
+  ['ivc','right','left'].forEach(side => {
+    const defaultCount = side === 'ivc' ? 2 : 3;
+    state[side] = Array.from({length: defaultCount}, (_, i) => ({ id: i, aldo: '', cort: '', included: true, note: '' }));
     buildAllRows(side);
-  });
-  state.ivc.forEach((s, i) => {
-    s.aldo = ''; s.cort = ''; s.included = true;
-    const aldo = document.getElementById(`ivc-aldo-${i}`); if (aldo) aldo.value = '';
-    const cort = document.getElementById(`ivc-cort-${i}`); if (cort) cort.value = '';
-    updateRowDisplay('ivc', i);
-    const row = document.getElementById(`ivc-row-${i}`); if (row) row.classList.remove('excluded');
-    const chk = document.querySelector(`#ivc-toggle-${i} input`); if (chk) chk.checked = true;
   });
   calculate();
 }
@@ -3944,6 +3991,7 @@ function loadTestData(num) {
     state[side] = s[side].map((d, i) => ({ id: i, aldo: d.aldo, cort: d.cort, included: true, note: '' }));
     buildAllRows(side);
   });
+  recheckAllPlausibility();
   calculate();
   console.log(s.label);
 }
