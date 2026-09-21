@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="description" content="Free browser-based adrenal vein sampling calculator. Calculates Selectivity Index (SI), Lateralization Index (LI), and Contralateral Suppression Index (CSI) in real time. No login required. PHI-safe.">
+<meta name="description" content="Instantly interpret adrenal vein sampling results. Calculate SI, LI, and CSI in real time — free, PHI-safe, browser-based. No login. Built by a practicing NP per Endocrine Society guidelines.">
 <meta name="keywords" content="adrenal vein sampling, AVS calculator, primary aldosteronism, selectivity index, lateralization index, contralateral suppression index, AVS interpretation, adrenal vein sampling tool, primary hyperaldosteronism, adrenalectomy">
 <meta name="author" content="Rebecca Allegretto, NP, MSN, MBA, ACNP-BC">
-<meta property="og:title" content="AVS Calculator — Adrenal Vein Sampling Interpretation">
+<meta property="og:title" content="Adrenal Vein Sampling Calculator | Free AVS Interpretation Tool">
 <meta property="og:description" content="Free, PHI-safe, browser-based tool for real-time adrenal vein sampling interpretation. Calculates SI, LI, and CSI. No login. No data storage.">
 <meta property="og:url" content="https://avsresults.com">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="AVS Calculator — Adrenal Vein Sampling">
+<meta name="twitter:title" content="Adrenal Vein Sampling Calculator | Free AVS Interpretation Tool">
 <meta name="twitter:description" content="Free, PHI-safe clinical tool for adrenal vein sampling interpretation. Real-time SI, LI, CSI. No login required.">
 <link rel="canonical" href="https://avsresults.com">
 <script type="application/ld+json">
@@ -28,8 +28,64 @@
   "keywords": "adrenal vein sampling, primary aldosteronism, AVS calculator, selectivity index, lateralization index"
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is adrenal vein sampling (AVS)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Adrenal vein sampling (AVS) is a procedure used to determine whether one or both adrenal glands are overproducing aldosterone in patients with primary aldosteronism. Blood is sampled from each adrenal vein and the inferior vena cava (IVC) to calculate the selectivity index (SI), lateralization index (LI), and contralateral suppression index (CSI). The results guide the decision between surgical adrenalectomy and medical management."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is the Selectivity Index (SI) calculated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Selectivity Index (SI) confirms adequate adrenal vein catheterization. It is calculated as adrenal vein cortisol divided by IVC cortisol. Thresholds are ≥2.0 for unstimulated protocols and ≥3.0 for cosyntropin-stimulated protocols per Endocrine Society guidelines. An SI below the cutoff means the catheter was not correctly seated and lateralization cannot be interpreted."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does the Lateralization Index (LI) mean?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Lateralization Index (LI) compares the cortisol-corrected aldosterone (A/C ratio) between the dominant and non-dominant adrenal veins. An LI ≥4.0 indicates lateralized aldosterone production (unilateral disease). A borderline LI falls between 2.0 and 3.9. An LI below 2.0 suggests bilateral disease. The LI guides whether a patient should be referred for adrenalectomy or managed medically."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the Contralateral Suppression Index (CSI)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Contralateral Suppression Index (CSI) measures whether the non-dominant adrenal gland's aldosterone production is suppressed relative to the IVC. A CSI less than 1.0 indicates contralateral suppression, supporting unilateral disease. It is used alongside the LI, particularly to support lateralization in borderline cases."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this AVS calculator free to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The AVS Calculator is completely free. It runs in your browser with no login, no account, and no subscription required. All calculations are performed locally — no patient data is ever transmitted or stored — making it PHI-safe for clinical use."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which AVS guidelines does this calculator follow?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The calculator follows the 2025 Endocrine Society Clinical Practice Guideline (Adler et al., J Clin Endocrinol Metab, 2025) and the 2016 guideline (Funder et al.) for threshold values. Selectivity index cutoffs are ≥2.0 (unstimulated) and ≥3.0 (cosyntropin-stimulated). Lateralization threshold is LI ≥4.0."
+      }
+    }
+  ]
+}
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AVS Calculator — Adrenal Vein Sampling</title>
+<title>Adrenal Vein Sampling Calculator | Free AVS Interpretation Tool</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%231a1714'/><g transform='translate(50,52)'><line x1='0' y1='32' x2='0' y2='10' stroke='%232B3A8C' stroke-width='5' stroke-linecap='round'/><path d='M0 10 C-4 4 -10 0 -17 -5' fill='none' stroke='%237A1F1F' stroke-width='4' stroke-linecap='round'/><path d='M0 10 C5 3 13 -2 21 -8' fill='none' stroke='%231B4D3E' stroke-width='4' stroke-linecap='round'/><path d='M-17 -5 C-20 -12 -18 -20 -15 -25' fill='none' stroke='%237A1F1F' stroke-width='3' stroke-linecap='round'/><path d='M21 -8 C24 -15 23 -23 20 -28' fill='none' stroke='%231B4D3E' stroke-width='3' stroke-linecap='round'/><circle cx='-15' cy='-25' r='7' fill='%237A1F1F'/><circle cx='20' cy='-28' r='7' fill='%231B4D3E'/><circle cx='0' cy='32' r='5' fill='none' stroke='%232B3A8C' stroke-width='3'/><circle cx='0' cy='10' r='3.5' fill='%23aaa'/></g></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -926,6 +982,8 @@
     <button onclick="openMethods()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Methods</button>
     <span style="margin-left:6px;opacity:0.4">·</span>
     <button onclick="openCitation()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Cite This Tool</button>
+    <span style="margin-left:10px;opacity:0.4">·</span>
+    <a href="/arr" style="font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:0.04em;text-decoration:none;margin-left:6px;font-weight:500">ARR Calculator →</a>
   </div>
   <div class="toolbar-right">
     <button class="reset-btn reset-danger" onclick="resetAll()">
@@ -2648,6 +2706,9 @@ function copyAdvancedResults() {
   let liHigh = null;
   if (highR !== null && highL !== null && Math.min(highR, highL) !== 0) liHigh = Math.max(highR, highL) / Math.min(highR, highL);
 
+  const avgCannulationOK = siR_avg !== null && siL_avg !== null && siR_avg >= siThresh && siL_avg >= siThresh;
+  const highCannulationOK = siR_high !== null && siL_high !== null && siR_high >= siThresh && siL_high >= siThresh;
+
   const domAvg = (avgR !== null && avgL !== null) ? (avgR > avgL ? 'Right' : 'Left') : '—';
   const domHigh = (highR !== null && highL !== null) ? (highR > highL ? 'Right' : 'Left') : '—';
 
@@ -2657,13 +2718,13 @@ function copyAdvancedResults() {
 AVERAGE METHOD (all included samples averaged):
   SI Right: ${v(siR_avg)} (threshold ≥${siThresh.toFixed(1)}) — ${siR_avg !== null ? (siR_avg >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}
   SI Left:  ${v(siL_avg)} (threshold ≥${siThresh.toFixed(1)}) — ${siL_avg !== null ? (siL_avg >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}
-  LI:       ${v(liAvg)} — ${liAvg !== null ? (liAvg > thresholds.liLat ? 'Lateralized' : liAvg >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}
+  LI:       ${v(liAvg)} — ${liAvg !== null ? (!avgCannulationOK ? 'Cannulation inadequate' : liAvg > thresholds.liLat ? 'Lateralized' : liAvg >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}
   Dominant: ${domAvg}
 
 HIGHEST VALUE METHOD (single highest A/C ratio per side):
   SI Right: ${v(siR_high)} (threshold ≥${siThresh.toFixed(1)}) — ${siR_high !== null ? (siR_high >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}
   SI Left:  ${v(siL_high)} (threshold ≥${siThresh.toFixed(1)}) — ${siL_high !== null ? (siL_high >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}
-  LI:       ${v(liHigh)} — ${liHigh !== null ? (liHigh > thresholds.liLat ? 'Lateralized' : liHigh >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}
+  LI:       ${v(liHigh)} — ${liHigh !== null ? (!highCannulationOK ? 'Cannulation inadequate' : liHigh > thresholds.liLat ? 'Lateralized' : liHigh >= thresholds.liBorder ? 'Borderline' : 'Bilateral') : 'No data'}
   Dominant: ${domHigh}
 
 Methods ${domAvg === domHigh ? 'agree' : 'disagree'} on dominant side.`;
@@ -2732,14 +2793,18 @@ function updateAdvancedCalc() {
     return;
   }
 
-  function badge(val, thresh, type) {
+  const avgCannulationOK = siR_avg !== null && siL_avg !== null && siR_avg >= siThresh && siL_avg >= siThresh;
+  const highCannulationOK = siR_high !== null && siL_high !== null && siR_high >= siThresh && siL_high >= siThresh;
+
+  function badge(val, thresh, type, cannulationOK) {
     if (val === null) return '<span style="color:var(--text-3)">—</span>';
     let pass, label;
     if (type === 'si') {
       pass = val >= thresh;
       label = pass ? 'Cannulated' : 'Not cannulated';
     } else {
-      if (val > thresholds.liLat) { pass = true; label = 'Lateralized'; }
+      if (cannulationOK === false) { pass = false; label = 'Cannulation inadequate'; }
+      else if (val > thresholds.liLat) { pass = true; label = 'Lateralized'; }
       else if (val >= thresholds.liBorder) { pass = null; label = 'Borderline'; }
       else { pass = false; label = 'Bilateral'; }
     }
@@ -2777,12 +2842,12 @@ function updateAdvancedCalc() {
           <tr style="border-bottom:1px solid rgba(0,0,0,0.05)">
             <td style="padding:6px 10px;font-weight:500">LI</td>
             <td style="padding:6px 10px;text-align:center;font-weight:700">${valStr(liAvg)}</td>
-            <td style="padding:6px 10px;text-align:center">${badge(liAvg, thresholds.liLat, 'li')}</td>
+            <td style="padding:6px 10px;text-align:center">${badge(liAvg, thresholds.liLat, 'li', avgCannulationOK)}</td>
           </tr>
           <tr>
             <td style="padding:6px 10px;font-weight:500">CSI</td>
             <td style="padding:6px 10px;text-align:center;font-weight:700">${(() => { const IVC = avgAC('ivc'); if (avgR !== null && avgL !== null && IVC !== null && IVC !== 0) return valStr(Math.min(avgR,avgL)/IVC); return '—'; })()}</td>
-            <td style="padding:6px 10px;text-align:center">${(() => { const IVC = avgAC('ivc'); if (avgR !== null && avgL !== null && IVC !== null && IVC !== 0) { const c = Math.min(avgR,avgL)/IVC; return c < thresholds.csi ? '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">Suppressed</span>' : '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(139,26,26,0.1);color:#8B1A1A">Not suppressed</span>'; } return '<span style="color:var(--text-3)">—</span>'; })()}</td>
+            <td style="padding:6px 10px;text-align:center">${(() => { const IVC = avgAC('ivc'); if (avgR !== null && avgL !== null && IVC !== null && IVC !== 0) { if (!avgCannulationOK) return '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(139,26,26,0.1);color:#8B1A1A">Cannulation inadequate</span>'; const c = Math.min(avgR,avgL)/IVC; return c < thresholds.csi ? '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">Suppressed</span>' : '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(139,26,26,0.1);color:#8B1A1A">Not suppressed</span>'; } return '<span style="color:var(--text-3)">—</span>'; })()}</td>
           </tr>
         </tbody>
       </table>
@@ -2825,12 +2890,12 @@ function updateAdvancedCalc() {
           <tr style="border-bottom:1px solid rgba(0,0,0,0.05)">
             <td style="padding:6px 10px;font-weight:500">LI</td>
             <td style="padding:6px 10px;text-align:center;font-weight:700">${valStr(liHigh)}</td>
-            <td style="padding:6px 10px;text-align:center">${badge(liHigh, thresholds.liLat, 'li')}</td>
+            <td style="padding:6px 10px;text-align:center">${badge(liHigh, thresholds.liLat, 'li', highCannulationOK)}</td>
           </tr>
           <tr>
             <td style="padding:6px 10px;font-weight:500">CSI</td>
             <td style="padding:6px 10px;text-align:center;font-weight:700">${(() => { const IVC = avgAC('ivc'); if (highR !== null && highL !== null && IVC !== null && IVC !== 0) return valStr(Math.min(highR,highL)/IVC); return '—'; })()}</td>
-            <td style="padding:6px 10px;text-align:center">${(() => { const IVC = avgAC('ivc'); if (highR !== null && highL !== null && IVC !== null && IVC !== 0) { const c = Math.min(highR,highL)/IVC; return c < thresholds.csi ? '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">Suppressed</span>' : '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(139,26,26,0.1);color:#8B1A1A">Not suppressed</span>'; } return '<span style="color:var(--text-3)">—</span>'; })()}</td>
+            <td style="padding:6px 10px;text-align:center">${(() => { const IVC = avgAC('ivc'); if (highR !== null && highL !== null && IVC !== null && IVC !== 0) { if (!highCannulationOK) return '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(139,26,26,0.1);color:#8B1A1A">Cannulation inadequate</span>'; const c = Math.min(highR,highL)/IVC; return c < thresholds.csi ? '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">Suppressed</span>' : '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(139,26,26,0.1);color:#8B1A1A">Not suppressed</span>'; } return '<span style="color:var(--text-3)">—</span>'; })()}</td>
           </tr>
         </tbody>
       </table>
@@ -2960,14 +3025,18 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
   const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-  function statusBadge(val, thresh, type) {
+  const avgCannulationOK = siR_avg !== null && siL_avg !== null && siR_avg >= siThresh && siL_avg >= siThresh;
+  const highCannulationOK = siR_high !== null && siL_high !== null && siR_high >= siThresh && siL_high >= siThresh;
+
+  function statusBadge(val, thresh, type, cannulationOK) {
     if (val === null) return '<span style="color:#888">—</span>';
     let pass, label;
     if (type === 'si') {
       pass = val >= thresh;
       label = pass ? 'Successful' : 'Unsuccessful';
     } else if (type === 'li') {
-      if (val > thresholds.liLat) { pass = true; label = 'Lateralized'; }
+      if (cannulationOK === false) { pass = false; label = 'Cannulation inadequate'; }
+      else if (val > thresholds.liLat) { pass = true; label = 'Lateralized'; }
       else if (val >= thresholds.liBorder) { pass = null; label = 'Borderline'; }
       else { pass = false; label = 'Bilateral'; }
     }
@@ -2980,9 +3049,9 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
     return `<tr>
       <td style="padding:10px 14px;border-bottom:1px solid #eee;font-size:10.5pt;font-weight:500">${label}</td>
       <td style="padding:10px 14px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">${avgVal !== null ? fmt(avgVal) : '—'}</td>
-      <td style="padding:10px 14px;border-bottom:1px solid #eee;text-align:center">${statusBadge(avgVal, thresh, type)}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #eee;text-align:center">${statusBadge(avgVal, thresh, type, type === 'li' ? avgCannulationOK : undefined)}</td>
       <td style="padding:10px 14px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">${highVal !== null ? fmt(highVal) : '—'}</td>
-      <td style="padding:10px 14px;border-bottom:1px solid #eee;text-align:center">${statusBadge(highVal, thresh, type)}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #eee;text-align:center">${statusBadge(highVal, thresh, type, type === 'li' ? highCannulationOK : undefined)}</td>
     </tr>`;
   }
 
@@ -3079,8 +3148,8 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
         const rows = [
           { label: 'Selectivity Index — Right (SI)', val: siR_avg, thresh: '≥ ' + siThresh.toFixed(1) + ' (' + (protocol === 'stimulated' ? 'stimulated' : 'unstimulated') + ')', interp: siR_avg === null ? '—' : siR_avg >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
           { label: 'Selectivity Index — Left (SI)', val: siL_avg, thresh: '≥ ' + siThresh.toFixed(1) + ' (' + (protocol === 'stimulated' ? 'stimulated' : 'unstimulated') + ')', interp: siL_avg === null ? '—' : siL_avg >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
-          { label: 'Lateralization Index (LI)', val: liAvg, thresh: '> ' + thresholds.liLat.toFixed(1) + ' lateralized | ' + thresholds.liBorder.toFixed(1) + '–' + thresholds.liLat.toFixed(1) + ' borderline | < ' + thresholds.liBorder.toFixed(1) + ' bilateral', interp: liAvg === null ? '—' : liAvg > thresholds.liLat ? 'Lateralized → ' + domSide : liAvg >= thresholds.liBorder ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
-          { label: 'Contralateral Suppression (CSI)', val: csiVal, thresh: '< ' + thresholds.csi.toFixed(1) + ' = suppression present', interp: csiVal === null ? '—' : csiVal < thresholds.csi ? 'Contralateral suppression present' : 'No contralateral suppression' },
+          { label: 'Lateralization Index (LI)', val: liAvg, thresh: '> ' + thresholds.liLat.toFixed(1) + ' lateralized | ' + thresholds.liBorder.toFixed(1) + '–' + thresholds.liLat.toFixed(1) + ' borderline | < ' + thresholds.liBorder.toFixed(1) + ' bilateral', interp: liAvg === null ? '—' : !avgCannulationOK ? 'Cannulation inadequate' : liAvg > thresholds.liLat ? 'Lateralized → ' + domSide : liAvg >= thresholds.liBorder ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
+          { label: 'Contralateral Suppression (CSI)', val: csiVal, thresh: '< ' + thresholds.csi.toFixed(1) + ' = suppression present', interp: csiVal === null ? '—' : !avgCannulationOK ? 'Cannulation inadequate' : csiVal < thresholds.csi ? 'Contralateral suppression present' : 'No contralateral suppression' },
         ];
         return rows.map(r => {
           const pass = r.interp.includes('Successful') || r.interp.includes('Lateralized →') || r.interp.includes('suppression present');
@@ -3096,7 +3165,17 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
 
   <div style="margin-top:20px">
     <h2>Clinical Interpretation</h2>
-    ${(() => { const lines = getInterpretationText(siR_avg, siL_avg, siThresh, liAvg, (() => { const R = avgAC('right'), L = avgAC('left'), I = avgAC('ivc'); return (R !== null && L !== null && I !== null && I !== 0) ? Math.min(R,L)/I : null; })(), avgAC('right'), avgAC('left')); return lines.map(l => '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:' + l.bg + ';border-left:4px solid ' + l.color + ';border-radius:3px;margin-bottom:10px"><span style="font-size:16px;line-height:1.4;flex-shrink:0">' + l.icon + '</span><p style="font-size:10.5pt;line-height:1.7;color:#1a1714;margin:0">' + l.text + '</p></div>').join(''); })()}
+    <p style="font-size:9.5pt;color:#666;margin-bottom:14px;line-height:1.6">The two calculation methods can yield different conclusions. Each is interpreted separately below.</p>
+
+    <h3 style="font-size:11pt;color:#1B5E35;margin-bottom:4px;border-bottom:1px solid #c2ddd3;padding-bottom:4px">Method 1: Average of All Included Values</h3>
+    <div style="margin-bottom:20px;margin-top:10px">
+    ${(() => { const ivcACa = avgAC('ivc'); const csiAvg = (avgR !== null && avgL !== null && ivcACa !== null && ivcACa !== 0) ? Math.min(avgR, avgL) / ivcACa : null; const lines = getInterpretationText(siR_avg, siL_avg, siThresh, liAvg, csiAvg, avgR, avgL); return lines.map(l => '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:' + l.bg + ';border-left:4px solid ' + l.color + ';border-radius:3px;margin-bottom:10px"><span style="font-size:16px;line-height:1.4;flex-shrink:0">' + l.icon + '</span><p style="font-size:10.5pt;line-height:1.7;color:#1a1714;margin:0">' + l.text + '</p></div>').join(''); })()}
+    </div>
+
+    <h3 style="font-size:11pt;color:#7A4F00;margin-bottom:4px;border-bottom:1px solid #e8d5a0;padding-bottom:4px">Method 2: Highest Single Value</h3>
+    <div style="margin-top:10px">
+    ${(() => { const ivcACh = avgAC('ivc'); const csiHigh = (highR !== null && highL !== null && ivcACh !== null && ivcACh !== 0) ? Math.min(highR, highL) / ivcACh : null; const lines = getInterpretationText(siR_high, siL_high, siThresh, liHigh, csiHigh, highR, highL); return lines.map(l => '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:' + l.bg + ';border-left:4px solid ' + l.color + ';border-radius:3px;margin-bottom:10px"><span style="font-size:16px;line-height:1.4;flex-shrink:0">' + l.icon + '</span><p style="font-size:10.5pt;line-height:1.7;color:#1a1714;margin:0">' + l.text + '</p></div>').join(''); })()}
+    </div>
   </div>
   ` : ''}
 
@@ -3221,6 +3300,7 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   if (R !== null && L !== null && Math.min(R,L) !== 0) li = Math.max(R,L) / Math.min(R,L);
   let csi = null;
   if (R !== null && L !== null && IVC !== null && IVC !== 0) csi = Math.min(R,L) / IVC;
+  const cannulationOK = siR !== null && siL !== null && siR >= siThresh && siL >= siThresh;
 
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -3240,8 +3320,8 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   const indexRows = [
     { label: 'Selectivity Index — Right (SI)', value: siR, pass: siR !== null && siR >= siThresh, fail: siR !== null && siR < siThresh, thresh: `≥ ${siThresh.toFixed(1)} (${protocol === 'stimulated' ? 'stimulated' : 'unstimulated'})`, interp: siR === null ? '—' : siR >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
     { label: 'Selectivity Index — Left (SI)',  value: siL, pass: siL !== null && siL >= siThresh, fail: siL !== null && siL < siThresh, thresh: `≥ ${siThresh.toFixed(1)} (${protocol === 'stimulated' ? 'stimulated' : 'unstimulated'})`, interp: siL === null ? '—' : siL >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
-    { label: 'Lateralization Index (LI)',       value: li,  pass: li !== null && li > thresholds.liLat, warn: li !== null && li >= thresholds.liBorder && li <= thresholds.liLat, fail: li !== null && li < thresholds.liBorder, thresh: `> ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${thresholds.liLat.toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`, interp: li === null ? '—' : li > thresholds.liLat ? `Lateralized → ${domSide}` : li >= thresholds.liBorder ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
-    { label: 'Contralateral Suppression (CSI)', value: csi, pass: csi !== null && csi < thresholds.csi, fail: csi !== null && csi >= thresholds.csi, thresh: `< ${thresholds.csi.toFixed(1)} = suppression present`, interp: csi === null ? '—' : csi < thresholds.csi ? 'Contralateral suppression present' : 'No contralateral suppression' },
+    { label: 'Lateralization Index (LI)',       value: li,  pass: cannulationOK && li !== null && li > thresholds.liLat, warn: cannulationOK && li !== null && li >= thresholds.liBorder && li <= thresholds.liLat, fail: li !== null && (!cannulationOK || li < thresholds.liBorder), thresh: `> ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${thresholds.liLat.toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`, interp: li === null ? '—' : !cannulationOK ? 'Cannulation inadequate' : li > thresholds.liLat ? `Lateralized → ${domSide}` : li >= thresholds.liBorder ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
+    { label: 'Contralateral Suppression (CSI)', value: csi, pass: cannulationOK && csi !== null && csi < thresholds.csi, fail: csi !== null && (!cannulationOK || csi >= thresholds.csi), thresh: `< ${thresholds.csi.toFixed(1)} = suppression present`, interp: csi === null ? '—' : !cannulationOK ? 'Cannulation inadequate' : csi < thresholds.csi ? 'Contralateral suppression present' : 'No contralateral suppression' },
   ];
 
   const indexTableRows = indexRows.map(r => {
@@ -4062,5 +4142,35 @@ function loadTestData(num) {
 </div>
 
 <div id="print-report"></div>
+
+<section id="avs-about" style="background:#F0EDE6;border-top:1px solid #D8D3C8;padding:40px;font-family:'DM Sans',sans-serif;color:#5C564E;font-size:13px;line-height:1.8;">
+  <div style="max-width:800px;margin:0 auto;">
+    <h2 style="font-family:'Libre Baskerville',serif;font-size:16px;font-weight:700;color:#1A1714;margin-bottom:8px;">About This Calculator</h2>
+    <p style="margin-bottom:24px;">AVS Calculator is a free, browser-based tool for interpreting adrenal vein sampling (AVS) results in patients with primary aldosteronism. It calculates the Selectivity Index (SI), Lateralization Index (LI), and Contralateral Suppression Index (CSI) in real time, following current Endocrine Society guidelines. All calculations run locally — no patient data is ever transmitted or stored.</p>
+
+    <h3 style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#8C867E;margin-bottom:12px;">Frequently Asked Questions</h3>
+
+    <div style="display:grid;gap:16px;">
+      <details style="border:1px solid #D8D3C8;border-radius:4px;background:#fff;padding:14px 16px;">
+        <summary style="font-weight:600;color:#1A1714;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">What is adrenal vein sampling? <span style="color:#8C867E;font-weight:400;">+</span></summary>
+        <p style="margin-top:10px;color:#5C564E;">Adrenal vein sampling (AVS) is the gold-standard procedure for subtype differentiation in primary aldosteronism (primary hyperaldosteronism). Blood is simultaneously or sequentially drawn from both adrenal veins and the inferior vena cava (IVC) to measure aldosterone and cortisol levels. The resulting indices determine whether aldosterone excess is coming from one gland (unilateral) — which may be surgically curable — or both glands (bilateral), which is managed medically.</p>
+      </details>
+      <details style="border:1px solid #D8D3C8;border-radius:4px;background:#fff;padding:14px 16px;">
+        <summary style="font-weight:600;color:#1A1714;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">How is the Selectivity Index (SI) interpreted? <span style="color:#8C867E;font-weight:400;">+</span></summary>
+        <p style="margin-top:10px;color:#5C564E;">The SI confirms that the catheter was correctly positioned in the adrenal vein, not the IVC. It is calculated as adrenal vein cortisol ÷ IVC cortisol. A threshold of ≥2.0 is used for unstimulated protocols and ≥3.0 for cosyntropin-stimulated protocols. If either SI falls below the cutoff, the sample is non-selective and lateralization cannot be reliably interpreted.</p>
+      </details>
+      <details style="border:1px solid #D8D3C8;border-radius:4px;background:#fff;padding:14px 16px;">
+        <summary style="font-weight:600;color:#1A1714;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">What LI threshold indicates lateralized disease? <span style="color:#8C867E;font-weight:400;">+</span></summary>
+        <p style="margin-top:10px;color:#5C564E;">A Lateralization Index (LI) ≥4.0 is the standard threshold for unilateral (lateralized) aldosterone excess, per Endocrine Society guidelines. An LI between 2.0 and 3.9 is borderline and warrants additional clinical correlation. An LI below 2.0 is consistent with bilateral disease. The CSI provides supporting evidence, particularly in borderline cases.</p>
+      </details>
+      <details style="border:1px solid #D8D3C8;border-radius:4px;background:#fff;padding:14px 16px;">
+        <summary style="font-weight:600;color:#1A1714;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">Is patient data stored or shared? <span style="color:#8C867E;font-weight:400;">+</span></summary>
+        <p style="margin-top:10px;color:#5C564E;">No. All calculations are performed locally in your browser. No data is transmitted to any server, logged, or stored. The session automatically clears after inactivity. This tool is PHI-safe and appropriate for direct clinical use.</p>
+      </details>
+    </div>
+
+    <p style="margin-top:24px;font-size:11px;color:#8C867E;">Built by Rebecca Allegretto, NP, MSN, MBA, ACNP-BC. References: Adler GK et al. <em>J Clin Endocrinol Metab.</em> 2025;110(9):2453–2495 · Funder JW et al. <em>J Clin Endocrinol Metab.</em> 2016;101(5):1889–1916.</p>
+  </div>
+</section>
 </body>
 </html>
