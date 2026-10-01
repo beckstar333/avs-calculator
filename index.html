@@ -838,18 +838,14 @@
     <!-- Patient Summary Preview -->
     <div id="patient-preview-section" style="display:none;margin-top:16px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em">Patient Summary Preview</div>
-        <div style="display:flex;gap:6px">
-          <button id="patient-edit-btn" onclick="togglePatientEdit()" style="font-family:var(--mono);font-size:10px;padding:3px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text-2);cursor:pointer">Customize</button>
-          <button onclick="resetPatientPreview()" style="font-family:var(--mono);font-size:10px;padding:3px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text-3);cursor:pointer">Reset</button>
-        </div>
+        <div style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em">Patient Summary Free Text</div>
+        <button onclick="resetPatientPreview()" style="font-family:var(--mono);font-size:10px;padding:3px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text-3);cursor:pointer">Clear</button>
       </div>
-      <p style="font-size:10px;color:var(--text-3);margin-bottom:6px;font-style:italic">This text appears on the printed patient report. Click "Customize" to edit the wording before printing.</p>
-      <div id="patient-preview-display" style="padding:14px 18px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-size:12px;line-height:1.8;color:var(--text)"></div>
-      <textarea id="patient-preview-edit" style="display:none;width:100%;min-height:120px;padding:14px 18px;border-radius:var(--radius);border:1px solid var(--accent);background:var(--surface);font-family:var(--sans);font-size:12px;line-height:1.8;color:var(--text);resize:vertical;outline:none"></textarea>
+      <p style="font-size:10px;color:var(--text-3);margin-bottom:6px;font-style:italic">This text appears on the printed patient report. User responsible for patient summary information.</p>
+      <textarea id="patient-preview-edit" placeholder="Type patient summary text here (optional)..." style="width:100%;min-height:56px;padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-family:var(--sans);font-size:11px;line-height:1.5;color:var(--text);resize:vertical;outline:none"></textarea>
     </div>
 
-    <button class="copy-results-btn" id="copy-btn" onclick="copyResults()">
+    <button class="copy-results-btn" id="copy-btn" onclick="copyResults()" style="margin-top:22px">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M1 8V2a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
       Copy Results to Clipboard
     </button>
@@ -982,8 +978,8 @@
     <button onclick="openMethods()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Methods</button>
     <span style="margin-left:6px;opacity:0.4">·</span>
     <button onclick="openCitation()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Cite This Tool</button>
-    <span style="margin-left:10px;opacity:0.4">·</span>
-    <a href="/arr" style="font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:0.04em;text-decoration:none;margin-left:6px;font-weight:500">ARR Calculator →</a>
+    <span style="margin-left:6px;opacity:0.4">·</span>
+    <button onclick="scrollToAbout()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">About This Calculator</button>
   </div>
   <div class="toolbar-right">
     <button class="reset-btn reset-danger" onclick="resetAll()">
@@ -2055,12 +2051,26 @@ function copyResults() {
   const cortR = avgCort('right'), cortL = avgCort('left'), cortIVC = avgCort('ivc');
   const siR = (cortR !== null && cortIVC !== null && cortIVC !== 0) ? cortR / cortIVC : null;
   const siL = (cortL !== null && cortIVC !== null && cortIVC !== 0) ? cortL / cortIVC : null;
+  const li = (R !== null && L !== null && Math.min(R, L) !== 0) ? Math.max(R, L) / Math.min(R, L) : null;
+  const csi = (R !== null && L !== null && IVC !== null && IVC !== 0) ? Math.min(R, L) / IVC : null;
+  const protLabel = protocol === 'stimulated' ? 'Cosyntropin-stimulated' : 'Unstimulated';
+  const presetEl = document.getElementById('threshold-preset');
+  const guidelineLabel = presetEl && presetEl.value === 'custom' ? 'Custom thresholds' : (presetEl ? presetEl.options[presetEl.selectedIndex].text : 'ES Guidelines 2025');
+  const cls = classify(siR, siL, siThresh, li, csi, R, L);
+  let classificationLabel = '—';
+  if (cls) {
+    const domLabel = cls.domSide === 'right' ? 'Right' : 'Left';
+    if (cls.classification === 'lateralized') classificationLabel = `Lateralized → ${domLabel}`;
+    else if (cls.classification === 'borderline') classificationLabel = cls.csiSupports ? `Borderline (CSI supports ${domLabel})` : 'Borderline';
+    else if (cls.classification === 'bilateral') classificationLabel = 'Bilateral';
+    else if (cls.classification === 'non_selective') classificationLabel = `Non-selective — uninterpretable (${cls.failingSide})`;
+  }
 
   let lines = ['AVS CALCULATOR RESULTS', '─'.repeat(36)];
   lines.push(`Protocol: ${protLabel}`);
   lines.push(`Guideline: ${guidelineLabel}`);
   lines.push('');
-  lines.push(`Dominant Side: ${domSide}`);
+  lines.push(`Classification: ${classificationLabel}`);
   lines.push('');
   lines.push(`SI Right:  ${siR !== null ? fmt(siR) : '—'}  (threshold ≥ ${siThresh.toFixed(1)}) — ${siR !== null ? (siR >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}`);
   lines.push(`SI Left:   ${siL !== null ? fmt(siL) : '—'}  (threshold ≥ ${siThresh.toFixed(1)}) — ${siL !== null ? (siL >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}`);
@@ -2069,7 +2079,8 @@ function copyResults() {
   lines.push('');
   lines.push(`Generated by AVS Calculator ${APP_VERSION} — avsresults.com`);
 
-  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+  const text = lines.join('\n');
+  const onDone = () => {
     const btn = document.getElementById('copy-btn');
     btn.classList.add('copied');
     btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Copied to Clipboard`;
@@ -2077,7 +2088,13 @@ function copyResults() {
       btn.classList.remove('copied');
       btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M1 8V2a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Copy Results to Clipboard`;
     }, 2500);
-  });
+  };
+  const onFail = (err) => { console.error('Copy failed:', err); alert('Could not copy to clipboard — please copy manually.'); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(onDone).catch(onFail);
+  } else {
+    onFail(new Error('Clipboard API unavailable'));
+  }
 }
 
 // ── Keyboard Navigation ──
@@ -2283,96 +2300,22 @@ function updateCalcIndicesTable(siR, siL, siThresh, li, csi, R, L, cls) {
   updatePatientPreview(cls);
 }
 
-let patientPreviewCustomized = false;
-
-function getPatientPreviewText(cls) {
-  if (!cls) return '';
-  const c = cls.classification;
-  const domLabel = cls.domSide === 'right' ? 'right' : 'left';
-
-  if (c === 'lateralized') {
-    return `YOUR RESULTS POINT TO ONE GLAND\n\nYour results show that one of your adrenal glands - the ${domLabel} - is producing significantly more aldosterone than the other. This pattern often points to a single gland as the source of the problem. Treatment decisions will be made by your doctor.`;
-  } else if (c === 'borderline') {
-    return `THE RESULTS ARE NOT FULLY CLEAR YET\n\nThere is a possible tendency for one adrenal gland to be more active than the other, but the difference is not large enough to be certain. Further clinical decisions will be made by your doctor.`;
-  } else if (c === 'bilateral') {
-    return `YOUR RESULTS SUGGEST BOTH GLANDS ARE INVOLVED\n\nYour results show that both adrenal glands are producing aldosterone at similar levels. This pattern is most consistent with both glands being involved rather than just one. Further clinical decisions will be made by your doctor.`;
-  } else if (c === 'non_selective') {
-    return `THE SAMPLES NEED TO BE RECHECKED\n\nThe blood samples did not capture enough hormone from one or both adrenal glands for a reliable comparison. This sometimes happens because the small adrenal veins can be difficult to access. Further clinical decisions will be made by your doctor.`;
-  }
-  return '';
-}
-
 function updatePatientPreview(cls) {
   const section = document.getElementById('patient-preview-section');
-  const display = document.getElementById('patient-preview-display');
-  const edit = document.getElementById('patient-preview-edit');
-  if (!section || !display) return;
-
-  if (!cls) { section.style.display = 'none'; return; }
-  section.style.display = 'block';
-
-  const text = getPatientPreviewText(cls);
-  display.innerHTML = text.replace(/\n/g, '<br>');
-
-  if (!patientPreviewCustomized) {
-    edit.value = text;
-  }
-}
-
-function togglePatientEdit() {
-  const display = document.getElementById('patient-preview-display');
-  const edit = document.getElementById('patient-preview-edit');
-  const btn = document.getElementById('patient-edit-btn');
-  const isEditing = edit.style.display !== 'none';
-
-  if (isEditing) {
-    // Save edits
-    patientPreviewCustomized = true;
-    display.innerHTML = edit.value.replace(/\n/g, '<br>');
-    display.style.display = 'block';
-    edit.style.display = 'none';
-    btn.textContent = 'Customize';
-  } else {
-    // Open editor
-    if (!patientPreviewCustomized) {
-      edit.value = display.innerText;
-    }
-    display.style.display = 'none';
-    edit.style.display = 'block';
-    edit.focus();
-    btn.textContent = 'Done';
-  }
+  if (!section) return;
+  section.style.display = cls ? 'block' : 'none';
 }
 
 function resetPatientPreview() {
-  patientPreviewCustomized = false;
-  const display = document.getElementById('patient-preview-display');
   const edit = document.getElementById('patient-preview-edit');
-  const btn = document.getElementById('patient-edit-btn');
-  // Regenerate from current classification
-  const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
-  const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
-  const cortR = avgCort('right'), cortL = avgCort('left'), cortIVC = avgCort('ivc');
-  const siR = (cortR !== null && cortIVC !== null && cortIVC !== 0) ? cortR / cortIVC : null;
-  const siL = (cortL !== null && cortIVC !== null && cortIVC !== 0) ? cortL / cortIVC : null;
-  let li = null;
-  if (R !== null && L !== null && Math.min(R,L) !== 0) li = Math.max(R,L) / Math.min(R,L);
-  let csi = null;
-  if (R !== null && L !== null && IVC !== null && IVC !== 0) csi = Math.min(R,L) / IVC;
-  const cls = classify(siR, siL, siThresh, li, csi, R, L);
-  const text = getPatientPreviewText(cls);
-  display.innerHTML = text.replace(/\n/g, '<br>');
-  edit.value = text;
-  display.style.display = 'block';
-  edit.style.display = 'none';
-  btn.textContent = 'Customize';
+  if (edit) edit.value = '';
 }
 
 function getCustomPatientText() {
-  if (patientPreviewCustomized) {
-    return document.getElementById('patient-preview-edit').value;
-  }
-  return null;
+  const edit = document.getElementById('patient-preview-edit');
+  if (!edit) return null;
+  const val = edit.value.trim();
+  return val ? val : null;
 }
 
 function toggleLangSelector() {
@@ -2445,6 +2388,14 @@ function confirmPrintReport() {
 document.getElementById('print-options-overlay').addEventListener('click', function(e) {
   if (e.target === this) closePrintOptions();
 });
+
+function scrollToAbout() {
+  const el = document.getElementById('avs-about');
+  if (!el) return;
+  const details = document.getElementById('avs-about-details');
+  if (details) details.open = true;
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 function openChangelog() {
   document.getElementById('changelog-overlay').classList.add('open');
@@ -3122,7 +3073,7 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
   ` : ''}
 
   ${wantSummary ? `
-  <div style="${wantComparison ? 'page-break-before:always;' : ''}">
+  <div style="page-break-before:always">
   <h2>Measured Values &amp; A/C Ratios</h2>
   <h3 style="color:#2B3A8C;margin-bottom:6px">Inferior Vena Cava (IVC) — Peripheral Reference</h3>
   <div style="border:1px solid #dde3f5;border-radius:3px;overflow:hidden;margin-bottom:18px">${buildSampleTableHTML('ivc', '#2B3A8C')}</div>
@@ -3131,10 +3082,16 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
   <h3 style="color:#7A1F1F;margin-bottom:6px">Left Adrenal Vein</h3>
   <div style="border:1px solid #dec4c4;border-radius:3px;overflow:hidden;margin-bottom:18px">${buildSampleTableHTML('left', '#7A1F1F')}</div>
   </div>
+  ` : ''}
 
+  ${(wantSummary || wantWorksheet) ? `
   <div style="page-break-before:always"></div>
-  <h2>Calculated Indices</h2>
-  <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-radius:3px;overflow:hidden">
+  <h2 style="border-bottom-color:#1B5E35;color:#1B5E35">Method 1: Average of All Included Values</h2>
+  <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">All included sample A/C ratios are averaged for each site. This is the standard calculation method.</p>
+
+  ${wantSummary ? `
+  <h3 style="font-size:11pt;color:#1B5E35;margin:16px 0 10px;border-bottom:1px solid #c2ddd3;padding-bottom:4px">Calculated Indices</h3>
+  <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-radius:3px;overflow:hidden;margin-bottom:20px">
     <thead><tr style="background:#f5f5f5">
       <th style="padding:8px 12px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Index</th>
       <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Value</th>
@@ -3143,7 +3100,8 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
     </tr></thead>
     <tbody>
       ${(() => {
-        const csiVal = (avgAC('right') !== null && avgAC('left') !== null && avgAC('ivc') !== null && avgAC('ivc') !== 0) ? Math.min(avgAC('right'), avgAC('left')) / avgAC('ivc') : null;
+        const ivcACa = avgAC('ivc');
+        const csiVal = (avgR !== null && avgL !== null && ivcACa !== null && ivcACa !== 0) ? Math.min(avgR, avgL) / ivcACa : null;
         const domSide = (avgR !== null && avgL !== null) ? (avgR > avgL ? 'Right' : 'Left') : null;
         const rows = [
           { label: 'Selectivity Index — Right (SI)', val: siR_avg, thresh: '≥ ' + siThresh.toFixed(1) + ' (' + (protocol === 'stimulated' ? 'stimulated' : 'unstimulated') + ')', interp: siR_avg === null ? '—' : siR_avg >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
@@ -3163,25 +3121,14 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
     </tbody>
   </table>
 
-  <div style="margin-top:20px">
-    <h2>Clinical Interpretation</h2>
-    <p style="font-size:9.5pt;color:#666;margin-bottom:14px;line-height:1.6">The two calculation methods can yield different conclusions. Each is interpreted separately below.</p>
-
-    <h3 style="font-size:11pt;color:#1B5E35;margin-bottom:4px;border-bottom:1px solid #c2ddd3;padding-bottom:4px">Method 1: Average of All Included Values</h3>
-    <div style="margin-bottom:20px;margin-top:10px">
-    ${(() => { const ivcACa = avgAC('ivc'); const csiAvg = (avgR !== null && avgL !== null && ivcACa !== null && ivcACa !== 0) ? Math.min(avgR, avgL) / ivcACa : null; const lines = getInterpretationText(siR_avg, siL_avg, siThresh, liAvg, csiAvg, avgR, avgL); return lines.map(l => '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:' + l.bg + ';border-left:4px solid ' + l.color + ';border-radius:3px;margin-bottom:10px"><span style="font-size:16px;line-height:1.4;flex-shrink:0">' + l.icon + '</span><p style="font-size:10.5pt;line-height:1.7;color:#1a1714;margin:0">' + l.text + '</p></div>').join(''); })()}
-    </div>
-
-    <h3 style="font-size:11pt;color:#7A4F00;margin-bottom:4px;border-bottom:1px solid #e8d5a0;padding-bottom:4px">Method 2: Highest Single Value</h3>
-    <div style="margin-top:10px">
-    ${(() => { const ivcACh = avgAC('ivc'); const csiHigh = (highR !== null && highL !== null && ivcACh !== null && ivcACh !== 0) ? Math.min(highR, highL) / ivcACh : null; const lines = getInterpretationText(siR_high, siL_high, siThresh, liHigh, csiHigh, highR, highL); return lines.map(l => '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:' + l.bg + ';border-left:4px solid ' + l.color + ';border-radius:3px;margin-bottom:10px"><span style="font-size:16px;line-height:1.4;flex-shrink:0">' + l.icon + '</span><p style="font-size:10.5pt;line-height:1.7;color:#1a1714;margin:0">' + l.text + '</p></div>').join(''); })()}
-    </div>
+  <h3 style="font-size:11pt;color:#1B5E35;margin:16px 0 10px;border-bottom:1px solid #c2ddd3;padding-bottom:4px">Clinical Interpretation</h3>
+  <div style="margin-bottom:20px">
+  ${(() => { const ivcACa = avgAC('ivc'); const csiAvg = (avgR !== null && avgL !== null && ivcACa !== null && ivcACa !== 0) ? Math.min(avgR, avgL) / ivcACa : null; const lines = getInterpretationText(siR_avg, siL_avg, siThresh, liAvg, csiAvg, avgR, avgL); return lines.map(l => '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:' + l.bg + ';border-left:4px solid ' + l.color + ';border-radius:3px;margin-bottom:10px"><span style="font-size:16px;line-height:1.4;flex-shrink:0">' + l.icon + '</span><p style="font-size:10.5pt;line-height:1.7;color:#1a1714;margin:0">' + l.text + '</p></div>').join(''); })()}
   </div>
   ` : ''}
 
   ${wantWorksheet ? `
-  <div style="page-break-before:always"></div>
-  <h2>Calculation Workup</h2>
+  <h3 style="font-size:11pt;color:#1B5E35;margin:16px 0 10px;border-bottom:1px solid #c2ddd3;padding-bottom:4px">Calculation Workup</h3>
   ${(() => {
     const aldoUnit = units.aldo;
     const cortUnit = units.cort;
@@ -3191,12 +3138,9 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
       if (result !== null) return '<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + '">' + label + '</td><td style="padding:8px 12px;font-size:9.5pt;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + 'font-family:monospace;color:#555">' + formula + '</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + 'text-align:center;font-family:monospace">' + fmt(result) + '</td></tr>';
       return '<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + '">' + label + '</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + 'font-style:italic">Insufficient data</td></tr>';
     }
-
     function sampleRows(side) {
       return state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
     }
-
-    // ─── METHOD 1: AVERAGE ───
     function avgSection(side, label, color) {
       const samples = sampleRows(side);
       if (!samples.length) return '<p style="color:#aaa;font-size:9pt;font-style:italic">No included samples for ' + label + '.</p>';
@@ -3208,8 +3152,84 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
         : '<tr style="background:#f0f0f0;border-top:2px solid #ddd"><td style="padding:6px 10px;font-size:8.5pt;color:#555;font-style:italic;font-weight:600">Used in calculations</td><td style="padding:6px 10px"></td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">' + avgCortVal.toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;text-align:center;font-size:8.5pt;color:#888;font-style:italic">single sample</td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:10pt;font-weight:700;color:' + color + '">' + fmt(avgACVal) + '</td></tr>';
       return '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:' + color + ';text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">' + label + '</p><table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px">' + thd + '<tbody>' + rows + sumRow + '</tbody></table>';
     }
+    const ivcAC = avgAC('ivc'), rightAC = avgAC('right'), leftAC = avgAC('left');
+    const cortIVCw = avgCort('ivc'), cortRw = avgCort('right'), cortLw = avgCort('left');
+    const domAvg = (rightAC !== null && leftAC !== null) ? (rightAC > leftAC ? 'Right' : 'Left') : '—';
+    const contraAvg = (rightAC !== null && leftAC !== null) ? Math.min(rightAC, leftAC) : null;
+    const higherAvg = (rightAC !== null && leftAC !== null) ? Math.max(rightAC, leftAC) : null;
+    const siRavg = (cortRw !== null && cortIVCw !== null && cortIVCw !== 0) ? cortRw/cortIVCw : null;
+    const siLavg = (cortLw !== null && cortIVCw !== null && cortIVCw !== 0) ? cortLw/cortIVCw : null;
+    const liAvgW  = (higherAvg !== null && contraAvg !== null && contraAvg !== 0) ? higherAvg/contraAvg : null;
+    const csiAvgW = (contraAvg !== null && ivcAC !== null && ivcAC !== 0) ? contraAvg/ivcAC : null;
+    return avgSection('ivc','Inferior Vena Cava (IVC)','#2B3A8C') + avgSection('right','Right Adrenal Vein','#1B4D3E') + avgSection('left','Left Adrenal Vein','#7A1F1F') +
+      '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:#1B5E35;text-transform:uppercase;letter-spacing:0.08em;margin:14px 0 6px">Index Derivation — Average Method</p>' +
+      derivHead +
+      derivRow('SI — Right', 'Avg Right Cortisol ÷ Avg IVC Cortisol = ' + (cortRw !== null ? fmt(cortRw) : '—') + ' ÷ ' + (cortIVCw !== null ? fmt(cortIVCw) : '—'), siRavg, false) +
+      derivRow('SI — Left', 'Avg Left Cortisol ÷ Avg IVC Cortisol = ' + (cortLw !== null ? fmt(cortLw) : '—') + ' ÷ ' + (cortIVCw !== null ? fmt(cortIVCw) : '—'), siLavg, false) +
+      derivRow('LI', domAvg + ' A/C ÷ Contralateral A/C = ' + (higherAvg !== null ? fmt(higherAvg) : '—') + ' ÷ ' + (contraAvg !== null ? fmt(contraAvg) : '—'), liAvgW, false) +
+      derivRow('CSI', 'Contralateral A/C ÷ IVC A/C = ' + (contraAvg !== null ? fmt(contraAvg) : '—') + ' ÷ ' + (ivcAC !== null ? fmt(ivcAC) : '—'), csiAvgW, true) +
+      '</tbody></table>';
+  })()}
+  ` : ''}
+  ` : ''}
 
-    // ─── METHOD 2: HIGHEST VALUE ───
+  ${(wantSummary || wantWorksheet) ? `
+  <div style="page-break-before:always"></div>
+  <h2 style="border-bottom-color:#7A4F00;color:#7A4F00">Method 2: Highest Single Value</h2>
+  <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">Only the single highest A/C ratio from each site is used. This can reveal whether a single sample drives lateralization.</p>
+
+  ${wantSummary ? `
+  <h3 style="font-size:11pt;color:#7A4F00;margin:16px 0 10px;border-bottom:1px solid #e8d5a0;padding-bottom:4px">Calculated Indices</h3>
+  <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-radius:3px;overflow:hidden;margin-bottom:20px">
+    <thead><tr style="background:#f5f5f5">
+      <th style="padding:8px 12px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Index</th>
+      <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Value</th>
+      <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Threshold</th>
+      <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Result</th>
+    </tr></thead>
+    <tbody>
+      ${(() => {
+        const ivcACh = avgAC('ivc');
+        const csiVal = (highR !== null && highL !== null && ivcACh !== null && ivcACh !== 0) ? Math.min(highR, highL) / ivcACh : null;
+        const domSide = (highR !== null && highL !== null) ? (highR > highL ? 'Right' : 'Left') : null;
+        const rows = [
+          { label: 'Selectivity Index — Right (SI)', val: siR_high, thresh: '≥ ' + siThresh.toFixed(1) + ' (' + (protocol === 'stimulated' ? 'stimulated' : 'unstimulated') + ')', interp: siR_high === null ? '—' : siR_high >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
+          { label: 'Selectivity Index — Left (SI)', val: siL_high, thresh: '≥ ' + siThresh.toFixed(1) + ' (' + (protocol === 'stimulated' ? 'stimulated' : 'unstimulated') + ')', interp: siL_high === null ? '—' : siL_high >= siThresh ? 'Successful cannulation' : 'Unsuccessful cannulation' },
+          { label: 'Lateralization Index (LI)', val: liHigh, thresh: '> ' + thresholds.liLat.toFixed(1) + ' lateralized | ' + thresholds.liBorder.toFixed(1) + '–' + thresholds.liLat.toFixed(1) + ' borderline | < ' + thresholds.liBorder.toFixed(1) + ' bilateral', interp: liHigh === null ? '—' : !highCannulationOK ? 'Cannulation inadequate' : liHigh > thresholds.liLat ? 'Lateralized → ' + domSide : liHigh >= thresholds.liBorder ? 'Borderline lateralization' : 'No lateralization (bilateral)' },
+          { label: 'Contralateral Suppression (CSI)', val: csiVal, thresh: '< ' + thresholds.csi.toFixed(1) + ' = suppression present', interp: csiVal === null ? '—' : !highCannulationOK ? 'Cannulation inadequate' : csiVal < thresholds.csi ? 'Contralateral suppression present' : 'No contralateral suppression' },
+        ];
+        return rows.map(r => {
+          const pass = r.interp.includes('Successful') || r.interp.includes('Lateralized →') || r.interp.includes('suppression present');
+          const warn = r.interp.includes('Borderline');
+          const fail = r.interp !== '—' && !pass && !warn;
+          const statusColor = pass ? '#1B5E35' : warn ? '#7A4F00' : fail ? '#8B1A1A' : '#888';
+          const statusBg = pass ? '#E8F5EE' : warn ? '#FFF8E6' : fail ? '#FDEAEA' : '#f5f5f5';
+          return '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:10pt">' + r.label + '</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">' + (r.val !== null ? fmt(r.val) : '—') + '</td><td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:9pt;color:#666;text-align:center">' + r.thresh + '</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center"><span style="display:inline-block;padding:3px 10px;border-radius:2px;font-size:9pt;font-weight:600;background:' + statusBg + ';color:' + statusColor + '">' + r.interp + '</span></td></tr>';
+        }).join('');
+      })()}
+    </tbody>
+  </table>
+
+  <h3 style="font-size:11pt;color:#7A4F00;margin:16px 0 10px;border-bottom:1px solid #e8d5a0;padding-bottom:4px">Clinical Interpretation</h3>
+  <div style="margin-bottom:20px">
+  ${(() => { const ivcACh = avgAC('ivc'); const csiHigh = (highR !== null && highL !== null && ivcACh !== null && ivcACh !== 0) ? Math.min(highR, highL) / ivcACh : null; const lines = getInterpretationText(siR_high, siL_high, siThresh, liHigh, csiHigh, highR, highL); return lines.map(l => '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:' + l.bg + ';border-left:4px solid ' + l.color + ';border-radius:3px;margin-bottom:10px"><span style="font-size:16px;line-height:1.4;flex-shrink:0">' + l.icon + '</span><p style="font-size:10.5pt;line-height:1.7;color:#1a1714;margin:0">' + l.text + '</p></div>').join(''); })()}
+  </div>
+  ` : ''}
+
+  ${wantWorksheet ? `
+  <h3 style="font-size:11pt;color:#7A4F00;margin:16px 0 10px;border-bottom:1px solid #e8d5a0;padding-bottom:4px">Calculation Workup</h3>
+  ${(() => {
+    const aldoUnit = units.aldo;
+    const cortUnit = units.cort;
+    const thd = '<thead><tr style="background:#f5f5f5"><th style="padding:6px 10px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Sample</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;letter-spacing:0.05em">ALDO (' + aldoUnit + ')</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;letter-spacing:0.05em">CORTISOL (' + cortUnit + ')</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">Calculation</th><th style="padding:6px 10px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em">A/C Ratio</th></tr></thead>';
+    const derivHead = '<table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden"><thead><tr style="background:#f5f5f5"><th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:18%">Index</th><th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Formula &amp; Values</th><th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:14%">Result</th></tr></thead><tbody>';
+    function derivRow(label, formula, result, isLast) {
+      if (result !== null) return '<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + '">' + label + '</td><td style="padding:8px 12px;font-size:9.5pt;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + 'font-family:monospace;color:#555">' + formula + '</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + 'text-align:center;font-family:monospace">' + fmt(result) + '</td></tr>';
+      return '<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + '">' + label + '</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;' + (isLast ? '' : 'border-bottom:1px solid #eee;') + 'font-style:italic">Insufficient data</td></tr>';
+    }
+    function sampleRows(side) {
+      return state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
+    }
     function highSection(side, label, color) {
       const samples = sampleRows(side);
       if (!samples.length) return '<p style="color:#aaa;font-size:9pt;font-style:italic">No included samples for ' + label + '.</p>';
@@ -3224,21 +3244,9 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
       const sumRow = '<tr style="background:#f0f0f0;border-top:2px solid #ddd"><td style="padding:6px 10px;font-size:8.5pt;color:#555;font-style:italic;font-weight:600">Highest value used</td><td style="padding:6px 10px"></td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">' + highest.cort.toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;text-align:center;font-size:8.5pt;color:#888;font-style:italic">highest A/C ratio</td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:10pt;font-weight:700;color:' + color + '">' + fmt(highest.ac) + '</td></tr>';
       return '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:' + color + ';text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">' + label + '</p><table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px">' + thd + '<tbody>' + rows + sumRow + '</tbody></table>';
     }
-
-    // Average method values
-    const ivcAC = avgAC('ivc'), rightAC = avgAC('right'), leftAC = avgAC('left');
-    const cortIVCw = avgCort('ivc'), cortRw = avgCort('right'), cortLw = avgCort('left');
-    const domAvg = (rightAC !== null && leftAC !== null) ? (rightAC > leftAC ? 'Right' : 'Left') : '—';
-    const contraAvg = (rightAC !== null && leftAC !== null) ? Math.min(rightAC, leftAC) : null;
-    const higherAvg = (rightAC !== null && leftAC !== null) ? Math.max(rightAC, leftAC) : null;
-    const siRavg = (cortRw !== null && cortIVCw !== null && cortIVCw !== 0) ? cortRw/cortIVCw : null;
-    const siLavg = (cortLw !== null && cortIVCw !== null && cortIVCw !== 0) ? cortLw/cortIVCw : null;
-    const liAvgW  = (higherAvg !== null && contraAvg !== null && contraAvg !== 0) ? higherAvg/contraAvg : null;
-    const csiAvgW = (contraAvg !== null && ivcAC !== null && ivcAC !== 0) ? contraAvg/ivcAC : null;
-
-    // Highest method values
     function hAC(side) { const s = sampleRows(side); if (!s.length) return null; return Math.max(...s.map(x => parseFloat(x.aldo)/parseFloat(x.cort))); }
     function hCort(side) { const s = sampleRows(side); if (!s.length) return null; return Math.max(...s.map(x => parseFloat(x.cort))); }
+    const ivcAC = avgAC('ivc');
     const hR = hAC('right'), hL = hAC('left'), hCortR = hCort('right'), hCortL = hCort('left'), hCortIVC = hCort('ivc');
     const domHigh = (hR !== null && hL !== null) ? (hR > hL ? 'Right' : 'Left') : '—';
     const contraHigh = (hR !== null && hL !== null) ? Math.min(hR, hL) : null;
@@ -3247,23 +3255,8 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
     const siLhigh = (hCortL !== null && hCortIVC !== null && hCortIVC !== 0) ? hCortL/hCortIVC : null;
     const liHighW  = (higherHigh !== null && contraHigh !== null && contraHigh !== 0) ? higherHigh/contraHigh : null;
     const csiHighW = (contraHigh !== null && ivcAC !== null && ivcAC !== 0) ? contraHigh/ivcAC : null;
-
-    return '<h3 style="font-size:11pt;color:#1B5E35;margin-bottom:4px;border-bottom:1px solid #c2ddd3;padding-bottom:4px">Method 1: Average of All Included Values</h3>' +
-      '<p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">All included sample A/C ratios are averaged for each site. This is the standard calculation method.</p>' +
-      avgSection('ivc','Inferior Vena Cava (IVC)','#2B3A8C') + avgSection('right','Right Adrenal Vein','#1B4D3E') + avgSection('left','Left Adrenal Vein','#7A1F1F') +
-      '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:#1B5E35;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Index Derivation — Average Method</p>' +
-      derivHead +
-      derivRow('SI — Right', 'Avg Right Cortisol ÷ Avg IVC Cortisol = ' + (cortRw !== null ? fmt(cortRw) : '—') + ' ÷ ' + (cortIVCw !== null ? fmt(cortIVCw) : '—'), siRavg, false) +
-      derivRow('SI — Left', 'Avg Left Cortisol ÷ Avg IVC Cortisol = ' + (cortLw !== null ? fmt(cortLw) : '—') + ' ÷ ' + (cortIVCw !== null ? fmt(cortIVCw) : '—'), siLavg, false) +
-      derivRow('LI', domAvg + ' A/C ÷ Contralateral A/C = ' + (higherAvg !== null ? fmt(higherAvg) : '—') + ' ÷ ' + (contraAvg !== null ? fmt(contraAvg) : '—'), liAvgW, false) +
-      derivRow('CSI', 'Contralateral A/C ÷ IVC A/C = ' + (contraAvg !== null ? fmt(contraAvg) : '—') + ' ÷ ' + (ivcAC !== null ? fmt(ivcAC) : '—'), csiAvgW, true) +
-      '</tbody></table>' +
-
-      '<div style="page-break-before:always"></div>' +
-      '<h3 style="font-size:11pt;color:#7A4F00;margin-bottom:4px;border-bottom:1px solid #e8d5a0;padding-bottom:4px">Method 2: Highest Single Value</h3>' +
-      '<p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">Only the single highest A/C ratio from each site is used. This can reveal whether a single sample drives lateralization.</p>' +
-      highSection('ivc','Inferior Vena Cava (IVC)','#2B3A8C') + highSection('right','Right Adrenal Vein','#1B4D3E') + highSection('left','Left Adrenal Vein','#7A1F1F') +
-      '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:#7A4F00;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Index Derivation — Highest Value Method</p>' +
+    return highSection('ivc','Inferior Vena Cava (IVC)','#2B3A8C') + highSection('right','Right Adrenal Vein','#1B4D3E') + highSection('left','Left Adrenal Vein','#7A1F1F') +
+      '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:#7A4F00;text-transform:uppercase;letter-spacing:0.08em;margin:14px 0 6px">Index Derivation — Highest Value Method</p>' +
       derivHead +
       derivRow('SI — Right', 'Highest Right Cortisol ÷ Highest IVC Cortisol = ' + (hCortR !== null ? fmt(hCortR) : '—') + ' ÷ ' + (hCortIVC !== null ? fmt(hCortIVC) : '—'), siRhigh, false) +
       derivRow('SI — Left', 'Highest Left Cortisol ÷ Highest IVC Cortisol = ' + (hCortL !== null ? fmt(hCortL) : '—') + ' ÷ ' + (hCortIVC !== null ? fmt(hCortIVC) : '—'), siLhigh, false) +
@@ -3271,6 +3264,7 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
       derivRow('CSI', 'Contralateral A/C ÷ IVC A/C = ' + (contraHigh !== null ? fmt(contraHigh) : '—') + ' ÷ ' + (ivcAC !== null ? fmt(ivcAC) : '—'), csiHighW, true) +
       '</tbody></table>';
   })()}
+  ` : ''}
   ` : ''}
 
   ${wantPatient ? langs.map(lang => `
@@ -3284,10 +3278,11 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
 </div>
 </body></html>`;
 
-  const win = window.open('', 'avs_advanced_report', 'width=860,height=800,scrollbars=yes');
-  if (!win) { alert('Pop-up blocked. Please allow pop-ups for avsresults.com.'); return; }
-  win.document.write(html);
-  win.document.close();
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, 'avs_advanced_report', 'width=860,height=800,scrollbars=yes');
+  if (!win) { URL.revokeObjectURL(url); alert('Pop-up blocked. Please allow pop-ups for avsresults.com.'); return; }
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false, langs=['en']) {
@@ -3545,14 +3540,15 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
 </body>
 </html>`;
 
-  const win = window.open('', 'avs_report', 'width=900,height=800,scrollbars=yes');
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, 'avs_report', 'width=900,height=800,scrollbars=yes');
   if (!win) {
+    URL.revokeObjectURL(url);
     alert('Pop-up blocked. Please allow pop-ups for avsresults.com in your browser settings, then try again.');
     return;
   }
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 // ══════════════════════════════════════════════
@@ -3781,7 +3777,7 @@ const patientTranslations = {
 function buildPatientSectionHTML(dateStr, lang='en', timeStr='') {
   const t = patientTranslations[lang] || patientTranslations['en'];
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
-  const siThresh = protocol === 'stimulated' ? 3.0 : 2.0;
+  const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
   const cortR = avgCort('right'), cortL = avgCort('left'), cortIVC = avgCort('ivc');
   const siR = (cortR !== null && cortIVC !== null && cortIVC !== 0) ? cortR / cortIVC : null;
   const siL = (cortL !== null && cortIVC !== null && cortIVC !== 0) ? cortL / cortIVC : null;
@@ -3806,57 +3802,34 @@ function buildPatientSectionHTML(dateStr, lang='en', timeStr='') {
   const cls = classify(siR, siL, siThresh, li, csi, R, L);
   const c = cls ? cls.classification : null;
 
+  const resultsUnclear = (siR !== null || siL !== null) && (c === 'non_selective' || li === null);
+
   let cannulationCard = '';
   if (siR === null && siL === null) {
     cannulationCard = `<div class="patient-card" style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">⚠️</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.noDataTitle}</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">${t.noDataText}</p></div>`;
-  } else if (c === 'non_selective') {
-    cannulationCard = `<div class="patient-card" style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">📋</div><h3 style="font-size:13pt;color:#5C564E;margin-bottom:10px;font-family:'Libre Baskerville',serif">THE PROCEDURE WAS PERFORMED</h3><p style="font-size:11pt;color:#3a3530;line-height:1.8">Blood samples were collected from your adrenal veins, but the samples from one or both sides may not have captured enough hormone for a reliable comparison. This is sometimes due to the small size and position of the adrenal veins. Your care team will review the results and decide on next steps.</p></div>`;
+  } else if (resultsUnclear) {
+    cannulationCard = `<div class="patient-card" style="background:#FFF8E6;border:1px solid #e8d5a0;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">🔍</div><h3 style="font-size:13pt;color:#7A4F00;margin-bottom:10px;font-family:'Libre Baskerville',serif">THE RESULTS ARE UNCLEAR</h3><p style="font-size:11pt;color:#5a3e00;line-height:1.8">Your doctor will interpret these results and give you more information and discuss the next steps.</p></div>`;
   } else {
     cannulationCard = `<div class="patient-card" style="background:#E8F5EE;border:1px solid #a8d4b8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">✅</div><h3 style="font-size:13pt;color:#1B5E35;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.successTitle}</h3><p style="font-size:11pt;color:#1a3d28;line-height:1.8">${t.successText}</p></div>`;
   }
   cards += cannulationCard;
 
-  // Use customized patient preview text if available, otherwise fall back to defaults
+  // User-provided free text (optional). Printed only if the user typed something.
   const customText = getCustomPatientText();
-
-  if (c && c !== 'non_selective' && li !== null) {
-    let findingCard = '';
-    const styles = { lateralized: { bg: '#E8F5EE', border: '#a8d4b8', icon: '✅', hColor: '#1B5E35', pColor: '#1a3d28' }, borderline: { bg: '#FFF8E6', border: '#e8d5a0', icon: '🔍', hColor: '#7A4F00', pColor: '#5a3e00' }, bilateral: { bg: '#F7F5F0', border: '#D8D3C8', icon: 'ℹ️', hColor: '#5C564E', pColor: '#3a3530' } };
-    const s = styles[c];
-    if (customText) {
-      const lines = customText.split('\n').filter(l => l.trim());
-      const heading = lines[0] || '';
-      const body = lines.slice(1).join(' ').trim();
-      findingCard = `<div class="patient-card" style="background:${s.bg};border:1px solid ${s.border};border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">${s.icon}</div><h3 style="font-size:13pt;color:${s.hColor};margin-bottom:10px;font-family:'Libre Baskerville',serif">${heading}</h3><p style="font-size:11pt;color:${s.pColor};line-height:1.8">${body}</p></div>`;
-    } else if (c === 'lateralized') {
-      findingCard = `<div class="patient-card" style="background:${s.bg};border:1px solid ${s.border};border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">${s.icon}</div><h3 style="font-size:13pt;color:${s.hColor};margin-bottom:10px;font-family:'Libre Baskerville',serif">YOUR RESULTS POINT TO ONE GLAND</h3><p style="font-size:11pt;color:${s.pColor};line-height:1.8">Your results show that one of your adrenal glands — the ${domSideLabel} — is producing significantly more aldosterone than the other. This pattern often points to a single gland as the source of the problem. Your doctor will review the full picture — including your scans, lab work, and overall health — before recommending next steps.</p></div>`;
-    } else if (c === 'borderline') {
-      findingCard = `<div class="patient-card" style="background:${s.bg};border:1px solid ${s.border};border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">${s.icon}</div><h3 style="font-size:13pt;color:${s.hColor};margin-bottom:10px;font-family:'Libre Baskerville',serif">THE RESULTS ARE NOT FULLY CLEAR YET</h3><p style="font-size:11pt;color:${s.pColor};line-height:1.8">${t.borderlineText}</p></div>`;
-    } else if (c === 'bilateral') {
-      findingCard = `<div class="patient-card" style="background:${s.bg};border:1px solid ${s.border};border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">${s.icon}</div><h3 style="font-size:13pt;color:${s.hColor};margin-bottom:10px;font-family:'Libre Baskerville',serif">YOUR RESULTS SUGGEST BOTH GLANDS ARE INVOLVED</h3><p style="font-size:11pt;color:${s.pColor};line-height:1.8">Your results show that both adrenal glands are producing aldosterone at similar levels. This pattern is most consistent with both glands being involved rather than just one. Your doctor will review the full picture — including your scans, lab work, and overall health — before recommending next steps.</p></div>`;
-    }
-    cards += findingCard;
-  } else if (c === 'non_selective') {
-    const nsStyles = { bg: '#FDEAEA', border: '#e8b4b4', icon: '⚠️', hColor: '#8B1A1A', pColor: '#5a1010' };
-    if (customText) {
-      const lines = customText.split('\n').filter(l => l.trim());
-      const heading = lines[0] || '';
-      const body = lines.slice(1).join(' ').trim();
-      cards += `<div class="patient-card" style="background:${nsStyles.bg};border:1px solid ${nsStyles.border};border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">${nsStyles.icon}</div><h3 style="font-size:13pt;color:${nsStyles.hColor};margin-bottom:10px;font-family:'Libre Baskerville',serif">${heading}</h3><p style="font-size:11pt;color:${nsStyles.pColor};line-height:1.8">${body}</p></div>`;
-    } else {
-      cards += `<div class="patient-card" style="background:${nsStyles.bg};border:1px solid ${nsStyles.border};border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:24px;margin-bottom:8px">${nsStyles.icon}</div><h3 style="font-size:13pt;color:${nsStyles.hColor};margin-bottom:10px;font-family:'Libre Baskerville',serif">THE SAMPLES NEED TO BE RECHECKED</h3><p style="font-size:11pt;color:${nsStyles.pColor};line-height:1.8">The blood samples did not capture enough hormone from one or both adrenal glands for a reliable comparison. This sometimes happens because the small adrenal veins can be difficult to access. Your doctor will decide on the next steps.</p></div>`;
-    }
+  if (customText) {
+    const bodyHTML = customText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+    cards += `<div class="patient-card" style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><p style="font-size:11pt;color:#3a3530;line-height:1.8">${bodyHTML}</p></div>`;
   }
 
-  let nextSteps = '';
-  if (siR === null && siL === null) nextSteps = t.nextNoData;
-  else if (!rightOK || !leftOK) nextSteps = t.nextFail;
-  else if (li === null) nextSteps = t.nextNoLI;
-  else if (li >= 4) nextSteps = t.nextLateral(domSideLabel);
-  else if (li >= 2) nextSteps = t.nextBorderline;
-  else nextSteps = t.nextBilateral;
-
-  cards += `<div class="patient-card" style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.nextTitle}</h3><p style="font-size:11pt;color:#3a3530;line-height:1.8">${nextSteps}</p></div>`;
+  // "What happens next?" card — skipped when results are unclear (unclear card already covers it)
+  if (!resultsUnclear) {
+    let nextSteps = '';
+    if (siR === null && siL === null) nextSteps = t.nextNoData;
+    else if (li >= 4) nextSteps = t.nextLateral(domSideLabel);
+    else if (li >= 2) nextSteps = t.nextBorderline;
+    else nextSteps = t.nextBilateral;
+    cards += `<div class="patient-card" style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.nextTitle}</h3><p style="font-size:11pt;color:#3a3530;line-height:1.8">${nextSteps}</p></div>`;
+  }
   cards += `<div class="patient-card" style="background:#fff;border:2px solid #D8D3C8;border-radius:8px;padding:18px 24px;margin-bottom:20px"><p style="font-size:11pt;color:#5C564E;line-height:1.8;margin:0"><strong style="color:#1A1714">${t.importantTitle}</strong> ${t.importantText}</p></div>`;
 
   return `<div dir="${t.dir}">
@@ -4143,9 +4116,12 @@ function loadTestData(num) {
 
 <div id="print-report"></div>
 
-<section id="avs-about" style="background:#F0EDE6;border-top:1px solid #D8D3C8;padding:40px;font-family:'DM Sans',sans-serif;color:#5C564E;font-size:13px;line-height:1.8;">
-  <div style="max-width:800px;margin:0 auto;">
-    <h2 style="font-family:'Libre Baskerville',serif;font-size:16px;font-weight:700;color:#1A1714;margin-bottom:8px;">About This Calculator</h2>
+<section id="avs-about" style="background:#F0EDE6;border-top:1px solid #D8D3C8;padding:20px 40px;font-family:'DM Sans',sans-serif;color:#5C564E;font-size:13px;line-height:1.8;">
+  <details id="avs-about-details" style="max-width:800px;margin:0 auto;">
+    <summary style="list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:flex-end;padding:4px 0;outline:none">
+      <span id="avs-about-chevron" style="font-family:'DM Mono',monospace;font-size:14px;color:#8C867E;transition:transform 0.2s">▸</span>
+    </summary>
+    <div style="padding-top:20px">
     <p style="margin-bottom:24px;">AVS Calculator is a free, browser-based tool for interpreting adrenal vein sampling (AVS) results in patients with primary aldosteronism. It calculates the Selectivity Index (SI), Lateralization Index (LI), and Contralateral Suppression Index (CSI) in real time, following current Endocrine Society guidelines. All calculations run locally — no patient data is ever transmitted or stored.</p>
 
     <h3 style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#8C867E;margin-bottom:12px;">Frequently Asked Questions</h3>
@@ -4170,7 +4146,15 @@ function loadTestData(num) {
     </div>
 
     <p style="margin-top:24px;font-size:11px;color:#8C867E;">Built by Rebecca Allegretto, NP, MSN, MBA, ACNP-BC. References: Adler GK et al. <em>J Clin Endocrinol Metab.</em> 2025;110(9):2453–2495 · Funder JW et al. <em>J Clin Endocrinol Metab.</em> 2016;101(5):1889–1916.</p>
-  </div>
+    </div>
+  </details>
 </section>
+<script>
+  (function(){
+    const d = document.getElementById('avs-about-details');
+    const c = document.getElementById('avs-about-chevron');
+    if (d && c) d.addEventListener('toggle', () => { c.style.transform = d.open ? 'rotate(90deg)' : 'rotate(0deg)'; });
+  })();
+</script>
 </body>
 </html>
