@@ -1193,7 +1193,25 @@
 
       <div style="margin-bottom:20px">
         <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
-          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#1A1714;background:#C8901A;color:#fff;padding:2px 8px;border-radius:2px">v1.7</span>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#fff;background:#C8901A;padding:2px 8px;border-radius:2px">v1.8</span>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">September 2026</span>
+        </div>
+        <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
+          <li>Advanced report restructured — Index Comparison at top, Measured Values shared, then Method 1 (Average) and Method 2 (Highest Value) each as self-contained sections (Calculated Indices, Clinical Interpretation, Calculation Workup)</li>
+          <li>Report page breaks — each major section prints on its own page in both the regular Clinical and Advanced reports</li>
+          <li>Report popup URLs — switched to blob URLs so the print footer shows the domain instead of <em>about:blank</em></li>
+          <li>Patient summary — pre-emptive classification text removed from preview box; replaced with "Patient Summary Free Text" (user-controlled, empty by default); printed finding card appears only if text is typed</li>
+          <li>Patient summary threshold bug fixed — was using hardcoded SI cutoffs (3.0 stimulated / 2.0 unstimulated), now reads from the active guideline preset so clinical and patient reports stay in sync</li>
+          <li>Patient summary "results are unclear" — when cannulation falls below the selectivity threshold, patient page now shows a single clear "results are unclear" card with doctor-will-interpret language instead of a misleading "technically successful" statement</li>
+          <li>Copy Results to Clipboard fixed — was silently failing due to a <em>ReferenceError</em>; now writes the real classification (Lateralized → Right/Left, Borderline, Bilateral, Non-selective) matching the on-screen verdict</li>
+          <li>Footer: "About This Calculator" link added next to Changelog/Validation/Methods; bottom About section is now collapsible (closed by default)</li>
+          <li>ARR Calculator link removed from footer</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#1A1714;background:#F0EDE6;padding:2px 8px;border-radius:2px">v1.7</span>
           <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">May 2026</span>
         </div>
         <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
@@ -1608,7 +1626,7 @@
      PRINT REPORT WINDOW (opened separately)
 ════════════════════════════════════════════════ -->
 <script>
-const APP_VERSION = 'v1.6';
+const APP_VERSION = 'v1.8';
 
 // ── State ──
 let protocol = 'unstimulated';
@@ -4102,13 +4120,13 @@ function loadTestData(num) {
     <div style="padding:24px;color:rgba(255,255,255,0.85);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.8">
       <p style="margin-bottom:16px;color:rgba(255,255,255,0.6);font-size:12px">If you use AVS Calculator in a publication or clinical quality improvement project, please cite it using one of the formats below.</p>
       <h3 style="font-size:11px;font-weight:600;color:#C8901A;margin:0 0 8px;letter-spacing:0.06em;text-transform:uppercase">APA</h3>
-      <div id="cite-apa" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto, R. (2026). <em>AVS Calculator: Adrenal vein sampling interpretation tool</em> (Version 1.6) [Web application]. https://avsresults.com</div>
+      <div id="cite-apa" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto, R. (2026). <em>AVS Calculator: Adrenal vein sampling interpretation tool</em> (Version 1.8) [Web application]. https://avsresults.com</div>
       <button onclick="copyText('cite-apa','copy-apa')" id="copy-apa" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);padding:5px 12px;border-radius:3px;font-size:11px;cursor:pointer;margin-bottom:20px;font-family:var(--mono)">Copy APA</button>
       <h3 style="font-size:11px;font-weight:600;color:#C8901A;margin:0 0 8px;letter-spacing:0.06em;text-transform:uppercase">AMA</h3>
-      <div id="cite-ama" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto R. AVS Calculator: Adrenal Vein Sampling Interpretation Tool. Version 1.6. Web application. Published 2026. Accessed [date]. https://avsresults.com</div>
+      <div id="cite-ama" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto R. AVS Calculator: Adrenal Vein Sampling Interpretation Tool. Version 1.8. Web application. Published 2026. Accessed [date]. https://avsresults.com</div>
       <button onclick="copyText('cite-ama','copy-ama')" id="copy-ama" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);padding:5px 12px;border-radius:3px;font-size:11px;cursor:pointer;margin-bottom:20px;font-family:var(--mono)">Copy AMA</button>
       <h3 style="font-size:11px;font-weight:600;color:#C8901A;margin:0 0 8px;letter-spacing:0.06em;text-transform:uppercase">Vancouver</h3>
-      <div id="cite-van" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto R. AVS Calculator [Internet]. Version 1.6. 2026 [cited [date]]. Available from: https://avsresults.com</div>
+      <div id="cite-van" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto R. AVS Calculator [Internet]. Version 1.8. 2026 [cited [date]]. Available from: https://avsresults.com</div>
       <button onclick="copyText('cite-van','copy-van')" id="copy-van" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);padding:5px 12px;border-radius:3px;font-size:11px;cursor:pointer;font-family:var(--mono)">Copy Vancouver</button>
     </div>
   </div>
