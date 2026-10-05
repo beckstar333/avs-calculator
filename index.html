@@ -46,7 +46,7 @@
       "name": "How is the Selectivity Index (SI) calculated?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The Selectivity Index (SI) confirms adequate adrenal vein catheterization. It is calculated as adrenal vein cortisol divided by IVC cortisol. Thresholds are ≥2.0 for unstimulated protocols and ≥3.0 for cosyntropin-stimulated protocols per Endocrine Society guidelines. An SI below the cutoff means the catheter was not correctly seated and lateralization cannot be interpreted."
+        "text": "The Selectivity Index (SI) confirms adequate adrenal vein catheterization. It is calculated as adrenal vein cortisol divided by IVC cortisol. Thresholds are ≥2.0 for unstimulated protocols and ≥5.0 for cosyntropin-stimulated protocols per the 2025 Endocrine Society guideline. An SI below the cutoff means the catheter was not correctly seated and lateralization cannot be interpreted."
       }
     },
     {
@@ -54,7 +54,7 @@
       "name": "What does the Lateralization Index (LI) mean?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The Lateralization Index (LI) compares the cortisol-corrected aldosterone (A/C ratio) between the dominant and non-dominant adrenal veins. An LI ≥4.0 indicates lateralized aldosterone production (unilateral disease). A borderline LI falls between 2.0 and 3.9. An LI below 2.0 suggests bilateral disease. The LI guides whether a patient should be referred for adrenalectomy or managed medically."
+        "text": "The Lateralization Index (LI) compares the cortisol-corrected aldosterone (A/C ratio) between the dominant and non-dominant adrenal veins. An LI >4.0 indicates lateralized aldosterone production (unilateral disease). A borderline LI falls between 3.0 and 4.0. An LI below 3.0 suggests bilateral disease. The LI guides whether a patient should be referred for adrenalectomy or managed medically."
       }
     },
     {
@@ -78,7 +78,7 @@
       "name": "Which AVS guidelines does this calculator follow?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The calculator follows the 2025 Endocrine Society Clinical Practice Guideline (Adler et al., J Clin Endocrinol Metab, 2025) and the 2016 guideline (Funder et al.) for threshold values. Selectivity index cutoffs are ≥2.0 (unstimulated) and ≥3.0 (cosyntropin-stimulated). Lateralization threshold is LI ≥4.0."
+        "text": "The calculator follows the 2025 Endocrine Society Clinical Practice Guideline (Adler et al., J Clin Endocrinol Metab, 2025) for threshold values. Selectivity index cutoffs are ≥2.0 (unstimulated) and ≥5.0 (cosyntropin-stimulated). Lateralization threshold is LI >4.0."
       }
     }
   ]
@@ -591,6 +591,35 @@
 </head>
 <body>
 
+<!-- ── First-visit Terms of Use acknowledgment ── -->
+<div id="tou-overlay" style="display:none;position:fixed;inset:0;background:rgba(26,23,20,0.78);z-index:9999;align-items:center;justify-content:center;padding:20px;overflow-y:auto">
+  <div style="background:#fff;border-radius:6px;width:100%;max-width:560px;margin:auto;box-shadow:0 10px 50px rgba(0,0,0,0.3);display:flex;flex-direction:column;max-height:calc(100vh - 40px)">
+    <div style="background:#1A1714;padding:18px 24px;flex-shrink:0;border-top-left-radius:6px;border-top-right-radius:6px">
+      <div style="font-family:'Libre Baskerville',serif;font-size:17px;font-weight:700;color:#fff">Terms of Use</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9.5px;color:#8C8680;letter-spacing:0.08em;text-transform:uppercase;margin-top:3px">Please review before using the AVS Calculator</div>
+    </div>
+    <div style="padding:22px 24px;overflow-y:auto;flex:1;font-family:'DM Sans',sans-serif;font-size:13px;color:#1A1714;line-height:1.65">
+      <p style="margin-bottom:14px"><strong>This tool is for use by healthcare professionals only.</strong></p>
+      <ul style="margin:0 0 14px 20px;padding:0">
+        <li style="margin-bottom:10px">It does not provide medical advice, diagnosis, or treatment recommendations.</li>
+        <li style="margin-bottom:10px">Calculator outputs must be interpreted by a qualified clinician in the full clinical context — including imaging, biochemistry, patient presentation, and surgical candidacy.</li>
+        <li style="margin-bottom:10px">You are responsible for selecting threshold values appropriate to your institutional protocol and clinical context. Different frameworks may yield different classifications.</li>
+        <li style="margin-bottom:10px">This calculator should not be used as the sole basis for any clinical decision.</li>
+        <li style="margin-bottom:0">All calculations run locally in your browser. No patient data is transmitted, logged, or stored.</li>
+      </ul>
+      <p style="margin-bottom:16px;font-size:12px;color:#5C564E;font-style:italic">By continuing, you confirm that you are a healthcare professional, you have read and understood the above, and you accept full responsibility for any clinical use of the outputs generated by this calculator.</p>
+      <label style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid #D8D3C8;border-radius:4px;cursor:pointer;background:#F7F5F0" id="tou-check-label">
+        <input type="checkbox" id="tou-check" onchange="document.getElementById('tou-accept-btn').disabled = !this.checked" style="margin-top:3px;accent-color:#1A1714;width:16px;height:16px;flex-shrink:0;cursor:pointer">
+        <span style="font-size:12.5px;color:#1A1714;line-height:1.5">I am a healthcare professional and I agree to the terms above.</span>
+      </label>
+    </div>
+    <div style="padding:14px 24px;border-top:1px solid #E8E4DD;background:#fafaf7;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-shrink:0;border-bottom-left-radius:6px;border-bottom-right-radius:6px;flex-wrap:wrap">
+      <button onclick="declineTOU()" style="padding:8px 14px;background:transparent;border:none;font-family:'DM Sans',sans-serif;font-size:12px;color:#8C867E;cursor:pointer;text-decoration:underline">I don't agree — leave</button>
+      <button id="tou-accept-btn" onclick="acceptTOU()" disabled style="padding:9px 20px;background:#1A1714;border:1px solid #1A1714;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#fff;cursor:pointer;opacity:0.4" onmouseover="if(!this.disabled) this.style.opacity='1'" onmouseout="if(!this.disabled) this.style.opacity='1'">Enter Calculator</button>
+    </div>
+  </div>
+</div>
+
 <header>
   <div class="header-left">
     <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;margin-right:4px">
@@ -615,7 +644,7 @@
     <div style="position:relative;display:inline-block" id="clinical-btn-wrap">
       <button class="print-btn-header" onclick="openPrintOptions()">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 4H10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        Clinical Reports
+        Clinical Report
       </button>
     </div>
     <button class="print-btn-header" onclick="openAdvancedReportOptions()" style="background:#1B5E35">
@@ -627,7 +656,6 @@
 </header>
 
 <div id="settings-banner" onclick="scrollToThresholds()" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 16px;background:var(--surface2);border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'">
-  <span id="banner-protocol" style="font-family:var(--mono);font-size:10px;padding:3px 8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-2);font-weight:500">Unstimulated</span>
   <span id="banner-guideline" style="font-family:var(--mono);font-size:10px;padding:3px 8px;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-2);font-weight:500">ES Guidelines 2025</span>
   <span style="font-family:var(--mono);font-size:10px;color:var(--text);padding:3px 10px;border:1px solid var(--border);border-radius:3px;background:var(--surface);font-weight:500">Change Threshold Settings ▸</span>
 </div>
@@ -775,6 +803,12 @@
 
     <div class="panel-title">Results</div>
 
+    <button class="copy-results-btn" id="copy-btn" onclick="copyResults()" style="margin-bottom:14px">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M1 8V2a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Copy Results to Clipboard
+    </button>
+    <p style="font-size:10px;color:var(--text-3);text-align:center;margin-top:-10px;margin-bottom:14px;font-style:italic">Copies a brief summary suitable for pasting into a clinical note</p>
+
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Selectivity Index (SI)</span>
@@ -830,50 +864,61 @@
       </div>
     </div>
 
-    <div id="screen-interp" class="interp-section" style="display:none"></div>
-
-    <!-- Calculated Indices Table + Verdict -->
-    <div id="calc-indices-section" style="display:none;margin-top:16px"></div>
-
-    <!-- Patient Summary Preview -->
-    <div id="patient-preview-section" style="display:none;margin-top:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em">Patient Summary Free Text</div>
-        <button onclick="resetPatientPreview()" style="font-family:var(--mono);font-size:10px;padding:3px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text-3);cursor:pointer">Clear</button>
+    <!-- ── Interpretation gate ── -->
+    <div id="interp-gate" style="margin-top:18px;padding:16px 18px;border:1px solid #d0cfca;border-left:4px solid #2B3A8C;border-radius:var(--radius);background:#f7f6f1">
+      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:#2B3A8C;margin-bottom:6px;letter-spacing:0.08em">INTERPRETATION LOCKED</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:12px">Indices (SI, LI, CSI) above are calculated independently of any threshold set. To view a classification verdict, interpretation cards, and generate reports, select a threshold framework and acknowledge responsibility for the choice.</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-2);text-transform:uppercase;letter-spacing:0.06em">Framework:</label>
+        <select id="interp-gate-preset" onchange="onGatePresetChange(this.value)" style="font-family:var(--mono);font-size:11px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);cursor:pointer">
+          <option value="" selected>Choose...</option>
+          <option value="es2025">ES Guidelines 2025 (Adler et al.)</option>
+          <option value="custom">Custom thresholds</option>
+        </select>
       </div>
-      <p style="font-size:10px;color:var(--text-3);margin-bottom:6px;font-style:italic">This text appears on the printed patient report. User responsible for patient summary information.</p>
-      <textarea id="patient-preview-edit" placeholder="Type patient summary text here (optional)..." style="width:100%;min-height:56px;padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-family:var(--sans);font-size:11px;line-height:1.5;color:var(--text);resize:vertical;outline:none"></textarea>
+
+      <!-- ES Guidelines review panel (shown only when ES is selected) -->
+      <div id="interp-gate-es-review" style="display:none;margin-bottom:12px;padding:12px 14px;background:#eef1fa;border:1px solid #c5cfe8;border-radius:var(--radius)">
+        <div style="font-family:var(--mono);font-size:10px;font-weight:600;color:#2B3A8C;margin-bottom:8px;letter-spacing:0.05em">ES GUIDELINES 2025 — Review before proceeding</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:6px 14px;font-size:11px;color:var(--text);line-height:1.5">
+          <span>SI (unstimulated)</span><span style="font-family:var(--mono);text-align:right">≥ 2.0</span>
+          <span>SI (cosyntropin-stimulated)</span><span style="font-family:var(--mono);text-align:right">≥ 5.0</span>
+          <span>LI lateralized</span><span style="font-family:var(--mono);text-align:right">&gt; 4.0</span>
+          <span>LI borderline</span><span style="font-family:var(--mono);text-align:right">≥ 3.0</span>
+          <span>CSI suppression present</span><span style="font-family:var(--mono);text-align:right">&lt; 1.0</span>
+        </div>
+        <div style="font-size:10px;color:var(--text-3);margin-top:8px;font-style:italic">Adler et al., J Clin Endocrinol Metab, 2025</div>
+      </div>
+
+      <!-- Inline custom thresholds editor (shown only when Custom is selected) -->
+      <div id="interp-gate-custom" style="display:none;margin-bottom:12px;padding:12px 14px;background:#fffaef;border:1px solid #e8c97a;border-radius:var(--radius)">
+        <div style="font-family:var(--mono);font-size:10px;font-weight:600;color:#7A4F00;margin-bottom:8px;letter-spacing:0.05em">⚠ CUSTOM THRESHOLDS — not based on published guidelines</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;font-size:11px">
+          <label for="gate-thresh-si-unstim">SI (unstimulated) ≥</label>
+          <input type="number" id="gate-thresh-si-unstim" min="1" max="10" step="0.1" value="2.0" oninput="onGateCustomInput()" style="width:80px;padding:4px 8px;border:1px solid var(--border);border-radius:3px;font-family:var(--mono);font-size:11px;text-align:right">
+          <label for="gate-thresh-si-stim">SI (cosyntropin-stimulated) ≥</label>
+          <input type="number" id="gate-thresh-si-stim" min="1" max="10" step="0.1" value="5.0" oninput="onGateCustomInput()" style="width:80px;padding:4px 8px;border:1px solid var(--border);border-radius:3px;font-family:var(--mono);font-size:11px;text-align:right">
+          <label for="gate-thresh-li-lat">LI lateralized &gt;</label>
+          <input type="number" id="gate-thresh-li-lat" min="1" max="20" step="0.1" value="4.0" oninput="onGateCustomInput()" style="width:80px;padding:4px 8px;border:1px solid var(--border);border-radius:3px;font-family:var(--mono);font-size:11px;text-align:right">
+          <label for="gate-thresh-li-border">LI borderline ≥</label>
+          <input type="number" id="gate-thresh-li-border" min="1" max="20" step="0.1" value="3.0" oninput="onGateCustomInput()" style="width:80px;padding:4px 8px;border:1px solid var(--border);border-radius:3px;font-family:var(--mono);font-size:11px;text-align:right">
+          <label for="gate-thresh-csi">CSI suppression &lt;</label>
+          <input type="number" id="gate-thresh-csi" min="0.1" max="5" step="0.1" value="1.0" oninput="onGateCustomInput()" style="width:80px;padding:4px 8px;border:1px solid var(--border);border-radius:3px;font-family:var(--mono);font-size:11px;text-align:right">
+        </div>
+        <div style="font-size:10px;color:var(--text-3);margin-top:8px;font-style:italic">LI bilateral threshold is derived from LI borderline (anything below it = bilateral).</div>
+      </div>
+
+      <div id="interp-gate-confirm" style="display:none">
+        <label style="display:flex;align-items:flex-start;gap:8px;font-size:11px;color:var(--text);line-height:1.5;cursor:pointer;margin-bottom:12px">
+          <input type="checkbox" id="interp-attest" style="margin-top:2px;flex-shrink:0;cursor:pointer">
+          <span>I have selected the thresholds appropriate for my clinical context and accept responsibility for interpretation based on them. I understand that different frameworks may yield different classifications.</span>
+        </label>
+        <button onclick="unlockInterpretation()" style="font-family:var(--mono);font-size:11px;padding:8px 16px;border:1px solid #2B3A8C;border-radius:var(--radius);background:#2B3A8C;color:#fff;cursor:pointer;font-weight:600;letter-spacing:0.03em">Interpret with selected thresholds</button>
+      </div>
     </div>
 
-    <button class="copy-results-btn" id="copy-btn" onclick="copyResults()" style="margin-top:22px">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M1 8V2a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Copy Results to Clipboard
-    </button>
-    <p style="font-size:10px;color:var(--text-3);text-align:center;margin-top:5px;font-style:italic">Copies a brief summary suitable for pasting into a clinical note</p>
-
-    <!-- Advanced Calculations Dropdown -->
-    <div style="text-align:center;margin-top:16px;margin-bottom:10px">
-      <button onclick="toggleAdvancedCalc()" style="font-family:var(--mono);font-size:11px;padding:8px 18px;border:1px solid #1B5E35;border-radius:var(--radius);background:rgba(27,94,53,0.08);color:#1B5E35;cursor:pointer;font-weight:600;letter-spacing:0.03em;transition:all 0.15s" onmouseover="this.style.background='rgba(27,94,53,0.15)'" onmouseout="this.style.background='rgba(27,94,53,0.08)'">
-        <span id="adv-calc-arrow" style="display:inline-block;transition:transform 0.2s;margin-right:4px">▸</span> Advanced Calculations
-      </button>
-    </div>
-    <div id="adv-calc-panel" style="display:none;margin-bottom:16px;border:1px solid #c2ddd3;border-radius:var(--radius);overflow:visible;background:var(--surface2)">
-      <div style="padding:12px 16px;background:rgba(27,94,53,0.06);border-bottom:1px solid #c2ddd3">
-        <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:#1B5E35;text-transform:uppercase;letter-spacing:0.08em">Advanced Calculations</span>
-        <p style="font-size:10px;color:var(--text-3);margin-top:4px;font-family:var(--sans);line-height:1.5">These calculations are provided for your comparison. Two methods are shown using the same sample data.</p>
-      </div>
-      <div id="adv-calc-content" style="padding:14px 16px;font-family:var(--mono);font-size:11px;color:var(--text);line-height:2.2">
-        <em style="color:var(--text-3);font-size:10px">Enter sample values to see advanced calculations</em>
-      </div>
-      <div style="padding:8px 16px 12px;border-top:1px solid #c2ddd3;text-align:center">
-        <button onclick="copyAdvancedResults()" id="adv-copy-btn" style="font-family:var(--mono);font-size:10px;padding:6px 14px;border:1px solid #c2ddd3;border-radius:var(--radius);background:var(--surface);color:var(--text-2);cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='#1B5E35';this.style.color='#1B5E35'" onmouseout="this.style.borderColor='#c2ddd3';this.style.color='var(--text-2)'">
-          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" style="vertical-align:-1px;margin-right:4px"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M1 8V2a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          Copy Advanced Results
-        </button>
-      </div>
-    </div>
-
-    <div class="ref-section">
+    <!-- Reference Thresholds — placed under the gate so users can see the active framework's values while deciding -->
+    <div class="ref-section" style="margin-top:14px">
       <div class="ref-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <span style="display:flex;align-items:center;gap:8px">Reference Thresholds <span style="flex:1;height:1px;background:var(--border);display:inline-block;width:20px"></span></span>
         <select id="threshold-preset" onchange="applyThresholdPreset(this.value)" style="font-family:var(--mono);font-size:9px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text-2);cursor:pointer;letter-spacing:0.03em">
@@ -924,16 +969,48 @@
       <div style="margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--text-3);text-align:right" id="ref-guideline-label">ES Guidelines 2025</div>
     </div>
 
+    <!-- ── Active-framework banner (shown when unlocked) ── -->
+    <div id="interp-active-banner" style="display:none;margin-top:14px;padding:10px 14px;border:1px solid #c5c3b9;border-radius:var(--radius);background:#eef1e4;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div style="font-size:11px;color:var(--text);line-height:1.5">
+        <span style="font-family:var(--mono);font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em">Interpreting with</span>
+        <strong id="interp-active-label" style="margin-left:6px">ES Guidelines 2025</strong>
+      </div>
+      <button onclick="lockInterpretation()" style="font-family:var(--mono);font-size:10px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text-2);cursor:pointer">Change framework</button>
+    </div>
+
+    <div id="screen-interp" class="interp-section" style="display:none"></div>
+
+    <!-- Calculated Indices Table + Verdict -->
+    <div id="calc-indices-section" style="display:none;margin-top:16px"></div>
+
+    <!-- Advanced Calculations Dropdown -->
+    <div style="text-align:center;margin-top:16px;margin-bottom:10px">
+      <button onclick="toggleAdvancedCalc()" style="font-family:var(--mono);font-size:11px;padding:8px 18px;border:1px solid #1B5E35;border-radius:var(--radius);background:rgba(27,94,53,0.08);color:#1B5E35;cursor:pointer;font-weight:600;letter-spacing:0.03em;transition:all 0.15s" onmouseover="this.style.background='rgba(27,94,53,0.15)'" onmouseout="this.style.background='rgba(27,94,53,0.08)'">
+        <span id="adv-calc-arrow" style="display:inline-block;transition:transform 0.2s;margin-right:4px">▸</span> Advanced Calculations
+      </button>
+    </div>
+    <div id="adv-calc-panel" style="display:none;margin-bottom:16px;border:1px solid #c2ddd3;border-radius:var(--radius);overflow:visible;background:var(--surface2)">
+      <div style="padding:12px 16px;background:rgba(27,94,53,0.06);border-bottom:1px solid #c2ddd3">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:#1B5E35;text-transform:uppercase;letter-spacing:0.08em">Advanced Calculations</span>
+        <p style="font-size:10px;color:var(--text-3);margin-top:4px;font-family:var(--sans);line-height:1.5">These calculations are provided for your comparison. Two methods are shown using the same sample data.</p>
+      </div>
+      <div id="adv-calc-content" style="padding:14px 16px;font-family:var(--mono);font-size:11px;color:var(--text);line-height:2.2">
+        <em style="color:var(--text-3);font-size:10px">Enter sample values to see advanced calculations</em>
+      </div>
+      <div style="padding:8px 16px 12px;border-top:1px solid #c2ddd3;text-align:center">
+        <button onclick="copyAdvancedResults()" id="adv-copy-btn" style="font-family:var(--mono);font-size:10px;padding:6px 14px;border:1px solid #c2ddd3;border-radius:var(--radius);background:var(--surface);color:var(--text-2);cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='#1B5E35';this.style.color='#1B5E35'" onmouseout="this.style.borderColor='#c2ddd3';this.style.color='var(--text-2)'">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" style="vertical-align:-1px;margin-right:4px"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M1 8V2a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Copy Advanced Results
+        </button>
+      </div>
+    </div>
+
     <div class="ref-section" style="margin-top:24px">
       <div class="ref-title">References</div>
       <ol style="padding-left:16px;margin:0;list-style-position:outside">
         <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
           <strong>Adler GK, Stowasser M, Correa RR, et al.</strong> Primary Aldosteronism: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab.</em> 2025;110(9):2453–2495. <a href="https://doi.org/10.1210/clinem/dgaf284" target="_blank" style="color:#2B3A8C">doi:10.1210/clinem/dgaf284</a>
           <div style="font-size:10px;color:#8C867E;margin-top:2px">Most recent Endocrine Society clinical practice guideline. Primary source for SI, LI, and CSI thresholds used in this calculator (SI ≥2.0/5.0, LI >4.0, borderline 3.0–4.0, CSI &lt;1.0).</div>
-        </li>
-        <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
-          <strong>Funder JW, Carey RM, Mantero F, et al.</strong> The Management of Primary Aldosteronism: Case Detection, Diagnosis, and Treatment: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab.</em> 2016;101(5):1889–1916.
-          <div style="font-size:10px;color:#8C867E;margin-top:2px">Prior Endocrine Society guideline for primary aldosteronism management. Superseded by Adler et al. 2025.</div>
         </li>
         <li style="font-size:11px;color:#5C564E;line-height:1.6;margin-bottom:8px;padding-left:4px">
           <strong>Rossi GP, Auchus RJ, Brown M, et al.</strong> An Expert Consensus Statement on the Use of Adrenal Vein Sampling for the Subtyping of Primary Aldosteronism. <em>Hypertension.</em> 2014;63(1):151–160. <a href="https://doi.org/10.1161/HYPERTENSIONAHA.113.02097" target="_blank" style="color:#2B3A8C">doi:10.1161/HYPERTENSIONAHA.113.02097</a>
@@ -979,7 +1056,7 @@
     <span style="margin-left:6px;opacity:0.4">·</span>
     <button onclick="openCitation()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Cite This Tool</button>
     <span style="margin-left:6px;opacity:0.4">·</span>
-    <button onclick="scrollToAbout()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">About This Calculator</button>
+    <button onclick="openTOU()" style="background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;cursor:pointer;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px">Terms</button>
   </div>
   <div class="toolbar-right">
     <button class="reset-btn reset-danger" onclick="resetAll()">
@@ -992,7 +1069,7 @@
     </button>
     <button class="print-btn" onclick="openPrintOptions()">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 4H10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Clinical Reports
+      Clinical Report
     </button>
   </div>
 </div>
@@ -1044,18 +1121,26 @@
      PRINT OPTIONS MODAL
 ════════════════════════════════════════════════ -->
 <div id="print-options-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:6px;width:100%;max-width:400px;margin:20px;box-shadow:0 8px 40px rgba(0,0,0,0.2);overflow:hidden">
-    <div style="background:#1A1714;padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+  <div style="background:#fff;border-radius:6px;width:100%;max-width:400px;margin:20px;box-shadow:0 8px 40px rgba(0,0,0,0.2);overflow:hidden;max-height:calc(100vh - 40px);display:flex;flex-direction:column">
+    <div style="background:#1A1714;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
       <div>
-        <div style="font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:#fff">Clinical Reports</div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:#fff">Clinical Report</div>
         <div style="font-family:'DM Mono',monospace;font-size:9px;color:#8C8680;letter-spacing:0.08em;text-transform:uppercase;margin-top:2px">Select sections to include</div>
       </div>
       <button onclick="closePrintOptions()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1">✕</button>
     </div>
-    <div style="padding:20px">
+    <div style="padding:20px;overflow-y:auto;flex:1">
       <p style="font-style:italic;font-size:11px;color:#8C867E;margin:0 0 14px 0;line-height:1.5">For clinician use. This tool supports — but does not replace — clinical judgment. Not medical advice.</p>
-      <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #D8D3C8;border-radius:4px;margin-bottom:10px;cursor:pointer;background:#F7F5F0">
-        <input type="checkbox" id="opt-summary" checked style="margin-top:2px;accent-color:#1A1714;width:15px;height:15px;flex-shrink:0">
+      <div id="print-opt-locked-note" style="display:none;margin-bottom:12px;padding:9px 12px;background:#eef1f8;border:1px solid #c9d1e8;border-left:3px solid #2B3A8C;border-radius:3px;font-size:11px;color:#2B3A8C;line-height:1.5">Interpretation is locked. Only "Calculations Only" and "Calculation Worksheet" are available. To include a Clinical Summary or Patient Summary, close this dialog and unlock interpretation.</div>
+      <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px dashed #2B3A8C;border-radius:4px;margin-bottom:10px;cursor:pointer;background:#f7f8fc">
+        <input type="checkbox" id="opt-calculations-only" onchange="onCalcOnlyToggle()" style="margin-top:2px;accent-color:#2B3A8C;width:15px;height:15px;flex-shrink:0">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#2B3A8C;margin-bottom:2px">Calculations Only</div>
+          <div style="font-size:11px;color:#5C6B8C;line-height:1.5">Measured values and derived indices (SI, LI, CSI) — no classification, verdict, or interpretation. No guideline attribution.</div>
+        </div>
+      </label>
+      <label id="opt-summary-label" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #D8D3C8;border-radius:4px;margin-bottom:10px;cursor:pointer;background:#F7F5F0">
+        <input type="checkbox" id="opt-summary" checked onchange="onSummaryToggle()" style="margin-top:2px;accent-color:#1A1714;width:15px;height:15px;flex-shrink:0">
         <div>
           <div style="font-size:13px;font-weight:600;color:#1A1714;margin-bottom:2px">Clinical Summary</div>
           <div style="font-size:11px;color:#8C867E;line-height:1.5">Measured values, calculated indices, and clinical interpretation</div>
@@ -1068,7 +1153,7 @@
           <div style="font-size:11px;color:#8C867E;line-height:1.5">Full A/C ratio workup and step-by-step index derivation</div>
         </div>
       </label>
-      <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #D8D3C8;border-radius:4px;cursor:pointer;background:#F7F5F0">
+      <label id="opt-patient-label" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #D8D3C8;border-radius:4px;cursor:pointer;background:#F7F5F0">
         <input type="checkbox" id="opt-patient" onchange="toggleLangSelector()" style="margin-top:2px;accent-color:#1A1714;width:15px;height:15px;flex-shrink:0">
         <div style="flex:1">
           <div style="font-size:13px;font-weight:600;color:#1A1714;margin-bottom:2px">Patient-Friendly Summary</div>
@@ -1100,14 +1185,23 @@
         </div>
         <p style="font-size:10px;color:#B8A882;font-style:italic;margin-top:9px">Non-English translations are AI-generated. Hover a pill to see status.</p>
       </div>
-      <p style="font-size:10px;color:#B8B0A0;margin-top:10px;font-style:italic">Selected sections print as a single document with page breaks between them.</p>
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
-        <button onclick="closePrintOptions()" style="padding:8px 16px;background:transparent;border:1px solid #D8D3C8;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;color:#5C564E;cursor:pointer">Cancel</button>
-        <button onclick="confirmPrintReport()" style="padding:8px 18px;background:#1A1714;border:1px solid #1A1714;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer">
-          <svg width="12" height="12" viewBox="0 0 13 13" fill="none" style="margin-right:5px;vertical-align:middle"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/></svg>
-          Print / Save PDF
-        </button>
+      <!-- Patient summary free text (shown with Patient-Friendly Summary) -->
+      <div id="patient-text-section" style="display:none;margin-top:8px;padding:12px 14px;background:#F7F5F0;border:1px solid #D8D3C8;border-radius:4px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:600;color:#8C8680;letter-spacing:0.08em;text-transform:uppercase">Patient Summary Free Text</div>
+          <button type="button" onclick="resetPatientPreview()" style="font-family:'DM Mono',monospace;font-size:10px;padding:3px 10px;border:1px solid #D8D3C8;border-radius:3px;background:#fff;color:#8C867E;cursor:pointer">Clear</button>
+        </div>
+        <p style="font-size:10px;color:#8C867E;margin-bottom:6px;font-style:italic">This text appears on the printed patient report. User responsible for patient summary content.</p>
+        <textarea id="patient-preview-edit" placeholder="Type patient summary text here (optional)..." style="width:100%;min-height:56px;padding:8px 12px;border-radius:4px;border:1px solid #D8D3C8;background:#fff;font-family:'DM Sans',sans-serif;font-size:11px;line-height:1.5;color:#1A1714;resize:vertical;outline:none"></textarea>
       </div>
+      <p style="font-size:10px;color:#B8B0A0;margin-top:10px;font-style:italic">Selected sections print as a single document with page breaks between them.</p>
+    </div>
+    <div style="padding:14px 20px;border-top:1px solid #E8E4DD;background:#fafaf7;display:flex;justify-content:flex-end;gap:10px;flex-shrink:0">
+      <button onclick="closePrintOptions()" style="padding:8px 16px;background:transparent;border:1px solid #D8D3C8;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;color:#5C564E;cursor:pointer">Cancel</button>
+      <button onclick="confirmPrintReport()" style="padding:8px 18px;background:#1A1714;border:1px solid #1A1714;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer">
+        <svg width="12" height="12" viewBox="0 0 13 13" fill="none" style="margin-right:5px;vertical-align:middle"><rect x="2" y="1" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="8" width="7" height="4" rx="0.5" stroke="currentColor" stroke-width="1.3"/></svg>
+        Print / Save PDF
+      </button>
     </div>
   </div>
 </div>
@@ -1197,7 +1291,7 @@
           <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">September 2026</span>
         </div>
         <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
-          <li>Advanced report restructured — Index Comparison at top, Measured Values shared, then Method 1 (Average) and Method 2 (Highest Value) each as self-contained sections (Calculated Indices, Clinical Interpretation, Calculation Workup)</li>
+          <li>Advanced report restructured — Index Comparison at top, Measured Values shared, then Method 1 (Average) and Method 2 (Highest Value) each as self-contained sections (Calculated Indices, Clinical Interpretation, Calculation Worksheet)</li>
           <li>Report page breaks — each major section prints on its own page in both the regular Clinical and Advanced reports</li>
           <li>Report popup URLs — switched to blob URLs so the print footer shows the domain instead of <em>about:blank</em></li>
           <li>Patient summary — pre-emptive classification text removed from preview box; replaced with "Patient Summary Free Text" (user-controlled, empty by default); printed finding card appears only if text is typed</li>
@@ -1273,9 +1367,9 @@
           <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">March 2026</span>
         </div>
         <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
-          <li>Clinical Reports modal with section checkboxes (Summary, Worksheet, Patient Summary)</li>
+          <li>Clinical Report modal with section checkboxes (Summary, Worksheet, Patient Summary)</li>
           <li>Single print window with page breaks between selected sections</li>
-          <li>Patient-Friendly Summary merged into Clinical Reports dropdown</li>
+          <li>Patient-Friendly Summary merged into Clinical Report dropdown</li>
           <li>Calculation worksheet with index derivation table</li>
           <li>Report page order restructured</li>
         </ul>
@@ -1378,9 +1472,9 @@
           </tr>
           <tr style="border-bottom:1px solid #eee">
             <td style="padding:6px 10px;font-weight:600">3</td>
-            <td style="padding:6px 10px">Borderline, CSI suppressed</td>
-            <td style="padding:6px 10px;text-align:center">Borderline</td>
-            <td style="padding:6px 10px;text-align:center">Borderline</td>
+            <td style="padding:6px 10px">LI boundary — just under 3.0 bilateral cutoff, CSI suppressed</td>
+            <td style="padding:6px 10px;text-align:center">Bilateral</td>
+            <td style="padding:6px 10px;text-align:center">Bilateral</td>
             <td style="padding:6px 10px;text-align:center"><span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:600;background:rgba(27,94,53,0.1);color:#1B5E35">PASS</span></td>
           </tr>
           <tr style="border-bottom:1px solid #eee">
@@ -1475,7 +1569,7 @@
         </details>
 
         <details style="margin-bottom:6px;border:1px solid #eee;border-radius:4px;overflow:hidden">
-          <summary style="padding:8px 12px;font-size:11px;font-weight:600;color:#1A1714;cursor:pointer;background:#fafafa">Test 3 — Borderline, CSI suppressed</summary>
+          <summary style="padding:8px 12px;font-size:11px;font-weight:600;color:#1A1714;cursor:pointer;background:#fafafa">Test 3 — LI just below 3.0 bilateral cutoff, CSI suppressed</summary>
           <div style="padding:10px 12px;font-size:10px;color:#3a3530;line-height:1.8;background:#fff">
             <div style="font-family:monospace;font-size:9px;color:#888;margin-bottom:4px">Protocol: Cosyntropin-stimulated</div>
             <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px">
@@ -1492,8 +1586,8 @@
             <div style="font-family:monospace;font-size:10px;line-height:1.8">
               IVC avg A/C: 5.00 | Right avg A/C: 3.00 | Left avg A/C: 9.00<br>
               SI Right: 12.50 ✓ | SI Left: 20.00 ✓<br>
-              LI: 3.00 | CSI: 0.60 (suppressed)<br>
-              <strong>Classification: Borderline</strong>
+              LI: 2.9999 (just below the 3.0 borderline cutoff) | CSI: 0.60 (suppressed)<br>
+              <strong>Classification: Bilateral</strong> — confirms strict operator semantics at the LI = 3.0 boundary
             </div>
           </div>
         </details>
@@ -1626,11 +1720,157 @@
      PRINT REPORT WINDOW (opened separately)
 ════════════════════════════════════════════════ -->
 <script>
-const APP_VERSION = 'v1.8';
+const APP_VERSION = 'v1.8-dev';
 
 // ── State ──
 let protocol = 'unstimulated';
 const MAX_ROWS = 8;
+
+// ── Terms of Use ──
+const TOU_VERSION = '2026-10-03.1';
+const LS_TOU_KEY = 'avs_tou_accepted';
+function checkTOU() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(LS_TOU_KEY) || 'null'); } catch(e){}
+  if (!saved || saved.version !== TOU_VERSION) showTOU();
+}
+function showTOU() {
+  const overlay = document.getElementById('tou-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function acceptTOU() {
+  const ck = document.getElementById('tou-check');
+  if (!ck || !ck.checked) return;
+  try {
+    localStorage.setItem(LS_TOU_KEY, JSON.stringify({
+      version: TOU_VERSION,
+      acceptedAt: new Date().toISOString(),
+    }));
+  } catch(e){}
+  const overlay = document.getElementById('tou-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+function declineTOU() {
+  // User declined — send them off the page.
+  try { window.location.href = 'about:blank'; } catch(e){ window.close(); }
+}
+function openTOU() {
+  // Footer link — re-opens for review. Doesn't require re-acceptance.
+  const ck = document.getElementById('tou-check');
+  if (ck) ck.checked = true;
+  const btn = document.getElementById('tou-accept-btn');
+  if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Close'; }
+  showTOU();
+}
+
+// ── Interpretation gate ──
+// Attestation resets every session; preset choice persists.
+let interpretationUnlocked = false;
+const LS_PRESET_KEY = 'avs_preferred_preset';
+function lockInterpretation() {
+  interpretationUnlocked = false;
+  const gate = document.getElementById('interp-gate');
+  const banner = document.getElementById('interp-active-banner');
+  const attest = document.getElementById('interp-attest');
+  const gatePreset = document.getElementById('interp-gate-preset');
+  const esReview = document.getElementById('interp-gate-es-review');
+  const customBox = document.getElementById('interp-gate-custom');
+  const confirmBox = document.getElementById('interp-gate-confirm');
+  if (gate) gate.style.display = 'block';
+  if (banner) banner.style.display = 'none';
+  if (attest) attest.checked = false;
+  if (gatePreset) gatePreset.value = '';
+  if (esReview) esReview.style.display = 'none';
+  if (customBox) customBox.style.display = 'none';
+  if (confirmBox) confirmBox.style.display = 'none';
+  ['screen-interp','calc-indices-section','patient-preview-section'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+}
+function unlockInterpretation() {
+  const attest = document.getElementById('interp-attest');
+  if (!attest || !attest.checked) {
+    alert('Please tick the acknowledgment checkbox before unlocking interpretation.');
+    return;
+  }
+  interpretationUnlocked = true;
+  const gate = document.getElementById('interp-gate');
+  const banner = document.getElementById('interp-active-banner');
+  const presetEl = document.getElementById('threshold-preset');
+  const presetLabel = presetEl ? presetEl.options[presetEl.selectedIndex].text : 'ES Guidelines 2025';
+  const bannerLabel = document.getElementById('interp-active-label');
+  if (bannerLabel) bannerLabel.textContent = presetLabel;
+  if (gate) gate.style.display = 'none';
+  if (banner) banner.style.display = 'flex';
+  try { if (presetEl) localStorage.setItem(LS_PRESET_KEY, presetEl.value); } catch(e){}
+  calculate();
+}
+function requireInterpretation(featureName) {
+  if (interpretationUnlocked) return true;
+  alert(featureName + ' requires interpretation to be unlocked.\n\nScroll to the Interpretation panel, select a threshold framework, tick the acknowledgment, and click "Interpret with selected thresholds".');
+  const gate = document.getElementById('interp-gate');
+  if (gate) gate.scrollIntoView({behavior:'smooth', block:'center'});
+  return false;
+}
+function onGatePresetChange(value) {
+  const esReview = document.getElementById('interp-gate-es-review');
+  const customBox = document.getElementById('interp-gate-custom');
+  const confirmBox = document.getElementById('interp-gate-confirm');
+  const attest = document.getElementById('interp-attest');
+  // Any change here invalidates a prior attestation
+  if (attest) attest.checked = false;
+
+  // "Choose..." selected — hide everything downstream, don't touch thresholds
+  if (!value) {
+    if (esReview) esReview.style.display = 'none';
+    if (customBox) customBox.style.display = 'none';
+    if (confirmBox) confirmBox.style.display = 'none';
+    return;
+  }
+
+  // Mirror the choice to the main dropdown and apply (which also relocks and persists).
+  const mainSel = document.getElementById('threshold-preset');
+  if (mainSel) mainSel.value = value;
+  applyThresholdPreset(value);
+  // Show the review panel for the picked framework
+  if (esReview) esReview.style.display = (value === 'es2025') ? 'block' : 'none';
+  if (customBox) customBox.style.display = (value === 'custom') ? 'block' : 'none';
+  if (confirmBox) confirmBox.style.display = 'block';
+  // When Custom is picked, seed the gate inputs from the current thresholds state
+  if (value === 'custom') {
+    const map = {
+      'gate-thresh-si-unstim': thresholds.siUnstim,
+      'gate-thresh-si-stim':   thresholds.siStim,
+      'gate-thresh-li-lat':    thresholds.liLat,
+      'gate-thresh-li-border': thresholds.liBorder,
+      'gate-thresh-csi':       thresholds.csi,
+    };
+    Object.keys(map).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = map[id].toFixed(1);
+    });
+  }
+}
+function onGateCustomInput() {
+  // Write gate custom-input values into the main threshold-inputs, then trigger onCustomThreshold()
+  // so the existing state + ref panel + banner all sync.
+  const pairs = [
+    ['gate-thresh-si-unstim', 'thresh-si-unstim'],
+    ['gate-thresh-si-stim',   'thresh-si-stim'],
+    ['gate-thresh-li-lat',    'thresh-li-lat'],
+    ['gate-thresh-li-border', 'thresh-li-border'],
+    ['gate-thresh-csi',       'thresh-csi'],
+  ];
+  pairs.forEach(([fromId, toId]) => {
+    const from = document.getElementById(fromId);
+    const to = document.getElementById(toId);
+    if (from && to) to.value = from.value;
+  });
+  onCustomThreshold();
+}
 
 // ── Unit State ──
 const units = { aldo: 'ng/dL', cort: 'µg/dL' };
@@ -1672,6 +1912,25 @@ function classify(siR, siL, siThresh, li, csi, R, L) {
 }
 
 function applyThresholdPreset(value) {
+  // Changing framework relocks interpretation — user must re-attest.
+  if (typeof interpretationUnlocked !== 'undefined' && interpretationUnlocked) {
+    lockInterpretation();
+  }
+  try { localStorage.setItem(LS_PRESET_KEY, value); } catch(e){}
+  // Keep gate dropdown in sync with main one — and mirror its panel visibility
+  // so changing the main dropdown while locked updates the gate's progressive-disclosure UI.
+  const gatePresetEl = document.getElementById('interp-gate-preset');
+  if (gatePresetEl && gatePresetEl.value !== value) {
+    gatePresetEl.value = value;
+    const esReview = document.getElementById('interp-gate-es-review');
+    const customBox = document.getElementById('interp-gate-custom');
+    const confirmBox = document.getElementById('interp-gate-confirm');
+    const attest = document.getElementById('interp-attest');
+    if (esReview) esReview.style.display = (value === 'es2025') ? 'block' : 'none';
+    if (customBox) customBox.style.display = (value === 'custom') ? 'block' : 'none';
+    if (confirmBox) confirmBox.style.display = 'block';
+    if (attest) attest.checked = false;
+  }
   const isCustom = value === 'custom';
   document.getElementById('custom-warning').style.display = isCustom ? 'block' : 'none';
   document.getElementById('ref-guideline-label').style.display = isCustom ? 'none' : 'block';
@@ -1708,6 +1967,10 @@ function applyThresholdPreset(value) {
 }
 
 function onCustomThreshold() {
+  // Editing custom values relocks interpretation.
+  if (typeof interpretationUnlocked !== 'undefined' && interpretationUnlocked) {
+    lockInterpretation();
+  }
   thresholds.siUnstim = parseFloat(document.getElementById('thresh-si-unstim').value) || 2.0;
   thresholds.siStim   = parseFloat(document.getElementById('thresh-si-stim').value)   || 5.0;
   thresholds.liLat    = parseFloat(document.getElementById('thresh-li-lat').value)    || 4.0;
@@ -1967,8 +2230,13 @@ function calculate() {
   const siL = (cortL !== null && cortIVC !== null && cortIVC !== 0) ? cortL / cortIVC : null;
   renderIndexVal('si-right-val', siR);
   renderIndexVal('si-left-val', siL);
-  renderPill('si-right-status', siR === null ? null : siR >= siThresh ? 'pass' : 'fail', siR === null ? 'No data' : siR >= siThresh ? 'Cannulated' : 'Not cannulated');
-  renderPill('si-left-status',  siL === null ? null : siL >= siThresh ? 'pass' : 'fail', siL === null ? 'No data' : siL >= siThresh ? 'Cannulated' : 'Not cannulated');
+  if (!interpretationUnlocked) {
+    renderPill('si-right-status', siR === null ? null : 'na', siR === null ? 'No data' : 'Threshold not applied');
+    renderPill('si-left-status',  siL === null ? null : 'na', siL === null ? 'No data' : 'Threshold not applied');
+  } else {
+    renderPill('si-right-status', siR === null ? null : siR >= siThresh ? 'pass' : 'fail', siR === null ? 'No data' : siR >= siThresh ? 'Cannulated' : 'Not cannulated');
+    renderPill('si-left-status',  siL === null ? null : siL >= siThresh ? 'pass' : 'fail', siL === null ? 'No data' : siL >= siThresh ? 'Cannulated' : 'Not cannulated');
+  }
 
   let li = null;
   if (R !== null && L !== null && Math.min(R, L) !== 0) li = Math.max(R, L) / Math.min(R, L);
@@ -1984,7 +2252,8 @@ function calculate() {
 
   let liStatus = null, liLabel = 'No data';
   if (li !== null) {
-    if (li > thresholds.liLat) { liStatus = 'pass'; liLabel = 'Lateralized'; }
+    if (!interpretationUnlocked) { liStatus = 'na'; liLabel = 'Threshold not applied'; }
+    else if (li > thresholds.liLat) { liStatus = 'pass'; liLabel = 'Lateralized'; }
     else if (li >= thresholds.liBorder) { liStatus = 'warn'; liLabel = 'Borderline'; }
     else { liStatus = 'fail'; liLabel = 'Bilateral'; }
   }
@@ -2005,18 +2274,22 @@ function calculate() {
   renderIndexVal('csi-val', csi);
   document.getElementById('csi-thresh-text').textContent = `< ${thresholds.csi.toFixed(1)}`;
   let csiStatus = null, csiLabel = 'No data';
-  if (csi !== null) { csiStatus = csi < thresholds.csi ? 'pass' : 'fail'; csiLabel = csi < thresholds.csi ? 'Suppressed' : 'Not suppressed'; }
+  if (csi !== null) {
+    if (!interpretationUnlocked) { csiStatus = 'na'; csiLabel = 'Threshold not applied'; }
+    else { csiStatus = csi < thresholds.csi ? 'pass' : 'fail'; csiLabel = csi < thresholds.csi ? 'Suppressed' : 'Not suppressed'; }
+  }
   renderPill('csi-status', csiStatus, csiLabel);
 
   const cls = classify(siR, siL, siThresh, li, csi, R, L);
 
-  // Update dominant side label with significance
+  // Update dominant side label with significance (gated — "(not significant)" / "(non-selective)" are threshold-dependent)
   const domEl2 = document.getElementById('dominant-side');
-  if (domEl2 && cls && cls.classification === 'bilateral' && R !== null && L !== null) {
-    const side = R > L ? 'Left' : R < L ? 'Left' : 'Equal';
-    domEl2.innerHTML = (R > L ? 'Right' : L > R ? 'Left' : 'Equal') + ' <span style="font-size:9px;color:var(--text-3);font-weight:400">(not significant)</span>';
-  } else if (domEl2 && cls && cls.classification === 'non_selective') {
-    domEl2.innerHTML = (R !== null && L !== null ? (R > L ? 'Right' : L > R ? 'Left' : 'Equal') : '—') + ' <span style="font-size:9px;color:var(--text-3);font-weight:400">(non-selective)</span>';
+  if (interpretationUnlocked) {
+    if (domEl2 && cls && cls.classification === 'bilateral' && R !== null && L !== null) {
+      domEl2.innerHTML = (R > L ? 'Right' : L > R ? 'Left' : 'Equal') + ' <span style="font-size:9px;color:var(--text-3);font-weight:400">(not significant)</span>';
+    } else if (domEl2 && cls && cls.classification === 'non_selective') {
+      domEl2.innerHTML = (R !== null && L !== null ? (R > L ? 'Right' : L > R ? 'Left' : 'Equal') : '—') + ' <span style="font-size:9px;color:var(--text-3);font-weight:400">(non-selective)</span>';
+    }
   }
 
   renderSummary(siR, siL, siThresh, li, csi, R, L, cls);
@@ -2033,6 +2306,11 @@ function renderSummary(siR, siL, siThresh, li, csi, R, L, cls) {
   if (siR === null && siL === null) {
     box.className = 'summary-box incomplete';
     box.innerHTML = '<div class="summary-icon"></div><div class="summary-text">Awaiting sample data — results will appear here once values are entered.</div>';
+    return;
+  }
+  if (!interpretationUnlocked) {
+    box.className = 'summary-box incomplete';
+    box.innerHTML = '<div class="summary-icon">🔒</div><div class="summary-text"><strong>Raw indices shown.</strong> Classification is hidden until a threshold framework is selected and acknowledged.</div>';
     return;
   }
   const rightOK = siR !== null && siR >= siThresh;
@@ -2086,9 +2364,15 @@ function copyResults() {
 
   let lines = ['AVS CALCULATOR RESULTS', '─'.repeat(36)];
   lines.push(`Protocol: ${protLabel}`);
-  lines.push(`Guideline: ${guidelineLabel}`);
-  lines.push('');
-  lines.push(`Classification: ${classificationLabel}`);
+  if (interpretationUnlocked) {
+    lines.push(`Guideline: ${guidelineLabel}`);
+    lines.push('');
+    lines.push(`Classification: ${classificationLabel}`);
+  } else {
+    lines.push('Guideline: — (interpretation not unlocked)');
+    lines.push('');
+    lines.push('Classification: Not interpreted — raw indices only');
+  }
   lines.push('');
   lines.push(`SI Right:  ${siR !== null ? fmt(siR) : '—'}  (threshold ≥ ${siThresh.toFixed(1)}) — ${siR !== null ? (siR >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}`);
   lines.push(`SI Left:   ${siL !== null ? fmt(siL) : '—'}  (threshold ≥ ${siThresh.toFixed(1)}) — ${siL !== null ? (siL >= siThresh ? 'Cannulated' : 'Not cannulated') : 'No data'}`);
@@ -2257,6 +2541,7 @@ function updateDomBox(R, L) {
 function updateScreenInterp(siR, siL, siThresh, li, csi, R, L, cls) {
   const el = document.getElementById('screen-interp');
   if (!el) return;
+  if (!interpretationUnlocked) { el.style.display = 'none'; return; }
   if (siR === null && siL === null) { el.style.display = 'none'; return; }
   const lines = getInterpretationText(siR, siL, siThresh, li, csi, R, L);
   if (!lines.length) { el.style.display = 'none'; return; }
@@ -2271,6 +2556,7 @@ function updateScreenInterp(siR, siL, siThresh, li, csi, R, L, cls) {
 function updateCalcIndicesTable(siR, siL, siThresh, li, csi, R, L, cls) {
   const el = document.getElementById('calc-indices-section');
   if (!el) return;
+  if (!interpretationUnlocked) { el.style.display = 'none'; return; }
   if (!cls) { el.style.display = 'none'; return; }
   el.style.display = 'block';
 
@@ -2321,6 +2607,7 @@ function updateCalcIndicesTable(siR, siL, siThresh, li, csi, R, L, cls) {
 function updatePatientPreview(cls) {
   const section = document.getElementById('patient-preview-section');
   if (!section) return;
+  if (!interpretationUnlocked) { section.style.display = 'none'; return; }
   section.style.display = cls ? 'block' : 'none';
 }
 
@@ -2339,6 +2626,8 @@ function getCustomPatientText() {
 function toggleLangSelector() {
   const checked = document.getElementById('opt-patient').checked;
   document.getElementById('lang-selector').style.display = checked ? 'block' : 'none';
+  const textSection = document.getElementById('patient-text-section');
+  if (textSection) textSection.style.display = checked ? 'block' : 'none';
 }
 
 function toggleLangPill(btn) {
@@ -2363,7 +2652,42 @@ function toggleLangPill(btn) {
 }
 
 function openPrintOptions() {
+  // Allowed when locked (Calculations Only is always available).
+  // Gate Clinical Summary & Patient-Friendly checkboxes based on interpretation state.
+  const locked = !interpretationUnlocked;
+  const summaryCk = document.getElementById('opt-summary');
+  const patientCk = document.getElementById('opt-patient');
+  const calcOnlyCk = document.getElementById('opt-calculations-only');
+  if (summaryCk) { summaryCk.disabled = locked; if (locked) summaryCk.checked = false; }
+  if (patientCk) { patientCk.disabled = locked; if (locked) patientCk.checked = false; }
+  // When locked, default to Calculations Only
+  if (locked && calcOnlyCk) calcOnlyCk.checked = true;
+  updatePrintOptLockedUI();
   document.getElementById('print-options-overlay').classList.add('open');
+}
+function updatePrintOptLockedUI() {
+  const locked = !interpretationUnlocked;
+  ['opt-summary-label', 'opt-patient-label'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.opacity = locked ? '0.45' : '1';
+    el.style.cursor = locked ? 'not-allowed' : 'pointer';
+  });
+  const lockedNote = document.getElementById('print-opt-locked-note');
+  if (lockedNote) lockedNote.style.display = locked ? 'block' : 'none';
+}
+// Mutual exclusivity: Calculations Only ↔ Clinical Summary
+function onCalcOnlyToggle() {
+  const calcOnly = document.getElementById('opt-calculations-only');
+  const summary  = document.getElementById('opt-summary');
+  if (!calcOnly || !summary) return;
+  if (calcOnly.checked) summary.checked = false;
+}
+function onSummaryToggle() {
+  const calcOnly = document.getElementById('opt-calculations-only');
+  const summary  = document.getElementById('opt-summary');
+  if (!calcOnly || !summary) return;
+  if (summary.checked) calcOnly.checked = false;
 }
 function closePrintOptions() {
   document.getElementById('print-options-overlay').classList.remove('open');
@@ -2377,13 +2701,21 @@ function closePrintOptions() {
   });
   document.getElementById('opt-patient').checked = false;
   document.getElementById('lang-selector').style.display = 'none';
+  const textSection = document.getElementById('patient-text-section');
+  if (textSection) textSection.style.display = 'none';
 }
 function confirmPrintReport() {
+  const wantCalcOnly  = document.getElementById('opt-calculations-only').checked;
   const wantSummary   = document.getElementById('opt-summary').checked;
   const wantWorksheet = document.getElementById('opt-worksheet').checked;
   const wantPatient   = document.getElementById('opt-patient').checked;
-  if (!wantSummary && !wantWorksheet && !wantPatient) {
+  if (!wantCalcOnly && !wantSummary && !wantWorksheet && !wantPatient) {
     alert('Please select at least one section to print.');
+    return;
+  }
+  // Guard: interpretation-dependent sections require unlock
+  if ((wantSummary || wantPatient) && !interpretationUnlocked) {
+    alert('Clinical Summary and Patient-Friendly Summary require interpretation to be unlocked. Pick a threshold framework and acknowledge first, or select "Calculations Only".');
     return;
   }
   const langs = [];
@@ -2396,7 +2728,7 @@ function confirmPrintReport() {
   }
   closePrintOptions();
   try {
-    openPrintReport(wantSummary, wantWorksheet, wantPatient, langs);
+    openPrintReport(wantSummary, wantWorksheet, wantPatient, langs, wantCalcOnly);
   } catch(err) {
     alert('Error generating report: ' + err.message);
   }
@@ -2406,14 +2738,6 @@ function confirmPrintReport() {
 document.getElementById('print-options-overlay').addEventListener('click', function(e) {
   if (e.target === this) closePrintOptions();
 });
-
-function scrollToAbout() {
-  const el = document.getElementById('avs-about');
-  if (!el) return;
-  const details = document.getElementById('avs-about-details');
-  if (details) details.open = true;
-  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
 
 function openChangelog() {
   document.getElementById('changelog-overlay').classList.add('open');
@@ -2767,6 +3091,9 @@ function updateAdvancedCalc() {
 
   function badge(val, thresh, type, cannulationOK) {
     if (val === null) return '<span style="color:var(--text-3)">—</span>';
+    if (!interpretationUnlocked) {
+      return '<span style="font-size:9px;padding:2px 7px;border-radius:2px;font-weight:500;background:var(--surface2);color:var(--text-3)">Threshold not applied</span>';
+    }
     let pass, label;
     if (type === 'si') {
       pass = val >= thresh;
@@ -2921,6 +3248,7 @@ function updateAdvancedCalc() {
 // ══════════════════════════════════════════════
 // ADVANCED REPORT OPTIONS
 function openAdvancedReportOptions() {
+  if (!requireInterpretation('Advanced Report')) return;
   document.getElementById('adv-report-overlay').style.display = 'flex';
 }
 function closeAdvancedReportOptions() {
@@ -3146,7 +3474,7 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
   ` : ''}
 
   ${wantWorksheet ? `
-  <h3 style="font-size:11pt;color:#1B5E35;margin:16px 0 10px;border-bottom:1px solid #c2ddd3;padding-bottom:4px">Calculation Workup</h3>
+  <h3 style="font-size:11pt;color:#1B5E35;margin:16px 0 10px;border-bottom:1px solid #c2ddd3;padding-bottom:4px">Calculation Worksheet</h3>
   ${(() => {
     const aldoUnit = units.aldo;
     const cortUnit = units.cort;
@@ -3235,7 +3563,7 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
   ` : ''}
 
   ${wantWorksheet ? `
-  <h3 style="font-size:11pt;color:#7A4F00;margin:16px 0 10px;border-bottom:1px solid #e8d5a0;padding-bottom:4px">Calculation Workup</h3>
+  <h3 style="font-size:11pt;color:#7A4F00;margin:16px 0 10px;border-bottom:1px solid #e8d5a0;padding-bottom:4px">Calculation Worksheet</h3>
   ${(() => {
     const aldoUnit = units.aldo;
     const cortUnit = units.cort;
@@ -3303,7 +3631,7 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
-function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false, langs=['en']) {
+function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false, langs=['en'], wantCalcOnly=false) {
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
   const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
   const cortR = avgCort('right'), cortL = avgCort('left'), cortIVC = avgCort('ivc');
@@ -3429,9 +3757,15 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
         <span class="badge" style="font-size:9pt;padding:3px 10px;background:#FDF3E3;color:#7A4F00;border-radius:2px;display:inline-block;font-family:monospace">
           ${protocol === 'stimulated' ? 'COSYNTROPIN-STIMULATED' : 'UNSTIMULATED'}
         </span>
+        ${wantCalcOnly ? `
+        <span class="badge" style="font-size:9pt;padding:3px 10px;background:#eef1f8;color:#2B3A8C;border-radius:2px;display:inline-block;font-family:monospace">
+          CALCULATIONS ONLY — NO INTERPRETATION APPLIED
+        </span>
+        ` : `
         <span class="badge" style="font-size:9pt;padding:3px 10px;background:${presetEl && presetEl.value === 'custom' ? '#FFF8E6' : '#EBF0FA'};color:${presetEl && presetEl.value === 'custom' ? '#7A4F00' : '#2B3A8C'};border-radius:2px;display:inline-block;font-family:monospace">
           ${presetEl && presetEl.value === 'custom' ? 'CUSTOM THRESHOLDS' : presetLabel}
         </span>
+        `}
         <span class="badge" style="font-size:9pt;padding:3px 10px;background:#F0EDE6;color:#555;border-radius:2px;display:inline-block;font-family:monospace">
           AVS Calculator ${APP_VERSION}
         </span>
@@ -3444,7 +3778,38 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
     </div>
   </div>
 
-  ${buildCustomThresholdsHTML()}
+  ${wantCalcOnly ? '' : buildCustomThresholdsHTML()}
+
+  <!-- CALCULATIONS ONLY (dev): measured values + stripped-down indices -->
+  ${wantCalcOnly ? `
+  <div class="section">
+    <h2>Measured Values &amp; A/C Ratios</h2>
+    <h3 style="color:#2B3A8C;margin-bottom:6px">Inferior Vena Cava (IVC) — Peripheral Reference</h3>
+    <div style="border:1px solid #dde3f5;border-radius:3px;overflow:hidden;margin-bottom:18px">${buildSampleTableHTML('ivc', '#2B3A8C')}</div>
+    <h3 style="color:#1B4D3E;margin-bottom:6px">Right Adrenal Vein</h3>
+    <div style="border:1px solid #c2ddd3;border-radius:3px;overflow:hidden;margin-bottom:18px">${buildSampleTableHTML('right', '#1B4D3E')}</div>
+    <h3 style="color:#7A1F1F;margin-bottom:6px">Left Adrenal Vein</h3>
+    <div style="border:1px solid #dec4c4;border-radius:3px;overflow:hidden;margin-bottom:0">${buildSampleTableHTML('left', '#7A1F1F')}</div>
+  </div>
+  <div class="section">
+    <h2>Derived Indices</h2>
+    <p style="font-size:9.5pt;color:#666;margin-bottom:12px;line-height:1.6;font-style:italic">These values are mathematically derived from the measured aldosterone and cortisol concentrations above. No classification or clinical interpretation has been applied. Any clinical determination of lateralization, cannulation adequacy, or suppression requires comparison against institution-specific threshold values by a qualified clinician.</p>
+    <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-radius:3px;overflow:hidden">
+      <thead><tr style="background:#f5f5f5">
+        <th style="padding:8px 12px;text-align:left;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Index</th>
+        <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Formula</th>
+        <th style="padding:8px 12px;text-align:center;font-size:9pt;color:#666;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Value</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:10pt">Selectivity Index — Right (SI)</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:9pt;color:#666;font-family:monospace">Right cortisol ÷ IVC cortisol</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">${siR !== null ? fmt(siR) : '—'}</td></tr>
+        <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:10pt">Selectivity Index — Left (SI)</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:9pt;color:#666;font-family:monospace">Left cortisol ÷ IVC cortisol</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">${siL !== null ? fmt(siL) : '—'}</td></tr>
+        <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:10pt">Lateralization Index (LI)</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:9pt;color:#666;font-family:monospace">Higher A/C ÷ Lower A/C</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">${li !== null ? fmt(li) : '—'}</td></tr>
+        <tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:10pt">Contralateral Suppression (CSI)</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:9pt;color:#666;font-family:monospace">Lower A/C ÷ IVC A/C</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-size:11pt;font-weight:700">${csi !== null ? fmt(csi) : '—'}</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:8.5pt;color:#888;margin-top:10px;font-style:italic">Protocol: ${protocol === 'stimulated' ? 'Cosyntropin-stimulated' : 'Unstimulated'}. Protocol affects which SI threshold is clinically appropriate, but SI values themselves are the same ratio regardless.</p>
+  </div>
+  ` : ''}
 
   <!-- CLINICAL SUMMARY: Measured Values + Indices + Interpretation -->
   ${wantSummary ? `
@@ -3490,7 +3855,7 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
     <span style="flex:1;border-bottom:1px solid #ccc;display:inline-block">&nbsp;</span>
   </div>
   <div class="section">
-    <h2>Calculation Workup</h2>
+    <h2>Calculation Worksheet</h2>
     <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">A/C ratios are calculated per sample (Aldosterone ÷ Cortisol, in reported units). When multiple samples are included, the A/C ratio is calculated for each sample individually, then those ratios are averaged. All indices are derived from these averaged values.</p>
     ${(() => {
       const aldoUnit = units.aldo;
@@ -3540,9 +3905,9 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
   ` : ''}
 
   <!-- DISCLAIMER + FOOTER (shown if any clinical section selected) -->
-  ${(wantSummary || wantWorksheet) ? `
+  ${(wantSummary || wantWorksheet || wantCalcOnly) ? `
   <div class="disclaimer-box" style="margin-top:24px;padding:12px 14px;background:#f8f8f8;border:1px solid #e0e0e0;border-radius:3px">
-    <p style="font-size:8.5pt;color:#888;line-height:1.6"><strong style="color:#555">Disclaimer:</strong> This report was generated by the AVS Calculator tool and is intended to assist qualified clinicians in interpreting adrenal vein sampling data. It does not constitute medical advice and should not be used as a substitute for clinical judgment. All results must be interpreted in the context of the patient's clinical presentation, imaging, and biochemical evaluation. Threshold values used are based on published guidelines and may vary by institution.</p>
+    <p style="font-size:8.5pt;color:#888;line-height:1.6"><strong style="color:#555">Disclaimer:</strong> ${wantCalcOnly && !wantSummary ? 'This report contains calculated indices only. No threshold framework has been applied and no classification or clinical interpretation is included. Interpretation of these values must be performed by a qualified clinician using thresholds appropriate for the clinical context.' : 'This report was generated by the AVS Calculator tool and is intended to assist qualified clinicians in interpreting adrenal vein sampling data. It does not constitute medical advice and should not be used as a substitute for clinical judgment. All results must be interpreted in the context of the patient\'s clinical presentation, imaging, and biochemical evaluation. Threshold values used are based on published guidelines and may vary by institution.'}</p>
   </div>
   <div class="report-footer" style="margin-top:20px;padding-top:14px;border-top:1px solid #e0e0e0;display:flex;justify-content:flex-end;align-items:center">
     <p style="font-size:8pt;color:#ccc;font-family:monospace">www.avsresults.com</p>
@@ -3843,8 +4208,8 @@ function buildPatientSectionHTML(dateStr, lang='en', timeStr='') {
   if (!resultsUnclear) {
     let nextSteps = '';
     if (siR === null && siL === null) nextSteps = t.nextNoData;
-    else if (li >= 4) nextSteps = t.nextLateral(domSideLabel);
-    else if (li >= 2) nextSteps = t.nextBorderline;
+    else if (c === 'lateralized') nextSteps = t.nextLateral(domSideLabel);
+    else if (c === 'borderline') nextSteps = t.nextBorderline;
     else nextSteps = t.nextBilateral;
     cards += `<div class="patient-card" style="background:#F7F5F0;border:1px solid #D8D3C8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><h3 style="font-size:13pt;color:#1A1714;margin-bottom:10px;font-family:'Libre Baskerville',serif">${t.nextTitle}</h3><p style="font-size:11pt;color:#3a3530;line-height:1.8">${nextSteps}</p></div>`;
   }
@@ -3868,6 +4233,7 @@ function buildPatientSectionHTML(dateStr, lang='en', timeStr='') {
 }
 
 function openPatientReport() {
+  if (!requireInterpretation('Patient Summary Report')) return;
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -3909,8 +4275,32 @@ buildAllRows('ivc');
 buildAllRows('right');
 buildAllRows('left');
 calculate();
-applyThresholdPreset('es2025');
+// Hydrate preset from localStorage (choice persists); keep interpretation locked until user re-attests.
+let _initialPreset = 'es2025';
+try {
+  const saved = localStorage.getItem(LS_PRESET_KEY);
+  if (saved === 'es2025' || saved === 'custom') _initialPreset = saved;
+} catch(e){}
+const _presetSel = document.getElementById('threshold-preset');
+if (_presetSel) _presetSel.value = _initialPreset;
+const _gatePresetSel = document.getElementById('interp-gate-preset');
+if (_gatePresetSel) _gatePresetSel.value = _initialPreset;
+applyThresholdPreset(_initialPreset);
+// Show gate's inline custom editor if persisted preset is custom; also seed its inputs
+const _gateCustomBox = document.getElementById('interp-gate-custom');
+if (_gateCustomBox) _gateCustomBox.style.display = (_initialPreset === 'custom') ? 'block' : 'none';
+if (_initialPreset === 'custom') {
+  [['gate-thresh-si-unstim', thresholds.siUnstim],
+   ['gate-thresh-si-stim',   thresholds.siStim],
+   ['gate-thresh-li-lat',    thresholds.liLat],
+   ['gate-thresh-li-border', thresholds.liBorder],
+   ['gate-thresh-csi',       thresholds.csi]].forEach(([id, val]) => {
+    const el = document.getElementById(id); if (el) el.value = val.toFixed(1);
+  });
+}
+lockInterpretation();
 initTimestamp();
+checkTOU();
 
 // ── Privacy: clear all fields on load ──
 window.addEventListener('load', () => {
@@ -3989,7 +4379,7 @@ function loadTestData(num) {
       left:  [{aldo:1200, cort:250}, {aldo:1100, cort:230}, {aldo:1300, cort:270}],
     },
     3: {
-      label: 'Test 3 — Borderline, rescue note triggers',
+      label: 'Test 3 — LI just below 3.0 bilateral cutoff, CSI suppressed',
       protocol: 'stimulated',
       ivc:   [{aldo:100, cort:20}, {aldo:100, cort:20}],
       right: [{aldo:750, cort:250}, {aldo:780, cort:260}, {aldo:720, cort:240}],
@@ -4097,7 +4487,7 @@ function loadTestData(num) {
       <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Lateralization Index (LI)</h3>
       <p style="margin-bottom:6px">Compares cortisol-corrected aldosterone (A/C ratio) between the dominant and non-dominant adrenal veins:</p>
       <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:10px 14px;font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px;color:#C8901A">LI = (Dominant Aldo ÷ Dominant Cort) ÷ (Non-Dominant Aldo ÷ Non-Dominant Cort)</div>
-      <p style="margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.55)">A/C ratios are calculated per sample first, then averaged across included samples. The side with the higher average A/C ratio is designated dominant. Threshold: ≥4.0 (stimulated) per ES Guidelines.</p>
+      <p style="margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.55)">A/C ratios are calculated per sample first, then averaged across included samples. The side with the higher average A/C ratio is designated dominant. Threshold: >4.0 per ES Guidelines.</p>
       <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Contralateral Suppression Index (CSI)</h3>
       <p style="margin-bottom:6px">Assesses suppression of aldosterone in the non-dominant gland relative to IVC:</p>
       <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:10px 14px;font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px;color:#C8901A">CSI = (Non-Dominant Aldo ÷ Non-Dominant Cort) ÷ (IVC Aldo ÷ IVC Cort)</div>
@@ -4105,7 +4495,7 @@ function loadTestData(num) {
       <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Multi-Sample Averaging</h3>
       <p style="margin-bottom:20px;font-size:12px;color:rgba(255,255,255,0.55)">When multiple samples are entered for a vein, A/C ratios are calculated for each sample individually (Aldo ÷ Cort per sample), then averaged across included samples. This preserves per-sample accuracy and is consistent with published multi-sample AVS methodology. Excluded samples are omitted from all averages.</p>
       <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Guideline References</h3>
-      <p style="font-size:12px;color:rgba(255,255,255,0.55);margin:0">Adler GK et al. J Clin Endocrinol Metab. 2025;110(9):2453–2495.<br>Funder JW et al. J Clin Endocrinol Metab. 2016;101(5):1889–1916.<br>Rossi GP et al. Hypertension. 2014;63(1):151–160.</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.55);margin:0">Adler GK et al. J Clin Endocrinol Metab. 2025;110(9):2453–2495.<br>Rossi GP et al. Hypertension. 2014;63(1):151–160.</p>
     </div>
   </div>
 </div>
@@ -4134,45 +4524,5 @@ function loadTestData(num) {
 
 <div id="print-report"></div>
 
-<section id="avs-about" style="background:#F0EDE6;border-top:1px solid #D8D3C8;padding:20px 40px;font-family:'DM Sans',sans-serif;color:#5C564E;font-size:13px;line-height:1.8;">
-  <details id="avs-about-details" style="max-width:800px;margin:0 auto;">
-    <summary style="list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:flex-end;padding:4px 0;outline:none">
-      <span id="avs-about-chevron" style="font-family:'DM Mono',monospace;font-size:14px;color:#8C867E;transition:transform 0.2s">▸</span>
-    </summary>
-    <div style="padding-top:20px">
-    <p style="margin-bottom:24px;">AVS Calculator is a free, browser-based tool for interpreting adrenal vein sampling (AVS) results in patients with primary aldosteronism. It calculates the Selectivity Index (SI), Lateralization Index (LI), and Contralateral Suppression Index (CSI) in real time, following current Endocrine Society guidelines. All calculations run locally — no patient data is ever transmitted or stored.</p>
-
-    <h3 style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#8C867E;margin-bottom:12px;">Frequently Asked Questions</h3>
-
-    <div style="display:grid;gap:16px;">
-      <details style="border:1px solid #D8D3C8;border-radius:4px;background:#fff;padding:14px 16px;">
-        <summary style="font-weight:600;color:#1A1714;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">What is adrenal vein sampling? <span style="color:#8C867E;font-weight:400;">+</span></summary>
-        <p style="margin-top:10px;color:#5C564E;">Adrenal vein sampling (AVS) is the gold-standard procedure for subtype differentiation in primary aldosteronism (primary hyperaldosteronism). Blood is simultaneously or sequentially drawn from both adrenal veins and the inferior vena cava (IVC) to measure aldosterone and cortisol levels. The resulting indices determine whether aldosterone excess is coming from one gland (unilateral) — which may be surgically curable — or both glands (bilateral), which is managed medically.</p>
-      </details>
-      <details style="border:1px solid #D8D3C8;border-radius:4px;background:#fff;padding:14px 16px;">
-        <summary style="font-weight:600;color:#1A1714;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">How is the Selectivity Index (SI) interpreted? <span style="color:#8C867E;font-weight:400;">+</span></summary>
-        <p style="margin-top:10px;color:#5C564E;">The SI confirms that the catheter was correctly positioned in the adrenal vein, not the IVC. It is calculated as adrenal vein cortisol ÷ IVC cortisol. A threshold of ≥2.0 is used for unstimulated protocols and ≥3.0 for cosyntropin-stimulated protocols. If either SI falls below the cutoff, the sample is non-selective and lateralization cannot be reliably interpreted.</p>
-      </details>
-      <details style="border:1px solid #D8D3C8;border-radius:4px;background:#fff;padding:14px 16px;">
-        <summary style="font-weight:600;color:#1A1714;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">What LI threshold indicates lateralized disease? <span style="color:#8C867E;font-weight:400;">+</span></summary>
-        <p style="margin-top:10px;color:#5C564E;">A Lateralization Index (LI) ≥4.0 is the standard threshold for unilateral (lateralized) aldosterone excess, per Endocrine Society guidelines. An LI between 2.0 and 3.9 is borderline and warrants additional clinical correlation. An LI below 2.0 is consistent with bilateral disease. The CSI provides supporting evidence, particularly in borderline cases.</p>
-      </details>
-      <details style="border:1px solid #D8D3C8;border-radius:4px;background:#fff;padding:14px 16px;">
-        <summary style="font-weight:600;color:#1A1714;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">Is patient data stored or shared? <span style="color:#8C867E;font-weight:400;">+</span></summary>
-        <p style="margin-top:10px;color:#5C564E;">No. All calculations are performed locally in your browser. No data is transmitted to any server, logged, or stored. The session automatically clears after inactivity. This tool is PHI-safe and appropriate for direct clinical use.</p>
-      </details>
-    </div>
-
-    <p style="margin-top:24px;font-size:11px;color:#8C867E;">Built by Rebecca Allegretto, NP, MSN, MBA, ACNP-BC. References: Adler GK et al. <em>J Clin Endocrinol Metab.</em> 2025;110(9):2453–2495 · Funder JW et al. <em>J Clin Endocrinol Metab.</em> 2016;101(5):1889–1916.</p>
-    </div>
-  </details>
-</section>
-<script>
-  (function(){
-    const d = document.getElementById('avs-about-details');
-    const c = document.getElementById('avs-about-chevron');
-    if (d && c) d.addEventListener('toggle', () => { c.style.transform = d.open ? 'rotate(90deg)' : 'rotate(0deg)'; });
-  })();
-</script>
 </body>
 </html>
