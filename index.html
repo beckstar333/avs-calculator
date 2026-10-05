@@ -651,7 +651,7 @@
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
       Advanced Report
     </button>
-    <button class="protocol-badge" id="headerProtocol" onclick="cycleProtocol()">Unstimulated</button>
+    <button class="protocol-badge" id="headerProtocol" onclick="cycleProtocol()" style="background:#FFF8E6;border-color:#e8c97a;color:#7A4F00">⚠ Choose Protocol</button>
   </div>
 </header>
 
@@ -664,9 +664,9 @@
 
   <!-- LEFT: DATA ENTRY -->
   <div class="data-panel">
-    <div class="panel-title">Protocol</div>
-    <div class="protocol-toggle">
-      <button class="proto-btn active" id="btnUnstim" onclick="setProtocol('unstimulated')">Unstimulated</button>
+    <div class="panel-title" id="protocol-title">Protocol <span id="protocol-required-hint" style="color:#7A4F00;font-weight:600;letter-spacing:0.05em">— choose one to continue</span></div>
+    <div class="protocol-toggle" id="protocol-toggle" style="outline:2px solid #e8c97a;outline-offset:2px;border-radius:4px">
+      <button class="proto-btn" id="btnUnstim" onclick="setProtocol('unstimulated')">Unstimulated</button>
       <button class="proto-btn" id="btnStim" onclick="setProtocol('stimulated')">Cosyntropin-Stimulated</button>
     </div>
     <div class="panel-title">Units</div>
@@ -1730,7 +1730,7 @@
 const APP_VERSION = 'v1.8';
 
 // ── State ──
-let protocol = 'unstimulated';
+let protocol = null;  // Must be explicitly chosen — no silent default
 const MAX_ROWS = 8;
 
 // ── Terms of Use ──
@@ -1798,6 +1798,7 @@ function lockInterpretation() {
   });
 }
 function unlockInterpretation() {
+  if (!requireProtocol('unlocking interpretation')) return;
   const attest = document.getElementById('interp-attest');
   if (!attest || !attest.checked) {
     alert('Please tick the acknowledgment checkbox before unlocking interpretation.');
@@ -1826,8 +1827,9 @@ function openWorksheetOnly() {
   // Shortcut from the Interpretation Gate — generates the Clinical Report with
   // the compact Calculations-Only summary + the full step-by-step Calculation
   // Worksheet. No classification, no verdict, no interpretation. Bypasses the
-  // framework-selection flow entirely.
+  // framework-selection flow entirely but still requires an explicit protocol choice.
   //   wantSummary=false, wantWorksheet=true, wantPatient=false, langs=['en'], wantCalcOnly=true
+  if (!requireProtocol('generating the Calculation Worksheet')) return;
   openPrintReport(false, true, false, ['en'], true);
 }
 function onGatePresetChange(value) {
@@ -2149,8 +2151,23 @@ function setProtocol(p) {
   document.getElementById('btnStim').classList.toggle('active', p === 'stimulated');
   document.getElementById('btnStim').classList.toggle('stim', p === 'stimulated');
   const hdr = document.getElementById('headerProtocol');
-  hdr.textContent = p === 'stimulated' ? 'Cosyntropin-Stimulated' : 'Unstimulated';
+  if (p) {
+    hdr.textContent = p === 'stimulated' ? 'Cosyntropin-Stimulated' : 'Unstimulated';
+    hdr.style.background = '';
+    hdr.style.borderColor = '';
+    hdr.style.color = '';
+  } else {
+    hdr.textContent = '⚠ Choose Protocol';
+    hdr.style.background = '#FFF8E6';
+    hdr.style.borderColor = '#e8c97a';
+    hdr.style.color = '#7A4F00';
+  }
   hdr.classList.toggle('stimulated', p === 'stimulated');
+  // Toggle the required-choice visual on the protocol selector
+  const protoToggle = document.getElementById('protocol-toggle');
+  const protoHint = document.getElementById('protocol-required-hint');
+  if (protoToggle) protoToggle.style.outline = p ? '' : '2px solid #e8c97a';
+  if (protoHint) protoHint.style.display = p ? 'none' : '';
   updateBanner();
   // Highlight active SI threshold in reference section
   const unstimRow = document.getElementById('ref-si-unstim');
@@ -2163,7 +2180,22 @@ function setProtocol(p) {
   }
   calculate();
 }
-function cycleProtocol() { setProtocol(protocol === 'stimulated' ? 'unstimulated' : 'stimulated'); }
+function cycleProtocol() {
+  // When no protocol is chosen yet, scroll to the toggle instead of silently picking one
+  if (!protocol) {
+    const protoToggle = document.getElementById('protocol-toggle');
+    if (protoToggle) protoToggle.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  setProtocol(protocol === 'stimulated' ? 'unstimulated' : 'stimulated');
+}
+function requireProtocol(featureName) {
+  if (protocol) return true;
+  alert('Please select a protocol (Unstimulated or Cosyntropin-Stimulated) before ' + featureName + '.');
+  const protoToggle = document.getElementById('protocol-toggle');
+  if (protoToggle) protoToggle.scrollIntoView({behavior:'smooth', block:'center'});
+  return false;
+}
 
 function scrollToThresholds() {
   const el = document.getElementById('threshold-preset');
@@ -2177,7 +2209,7 @@ function updateBanner() {
   const bs = document.getElementById('banner-si');
   const bl = document.getElementById('banner-li');
   const bc = document.getElementById('banner-csi');
-  if (bp) bp.textContent = protocol === 'stimulated' ? 'Cosyntropin-Stimulated' : 'Unstimulated';
+  if (bp) bp.textContent = protocol === 'stimulated' ? 'Cosyntropin-Stimulated' : protocol === 'unstimulated' ? 'Unstimulated' : 'Protocol not chosen';
   if (bg) {
     const presetEl = document.getElementById('threshold-preset');
     const isCustom = presetEl && presetEl.value === 'custom';
@@ -2675,6 +2707,7 @@ function toggleLangPill(btn) {
 }
 
 function openPrintOptions() {
+  if (!requireProtocol('generating a Clinical Report')) return;
   // Allowed when locked (Calculations Only is always available).
   // Gate Clinical Summary & Patient-Friendly checkboxes based on interpretation state.
   const locked = !interpretationUnlocked;
@@ -3278,6 +3311,7 @@ function updateAdvancedCalc() {
 // ══════════════════════════════════════════════
 // ADVANCED REPORT OPTIONS
 function openAdvancedReportOptions() {
+  if (!requireProtocol('generating an Advanced Report')) return;
   if (!requireInterpretation('Advanced Report')) return;
   document.getElementById('adv-report-overlay').style.display = 'flex';
 }
@@ -4263,6 +4297,7 @@ function buildPatientSectionHTML(dateStr, lang='en', timeStr='') {
 }
 
 function openPatientReport() {
+  if (!requireProtocol('generating a Patient Summary Report')) return;
   if (!requireInterpretation('Patient Summary Report')) return;
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
