@@ -1823,10 +1823,12 @@ function requireInterpretation(featureName) {
   return false;
 }
 function openWorksheetOnly() {
-  // Shortcut from the Interpretation Gate — generates the Clinical Report's
-  // Calculations-Only variant (raw indices, no classification or verdict) without
-  // requiring any framework selection or attestation.
-  openPrintReport(false, false, false, ['en'], true);
+  // Shortcut from the Interpretation Gate — generates the Clinical Report with
+  // the compact Calculations-Only summary + the full step-by-step Calculation
+  // Worksheet. No classification, no verdict, no interpretation. Bypasses the
+  // framework-selection flow entirely.
+  //   wantSummary=false, wantWorksheet=true, wantPatient=false, langs=['en'], wantCalcOnly=true
+  openPrintReport(false, true, false, ['en'], true);
 }
 function onGatePresetChange(value) {
   const esReview = document.getElementById('interp-gate-es-review');
