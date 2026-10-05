@@ -3423,7 +3423,14 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', sans-serif; font-size: 10pt; color: #1a1714; background: #fff; }
   @media screen { body { background: #e8e5e0; } .page { max-width: 820px; margin: 24px auto; background: #fff; padding: 40px 48px; box-shadow: 0 2px 20px rgba(0,0,0,0.12); } .no-print { position: fixed; top: 16px; right: 16px; display: flex; gap: 10px; z-index: 99; } }
-  @page { size: letter portrait; margin: 0.5in; }
+  @page {
+    size: letter portrait;
+    margin: 0.5in;
+    @top-left { content: ""; }
+    @top-right { content: ""; }
+    @bottom-left { content: ""; }
+    @bottom-right { content: ""; }
+  }
   @media print { .no-print { display: none !important; } .page { padding: 0; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }
   h1 { font-family: 'Libre Baskerville', serif; font-size: 20pt; font-weight: 700; letter-spacing: -0.02em; }
   h2 { font-family: 'Libre Baskerville', serif; font-size: 13pt; font-weight: 700; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #1B5E35; color: #1B5E35; }
