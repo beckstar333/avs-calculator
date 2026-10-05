@@ -812,7 +812,7 @@
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Selectivity Index (SI)</span>
-        <span class="index-thresh" id="si-thresh-label"><span id="si-thresh-text">Threshold: ≥ 2.0</span></span>
+        <span class="index-thresh" id="si-thresh-label"><span id="si-thresh-text"></span></span>
       </div>
       <div class="index-body">
         <div class="index-row">
@@ -835,7 +835,7 @@
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Lateralization Index (LI)</span>
-        <span class="index-thresh" id="li-thresh-label"><span id="li-thresh-text">> 4.0 lateralized | 3.0–4.0 borderline | < 3.0 bilateral</span></span>
+        <span class="index-thresh" id="li-thresh-label"><span id="li-thresh-text"></span></span>
       </div>
       <div class="index-body">
         <div class="index-row">
@@ -851,7 +851,7 @@
     <div class="index-card">
       <div class="index-header">
         <span class="index-name">Contralateral Suppression (CSI)</span>
-        <span class="index-thresh" id="csi-thresh-label"><span id="csi-thresh-text">< 1.0</span></span>
+        <span class="index-thresh" id="csi-thresh-label"><span id="csi-thresh-text"></span></span>
       </div>
       <div class="index-body">
         <div class="index-row">
@@ -868,13 +868,20 @@
     <div id="interp-gate" style="margin-top:18px;padding:16px 18px;border:1px solid #d0cfca;border-left:4px solid #2B3A8C;border-radius:var(--radius);background:#f7f6f1">
       <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:#2B3A8C;margin-bottom:6px;letter-spacing:0.08em">INTERPRETATION LOCKED</div>
       <div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:12px">Indices (SI, LI, CSI) above are calculated independently of any threshold set. To view a classification verdict, interpretation cards, and generate reports, select a threshold framework and acknowledge responsibility for the choice.</div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
         <label style="font-family:var(--mono);font-size:10px;color:var(--text-2);text-transform:uppercase;letter-spacing:0.06em">Framework:</label>
         <select id="interp-gate-preset" onchange="onGatePresetChange(this.value)" style="font-family:var(--mono);font-size:11px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);cursor:pointer">
           <option value="" selected>Choose...</option>
           <option value="es2025">ES Guidelines 2025 (Adler et al.)</option>
           <option value="custom">Custom thresholds</option>
         </select>
+      </div>
+
+      <!-- Always-visible shortcut: skip interpretation entirely and generate just the Calculation Worksheet -->
+      <div style="margin-bottom:12px">
+        <button onclick="openWorksheetOnly()" style="font-family:var(--mono);font-size:10px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--text-3);cursor:pointer;letter-spacing:0.03em">
+          No interpretation needed — just the Calculation Worksheet →
+        </button>
       </div>
 
       <!-- ES Guidelines review panel (shown only when ES is selected) -->
@@ -1815,6 +1822,12 @@ function requireInterpretation(featureName) {
   if (gate) gate.scrollIntoView({behavior:'smooth', block:'center'});
   return false;
 }
+function openWorksheetOnly() {
+  // Shortcut from the Interpretation Gate — generates the Clinical Report's
+  // Calculations-Only variant (raw indices, no classification or verdict) without
+  // requiring any framework selection or attestation.
+  openPrintReport(false, false, false, ['en'], true);
+}
 function onGatePresetChange(value) {
   const esReview = document.getElementById('interp-gate-es-review');
   const customBox = document.getElementById('interp-gate-custom');
@@ -2223,7 +2236,7 @@ function calculate() {
   document.getElementById('ivc-avg').textContent   = IVC !== null ? fmt(IVC) : '—';
 
   const siThresh = protocol === 'stimulated' ? thresholds.siStim : thresholds.siUnstim;
-  document.getElementById('si-thresh-text').textContent = `Threshold: ≥ ${siThresh.toFixed(1)}`;
+  document.getElementById('si-thresh-text').textContent = interpretationUnlocked ? `Threshold: ≥ ${siThresh.toFixed(1)}` : '';
 
   const cortR = avgCort('right'), cortL = avgCort('left'), cortIVC = avgCort('ivc');
   const siR = (cortR !== null && cortIVC !== null && cortIVC !== 0) ? cortR / cortIVC : null;
@@ -2247,8 +2260,10 @@ function calculate() {
     liBig.className = 'li-big' + (li !== null ? ' has-val' : '');
   }
 
-  // Update LI card threshold label dynamically
-  document.getElementById('li-thresh-text').textContent = `> ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${thresholds.liLat.toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`;
+  // Update LI card threshold label dynamically — empty while locked
+  document.getElementById('li-thresh-text').textContent = interpretationUnlocked
+    ? `> ${thresholds.liLat.toFixed(1)} lateralized | ${thresholds.liBorder.toFixed(1)}–${thresholds.liLat.toFixed(1)} borderline | < ${thresholds.liBorder.toFixed(1)} bilateral`
+    : '';
 
   let liStatus = null, liLabel = 'No data';
   if (li !== null) {
@@ -2272,7 +2287,7 @@ function calculate() {
   let csi = null;
   if (R !== null && L !== null && IVC !== null && IVC !== 0) csi = Math.min(R, L) / IVC;
   renderIndexVal('csi-val', csi);
-  document.getElementById('csi-thresh-text').textContent = `< ${thresholds.csi.toFixed(1)}`;
+  document.getElementById('csi-thresh-text').textContent = interpretationUnlocked ? `< ${thresholds.csi.toFixed(1)}` : '';
   let csiStatus = null, csiLabel = 'No data';
   if (csi !== null) {
     if (!interpretationUnlocked) { csiStatus = 'na'; csiLabel = 'Threshold not applied'; }
