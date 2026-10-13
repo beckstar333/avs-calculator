@@ -259,7 +259,7 @@
   .avg-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--surface2); border-top: 1px solid var(--border); flex-wrap: wrap; gap: 4px; }
   .avg-bar-left { display: flex; flex-direction: column; gap: 2px; }
   .avg-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
-  .avg-hint { font-family: var(--sans); font-size: 10px; color: var(--text-3); line-height: 1.4; font-style: italic; }
+  .avg-hint { font-family: var(--sans); font-size: 11.5px; color: var(--text); line-height: 1.5; display: inline-block; padding: 4px 10px; background: #FFF8E6; border: 1px solid #e8d5a0; border-radius: 3px; margin-top: 4px; }
   .avg-value { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text); }
   .avg-value.right-val { color: var(--right); }
   .avg-value.left-val { color: var(--left); }
@@ -711,7 +711,7 @@
       <div class="avg-bar">
         <div class="avg-bar-left">
           <span class="avg-label">A/C Ratio Used in Calculation (included samples)</span>
-          <span class="avg-hint">Multiple values are averaged. To use a single value, enter one sample or toggle off the others.</span>
+          <span class="avg-hint">⬌ Toggle any sample off to exclude it. All <strong>included</strong> samples are averaged per AVS guidelines.</span>
         </div>
         <span class="avg-value ivc-val" id="ivc-avg">—</span>
       </div>
@@ -751,7 +751,7 @@
       <div class="avg-bar">
         <div class="avg-bar-left">
           <span class="avg-label">A/C Ratio Used in Calculation (included samples)</span>
-          <span class="avg-hint">Multiple values are averaged. To use a single value, enter one sample or toggle off the others.</span>
+          <span class="avg-hint">⬌ Toggle any sample off to exclude it. All <strong>included</strong> samples are averaged per AVS guidelines.</span>
         </div>
         <span class="avg-value right-val" id="right-avg">—</span>
       </div>
@@ -785,7 +785,7 @@
       <div class="avg-bar">
         <div class="avg-bar-left">
           <span class="avg-label">A/C Ratio Used in Calculation (included samples)</span>
-          <span class="avg-hint">Multiple values are averaged. To use a single value, enter one sample or toggle off the others.</span>
+          <span class="avg-hint">⬌ Toggle any sample off to exclude it. All <strong>included</strong> samples are averaged per AVS guidelines.</span>
         </div>
         <span class="avg-value left-val" id="left-avg">—</span>
       </div>
@@ -1213,6 +1213,7 @@
   </div>
 </div>
 
+
 <!-- ═══════════════════════════════════════════════
      ADVANCED REPORT OPTIONS MODAL
 ════════════════════════════════════════════════ -->
@@ -1278,6 +1279,7 @@
   </div>
 </div>
 
+
 <!-- ═══════════════════════════════════════════════
      CHANGELOG MODAL
 ════════════════════════════════════════════════ -->
@@ -1294,7 +1296,22 @@
 
       <div style="margin-bottom:20px">
         <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
-          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#fff;background:#C8901A;padding:2px 8px;border-radius:2px">v1.8</span>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#fff;background:#C8901A;padding:2px 8px;border-radius:2px">v1.9</span>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">October 2026</span>
+        </div>
+        <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
+          <li>Sample include/exclude guidance made more visible — the yellow "Toggle any sample off to exclude it" callout now appears prominently next to each site's averaged A/C result (previously small italic text that was easy to miss)</li>
+          <li>IVC sample variation now flagged with a prominent red warning when included IVC samples differ by &gt;50% in A/C ratio or cortisol. IVC is the reference denominator for both SI and CSI, so variation flows into every index. The warning suggests which sample to re-examine or toggle off.</li>
+          <li>Method 2 (Highest Value) methodology corrected — SI calculation now uses cortisol from the <em>same sample</em> whose A/C ratio was selected (previously used max cortisol across all samples, which could flip the cannulation verdict). Derivation table label updated to "Right Cortisol (highest-A/C sample) ÷ Avg IVC Cortisol" to match the new logic.</li>
+          <li>Index Derivation tables now show intermediate values to 4 decimal places so the shown math reconciles with the shown result (previously 2 decimals meant hand-math wouldn't match due to rounding)</li>
+          <li>Advanced Report print area corners blanked (<em>@page @bottom-left/right</em>) so the browser's auto URL footer no longer prints at the bottom-left (Clinical Report already had this; Advanced now matches)</li>
+          <li>Reviewer sign-off placeholder planned for a future release (checkbox + initials on each printed page)</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#1A1714;background:#F0EDE6;padding:2px 8px;border-radius:2px">v1.8</span>
           <span style="font-family:'DM Mono',monospace;font-size:9px;color:#8C867E">September 2026</span>
         </div>
         <ul style="font-size:12px;color:#3a3530;line-height:1.8;padding-left:16px">
@@ -1727,7 +1744,7 @@
      PRINT REPORT WINDOW (opened separately)
 ════════════════════════════════════════════════ -->
 <script>
-const APP_VERSION = 'v1.8';
+const APP_VERSION = 'v1.9';
 
 // ── State ──
 let protocol = null;  // Must be explicitly chosen — no silent default
@@ -2349,6 +2366,11 @@ function calculate() {
   updateScreenInterp(siR, siL, siThresh, li, csi, R, L, cls);
   updateAdvancedCalc();
   updateCalcIndicesTable(siR, siL, siThresh, li, csi, R, L, cls);
+  // Keep per-side outlier flags fresh on every recalculation (IVC variation is especially important
+  // since it flows into both SI and CSI).
+  checkOutliers('ivc');
+  checkOutliers('right');
+  checkOutliers('left');
 }
 
 function renderSummary(siR, siL, siThresh, li, csi, R, L, cls) {
@@ -2572,7 +2594,26 @@ function checkOutliers(side) {
     const ratios = included.map(s => parseFloat(s.aldo) / parseFloat(s.cort));
     const avg = ratios.reduce((a,b) => a+b, 0) / ratios.length;
     const outliers = ratios.filter(r => Math.abs(r - avg) / avg > 0.5);
-    if (outliers.length > 0) {
+    const corts = included.map(s => parseFloat(s.cort));
+    const maxCort = Math.max(...corts), minCort = Math.min(...corts);
+    const cortSpread = (maxCort - minCort) / ((maxCort + minCort) / 2);  // relative spread
+    if (side === 'ivc') {
+      // IVC is the reference — its variation drives BOTH SI and CSI, so flag it more strongly.
+      // Trigger on either A/C spread (>50% deviation from mean) OR cortisol spread (>50%).
+      if (outliers.length > 0 || cortSpread > 0.5) {
+        bar.style.background = '#FDEAEA';
+        bar.style.borderColor = '#d68c8c';
+        bar.style.color = '#8B1A1A';
+        msgs.push(`⚠ <strong>IVC sample variation detected.</strong> Included IVC samples differ substantially (A/C or cortisol spread &gt;50%). IVC is the reference denominator for both SI and CSI — variation here flows into every index. Consider which IVC draw best represents the baseline (e.g., toggle off a late-draw cortisol spike after cosyntropin) or confirm the lab values.`);
+      } else {
+        bar.style.background = '';
+        bar.style.borderColor = '';
+        bar.style.color = '';
+      }
+    } else if (outliers.length > 0) {
+      bar.style.background = '';
+      bar.style.borderColor = '';
+      bar.style.color = '';
       msgs.push(`⚠ <strong>Possible outlier detected.</strong> One or more included samples has an A/C ratio that differs from the section average by >50%. Consider reviewing or toggling off the outlying sample.`);
     }
   }
@@ -3020,8 +3061,7 @@ function buildCustomThresholdsHTML() {
   </div>`;
 }
 
-// ══════════════════════════════════════════════
-// COPY ADVANCED RESULTS
+
 function copyAdvancedResults() {
   const cortIVC = avgCort('ivc');
   const cortR = avgCort('right');
@@ -3041,9 +3081,14 @@ function copyAdvancedResults() {
     return Math.max(...incl.map(s => s.aldo / s.cort));
   }
   function highestCort(side) {
-    const incl = state[side].filter(s => s.included && s.cort !== '' && parseFloat(s.cort) !== 0);
+    // Returns the cortisol value to use for the "Highest Value" method's SI calc.
+    // IVC: averaged (peripheral reference, no highest-A/C sample meaning).
+    // Adrenal vein: cortisol FROM the sample whose A/C ratio is highest (same sample as LI/CSI use).
+    const incl = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
     if (!incl.length) return null;
-    return Math.max(...incl.map(s => parseFloat(s.cort)));
+    if (side === 'ivc') return incl.reduce((sum, s) => sum + parseFloat(s.cort), 0) / incl.length;
+    const best = incl.reduce((b, s) => (parseFloat(s.aldo) / parseFloat(s.cort)) > (parseFloat(b.aldo) / parseFloat(b.cort)) ? s : b);
+    return parseFloat(best.cort);
   }
   const highR = highestAC('right');
   const highL = highestAC('left');
@@ -3116,9 +3161,14 @@ function updateAdvancedCalc() {
     return Math.max(...incl.map(s => s.aldo / s.cort));
   }
   function highestCort(side) {
-    const incl = state[side].filter(s => s.included && s.cort !== '' && parseFloat(s.cort) !== 0);
+    // Returns the cortisol value to use for the "Highest Value" method's SI calc.
+    // IVC: averaged (peripheral reference, no highest-A/C sample meaning).
+    // Adrenal vein: cortisol FROM the sample whose A/C ratio is highest (same sample as LI/CSI use).
+    const incl = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
     if (!incl.length) return null;
-    return Math.max(...incl.map(s => parseFloat(s.cort)));
+    if (side === 'ivc') return incl.reduce((sum, s) => sum + parseFloat(s.cort), 0) / incl.length;
+    const best = incl.reduce((b, s) => (parseFloat(s.aldo) / parseFloat(s.cort)) > (parseFloat(b.aldo) / parseFloat(b.cort)) ? s : b);
+    return parseFloat(best.cort);
   }
 
   const highR = highestAC('right');
@@ -3224,7 +3274,7 @@ function updateAdvancedCalc() {
 
     <div style="margin-bottom:4px">
       <div style="font-family:var(--mono);font-size:9px;font-weight:600;color:#7A4F00;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Method 2: Highest Value Only</div>
-      <p style="font-size:10px;color:var(--text-3);margin-bottom:8px;line-height:1.5">Only the single highest A/C ratio from each side is used. This can reveal whether a single sample drives lateralization.</p>
+      <p style="font-size:10px;color:var(--text-3);margin-bottom:8px;line-height:1.5">For each adrenal vein, the single sample with the highest A/C ratio is used (its cortisol also feeds SI). IVC cortisol is averaged. Reveals whether a single adrenal sample drives lateralization.</p>
       <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;border:1px solid var(--border);border-radius:3px">
         <thead>
           <tr style="background:rgba(122,79,0,0.05)">
@@ -3271,7 +3321,7 @@ function updateAdvancedCalc() {
       })()}
     </div>
     ${(() => {
-      // Dominant side interpretation
+      // Dominant side interpretation — hidden when interpretation is locked
       if (!interpretationUnlocked) return '';
       const domAvg = (avgR !== null && avgL !== null) ? (avgR > avgL ? 'Right' : avgR < avgL ? 'Left' : 'Equal') : null;
       const domHigh = (highR !== null && highL !== null) ? (highR > highL ? 'Right' : highR < highL ? 'Left' : 'Equal') : null;
@@ -3311,7 +3361,6 @@ function updateAdvancedCalc() {
 // ══════════════════════════════════════════════
 // ADVANCED REPORT OPTIONS
 function openAdvancedReportOptions() {
-  if (!requireProtocol('generating an Advanced Report')) return;
   if (!requireInterpretation('Advanced Report')) return;
   document.getElementById('adv-report-overlay').style.display = 'flex';
 }
@@ -3366,9 +3415,13 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
     return Math.max(...included.map(s => s.aldo / s.cort));
   }
   function highestCort(side) {
-    const included = state[side].filter(s => s.included && s.cort !== '' && parseFloat(s.cort) !== 0);
+    // Returns the cortisol value to use for the "Highest Value" method's SI calc.
+    // IVC: averaged (peripheral reference). Adrenal: cortisol from the sample with highest A/C ratio.
+    const included = state[side].filter(s => s.included && s.aldo !== '' && s.cort !== '' && parseFloat(s.cort) !== 0);
     if (!included.length) return null;
-    return Math.max(...included.map(s => parseFloat(s.cort)));
+    if (side === 'ivc') return included.reduce((sum, s) => sum + parseFloat(s.cort), 0) / included.length;
+    const best = included.reduce((b, s) => (parseFloat(s.aldo) / parseFloat(s.cort)) > (parseFloat(b.aldo) / parseFloat(b.cort)) ? s : b);
+    return parseFloat(best.cort);
   }
   const highR = highestAC('right');
   const highL = highestAC('left');
@@ -3581,10 +3634,10 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
     return avgSection('ivc','Inferior Vena Cava (IVC)','#2B3A8C') + avgSection('right','Right Adrenal Vein','#1B4D3E') + avgSection('left','Left Adrenal Vein','#7A1F1F') +
       '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:#1B5E35;text-transform:uppercase;letter-spacing:0.08em;margin:14px 0 6px">Index Derivation — Average Method</p>' +
       derivHead +
-      derivRow('SI — Right', 'Avg Right Cortisol ÷ Avg IVC Cortisol = ' + (cortRw !== null ? fmt(cortRw) : '—') + ' ÷ ' + (cortIVCw !== null ? fmt(cortIVCw) : '—'), siRavg, false) +
-      derivRow('SI — Left', 'Avg Left Cortisol ÷ Avg IVC Cortisol = ' + (cortLw !== null ? fmt(cortLw) : '—') + ' ÷ ' + (cortIVCw !== null ? fmt(cortIVCw) : '—'), siLavg, false) +
-      derivRow('LI', domAvg + ' A/C ÷ Contralateral A/C = ' + (higherAvg !== null ? fmt(higherAvg) : '—') + ' ÷ ' + (contraAvg !== null ? fmt(contraAvg) : '—'), liAvgW, false) +
-      derivRow('CSI', 'Contralateral A/C ÷ IVC A/C = ' + (contraAvg !== null ? fmt(contraAvg) : '—') + ' ÷ ' + (ivcAC !== null ? fmt(ivcAC) : '—'), csiAvgW, true) +
+      derivRow('SI — Right', 'Avg Right Cortisol ÷ Avg IVC Cortisol = ' + (cortRw !== null ? fmt(cortRw, 4) : '—') + ' ÷ ' + (cortIVCw !== null ? fmt(cortIVCw, 4) : '—'), siRavg, false) +
+      derivRow('SI — Left', 'Avg Left Cortisol ÷ Avg IVC Cortisol = ' + (cortLw !== null ? fmt(cortLw, 4) : '—') + ' ÷ ' + (cortIVCw !== null ? fmt(cortIVCw, 4) : '—'), siLavg, false) +
+      derivRow('LI', domAvg + ' A/C ÷ Contralateral A/C = ' + (higherAvg !== null ? fmt(higherAvg, 4) : '—') + ' ÷ ' + (contraAvg !== null ? fmt(contraAvg, 4) : '—'), liAvgW, false) +
+      derivRow('CSI', 'Contralateral A/C ÷ IVC A/C = ' + (contraAvg !== null ? fmt(contraAvg, 4) : '—') + ' ÷ ' + (ivcAC !== null ? fmt(ivcAC, 4) : '—'), csiAvgW, true) +
       '</tbody></table>';
   })()}
   ` : ''}
@@ -3593,7 +3646,7 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
   ${(wantSummary || wantWorksheet) ? `
   <div style="page-break-before:always"></div>
   <h2 style="border-bottom-color:#7A4F00;color:#7A4F00">Method 2: Highest Single Value</h2>
-  <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">Only the single highest A/C ratio from each site is used. This can reveal whether a single sample drives lateralization.</p>
+  <p style="font-size:9.5pt;color:#666;margin-bottom:16px;line-height:1.6">For each adrenal vein, the single sample with the highest A/C ratio is used (and its cortisol feeds SI). IVC cortisol is averaged across all IVC samples — as the peripheral reference, IVC lacks a biological "highest A/C" criterion. This method can reveal whether a single adrenal sample drives lateralization.</p>
 
   ${wantSummary ? `
   <h3 style="font-size:11pt;color:#7A4F00;margin:16px 0 10px;border-bottom:1px solid #e8d5a0;padding-bottom:4px">Calculated Indices</h3>
@@ -3651,18 +3704,38 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
       const samples = sampleRows(side);
       if (!samples.length) return '<p style="color:#aaa;font-size:9pt;font-style:italic">No included samples for ' + label + '.</p>';
       const acValues = samples.map((s, i) => ({ idx: i, aldo: parseFloat(s.aldo), cort: parseFloat(s.cort), ac: parseFloat(s.aldo) / parseFloat(s.cort), note: s.note }));
-      const highest = acValues.reduce((best, cur) => cur.ac > best.ac ? cur : best);
+      // IVC: averaged (peripheral reference, no "highest" biological meaning). Adrenal: pick highest A/C sample.
+      const isIVC = side === 'ivc';
+      const highest = isIVC ? null : acValues.reduce((best, cur) => cur.ac > best.ac ? cur : best);
       const rows = acValues.map(s => {
-        const isHighest = s === highest;
+        const isHighest = !isIVC && s === highest;
         const noteStr = s.note ? ' <span style="font-size:8pt;color:#888;font-style:italic">(' + esc(s.note) + ')</span>' : '';
-        const bold = isHighest ? 'font-weight:700;' : 'color:#aaa;';
-        return '<tr><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;' + bold + '">Sample ' + (s.idx+1) + noteStr + (isHighest ? ' <span style="font-size:7pt;padding:1px 5px;background:' + color + ';color:#fff;border-radius:2px;margin-left:4px">HIGHEST</span>' : '') + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;' + bold + '">' + s.aldo.toFixed(1) + ' ' + aldoUnit + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;' + bold + '">' + s.cort.toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;' + (isHighest ? 'color:#555;' : 'color:#ccc;') + '">' + s.aldo.toFixed(1) + ' ÷ ' + s.cort.toFixed(2) + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700;color:' + (isHighest ? color : '#ccc') + '">' + fmt(s.ac) + '</td></tr>';
+        const bold = isIVC ? '' : (isHighest ? 'font-weight:700;' : 'color:#aaa;');
+        const acColor = isIVC ? color : (isHighest ? color : '#ccc');
+        const calcColor = isIVC ? '#555' : (isHighest ? 'color:#555;' : 'color:#ccc;');
+        return '<tr><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;' + bold + '">Sample ' + (s.idx+1) + noteStr + (isHighest ? ' <span style="font-size:7pt;padding:1px 5px;background:' + color + ';color:#fff;border-radius:2px;margin-left:4px">HIGHEST</span>' : '') + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;' + bold + '">' + s.aldo.toFixed(1) + ' ' + aldoUnit + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;' + bold + '">' + s.cort.toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;' + (isIVC ? 'color:#555;' : calcColor) + '">' + s.aldo.toFixed(1) + ' ÷ ' + s.cort.toFixed(2) + '</td><td style="padding:6px 10px;font-size:9.5pt;border-bottom:1px solid #eee;text-align:center;font-family:monospace;font-weight:700;color:' + acColor + '">' + fmt(s.ac) + '</td></tr>';
       }).join('');
-      const sumRow = '<tr style="background:#f0f0f0;border-top:2px solid #ddd"><td style="padding:6px 10px;font-size:8.5pt;color:#555;font-style:italic;font-weight:600">Highest value used</td><td style="padding:6px 10px"></td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">' + highest.cort.toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;text-align:center;font-size:8.5pt;color:#888;font-style:italic">highest A/C ratio</td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:10pt;font-weight:700;color:' + color + '">' + fmt(highest.ac) + '</td></tr>';
+      let sumRow;
+      if (isIVC) {
+        const avgCortVal = acValues.reduce((sum, s) => sum + s.cort, 0) / acValues.length;
+        const avgACVal   = acValues.reduce((sum, s) => sum + s.ac, 0) / acValues.length;
+        const label2 = acValues.length > 1 ? ('Average (' + acValues.length + ' samples)') : 'Used in calculations';
+        const subLbl = acValues.length > 1 ? 'averaged per sample' : 'single sample';
+        sumRow = '<tr style="background:#f0f0f0;border-top:2px solid #ddd"><td style="padding:6px 10px;font-size:8.5pt;color:#555;font-style:italic;font-weight:600">' + label2 + '</td><td style="padding:6px 10px"></td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">' + avgCortVal.toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;text-align:center;font-size:8.5pt;color:#888;font-style:italic">' + subLbl + '</td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:10pt;font-weight:700;color:' + color + '">' + fmt(avgACVal) + '</td></tr>';
+      } else {
+        sumRow = '<tr style="background:#f0f0f0;border-top:2px solid #ddd"><td style="padding:6px 10px;font-size:8.5pt;color:#555;font-style:italic;font-weight:600">Highest value used</td><td style="padding:6px 10px"></td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:9pt;font-weight:700;color:#444">' + highest.cort.toFixed(2) + ' ' + cortUnit + '</td><td style="padding:6px 10px;text-align:center;font-size:8.5pt;color:#888;font-style:italic">highest A/C sample</td><td style="padding:6px 10px;text-align:center;font-family:monospace;font-size:10pt;font-weight:700;color:' + color + '">' + fmt(highest.ac) + '</td></tr>';
+      }
       return '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:' + color + ';text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">' + label + '</p><table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden;margin-bottom:18px">' + thd + '<tbody>' + rows + sumRow + '</tbody></table>';
     }
     function hAC(side) { const s = sampleRows(side); if (!s.length) return null; return Math.max(...s.map(x => parseFloat(x.aldo)/parseFloat(x.cort))); }
-    function hCort(side) { const s = sampleRows(side); if (!s.length) return null; return Math.max(...s.map(x => parseFloat(x.cort))); }
+    function hCort(side) {
+      // IVC: averaged (peripheral reference). Adrenal: cortisol FROM the sample with highest A/C ratio.
+      const s = sampleRows(side);
+      if (!s.length) return null;
+      if (side === 'ivc') return s.reduce((sum, x) => sum + parseFloat(x.cort), 0) / s.length;
+      const best = s.reduce((b, x) => (parseFloat(x.aldo)/parseFloat(x.cort)) > (parseFloat(b.aldo)/parseFloat(b.cort)) ? x : b);
+      return parseFloat(best.cort);
+    }
     const ivcAC = avgAC('ivc');
     const hR = hAC('right'), hL = hAC('left'), hCortR = hCort('right'), hCortL = hCort('left'), hCortIVC = hCort('ivc');
     const domHigh = (hR !== null && hL !== null) ? (hR > hL ? 'Right' : 'Left') : '—';
@@ -3675,10 +3748,10 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
     return highSection('ivc','Inferior Vena Cava (IVC)','#2B3A8C') + highSection('right','Right Adrenal Vein','#1B4D3E') + highSection('left','Left Adrenal Vein','#7A1F1F') +
       '<p style="font-family:monospace;font-size:8pt;font-weight:600;color:#7A4F00;text-transform:uppercase;letter-spacing:0.08em;margin:14px 0 6px">Index Derivation — Highest Value Method</p>' +
       derivHead +
-      derivRow('SI — Right', 'Highest Right Cortisol ÷ Highest IVC Cortisol = ' + (hCortR !== null ? fmt(hCortR) : '—') + ' ÷ ' + (hCortIVC !== null ? fmt(hCortIVC) : '—'), siRhigh, false) +
-      derivRow('SI — Left', 'Highest Left Cortisol ÷ Highest IVC Cortisol = ' + (hCortL !== null ? fmt(hCortL) : '—') + ' ÷ ' + (hCortIVC !== null ? fmt(hCortIVC) : '—'), siLhigh, false) +
-      derivRow('LI', domHigh + ' A/C ÷ Contralateral A/C = ' + (higherHigh !== null ? fmt(higherHigh) : '—') + ' ÷ ' + (contraHigh !== null ? fmt(contraHigh) : '—'), liHighW, false) +
-      derivRow('CSI', 'Contralateral A/C ÷ IVC A/C = ' + (contraHigh !== null ? fmt(contraHigh) : '—') + ' ÷ ' + (ivcAC !== null ? fmt(ivcAC) : '—'), csiHighW, true) +
+      derivRow('SI — Right', 'Right Cortisol (highest-A/C sample) ÷ Avg IVC Cortisol = ' + (hCortR !== null ? fmt(hCortR, 4) : '—') + ' ÷ ' + (hCortIVC !== null ? fmt(hCortIVC, 4) : '—'), siRhigh, false) +
+      derivRow('SI — Left', 'Left Cortisol (highest-A/C sample) ÷ Avg IVC Cortisol = ' + (hCortL !== null ? fmt(hCortL, 4) : '—') + ' ÷ ' + (hCortIVC !== null ? fmt(hCortIVC, 4) : '—'), siLhigh, false) +
+      derivRow('LI', domHigh + ' A/C ÷ Contralateral A/C = ' + (higherHigh !== null ? fmt(higherHigh, 4) : '—') + ' ÷ ' + (contraHigh !== null ? fmt(contraHigh, 4) : '—'), liHighW, false) +
+      derivRow('CSI', 'Contralateral A/C ÷ IVC A/C = ' + (contraHigh !== null ? fmt(contraHigh, 4) : '—') + ' ÷ ' + (ivcAC !== null ? fmt(ivcAC, 4) : '—'), csiHighW, true) +
       '</tbody></table>';
   })()}
   ` : ''}
@@ -3701,6 +3774,7 @@ function openAdvancedReport(wantComparison=true, wantSummary=true, wantWorksheet
   if (!win) { URL.revokeObjectURL(url); alert('Pop-up blocked. Please allow pop-ups for avsresults.com.'); return; }
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
+
 
 function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false, langs=['en'], wantCalcOnly=false) {
   const R = avgAC('right'), L = avgAC('left'), IVC = avgAC('ivc');
@@ -3966,10 +4040,10 @@ function openPrintReport(wantSummary=true, wantWorksheet=true, wantPatient=false
       return `${sectionWorkup('ivc','Inferior Vena Cava (IVC)','#2B3A8C')}${sectionWorkup('right','Right Adrenal Vein','#1B4D3E')}${sectionWorkup('left','Left Adrenal Vein','#7A1F1F')}
       <p style="font-family:monospace;font-size:8pt;font-weight:600;color:#444;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Index Derivation</p>
       <table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:3px;overflow:hidden"><thead><tr style="background:#f5f5f5"><th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:18%">Index</th><th style="padding:8px 12px;text-align:left;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd">Formula &amp; Values</th><th style="padding:8px 12px;text-align:center;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #ddd;width:14%">Result</th></tr></thead><tbody>
-        ${siRval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Right Cortisol ÷ IVC Cortisol = ${fmt(cortRw)} ÷ ${fmt(cortIVCw)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siRval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
-        ${siLval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Left Cortisol ÷ IVC Cortisol = ${fmt(cortLw)} ÷ ${fmt(cortIVCw)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siLval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
-        ${liVal  !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">LI</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">${domSideLabel} A/C ÷ Contralateral A/C = ${fmt(higherAC)} ÷ ${fmt(contraAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(liVal)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">LI</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
-        ${csiVal !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600">CSI</td><td style="padding:8px 12px;font-size:9.5pt;font-family:monospace;color:#555">Contralateral A/C ÷ IVC A/C = ${fmt(contraAC)} ÷ ${fmt(ivcAC)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;text-align:center;font-family:monospace">${fmt(csiVal)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600">CSI</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;font-style:italic">Insufficient data</td></tr>`}
+        ${siRval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Right Cortisol ÷ IVC Cortisol = ${fmt(cortRw, 4)} ÷ ${fmt(cortIVCw, 4)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siRval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Right</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
+        ${siLval !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">Left Cortisol ÷ IVC Cortisol = ${fmt(cortLw, 4)} ÷ ${fmt(cortIVCw, 4)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(siLval)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">SI — Left</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
+        ${liVal  !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">LI</td><td style="padding:8px 12px;font-size:9.5pt;border-bottom:1px solid #eee;font-family:monospace;color:#555">${domSideLabel} A/C ÷ Contralateral A/C = ${fmt(higherAC, 4)} ÷ ${fmt(contraAC, 4)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;border-bottom:1px solid #eee;text-align:center;font-family:monospace">${fmt(liVal)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600;border-bottom:1px solid #eee">LI</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;border-bottom:1px solid #eee;font-style:italic">Insufficient data</td></tr>`}
+        ${csiVal !== null ? `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600">CSI</td><td style="padding:8px 12px;font-size:9.5pt;font-family:monospace;color:#555">Contralateral A/C ÷ IVC A/C = ${fmt(contraAC, 4)} ÷ ${fmt(ivcAC, 4)}</td><td style="padding:8px 12px;font-size:10.5pt;font-weight:700;text-align:center;font-family:monospace">${fmt(csiVal)}</td></tr>` : `<tr><td style="padding:8px 12px;font-size:9.5pt;font-weight:600">CSI</td><td colspan="2" style="padding:8px 12px;font-size:9pt;color:#aaa;font-style:italic">Insufficient data</td></tr>`}
       </tbody></table>`;
     })()}
   </div>
@@ -4564,8 +4638,10 @@ function loadTestData(num) {
       <p style="margin-bottom:6px">Assesses suppression of aldosterone in the non-dominant gland relative to IVC:</p>
       <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:10px 14px;font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px;color:#C8901A">CSI = (Non-Dominant Aldo ÷ Non-Dominant Cort) ÷ (IVC Aldo ÷ IVC Cort)</div>
       <p style="margin-bottom:20px;font-size:12px;color:rgba(255,255,255,0.55)">A CSI &lt;1.0 indicates contralateral suppression, supporting unilateral disease. Used in conjunction with LI.</p>
-      <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Multi-Sample Averaging</h3>
+      <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Multi-Sample Averaging (Main Calculation / Clinical Report)</h3>
       <p style="margin-bottom:20px;font-size:12px;color:rgba(255,255,255,0.55)">When multiple samples are entered for a vein, A/C ratios are calculated for each sample individually (Aldo ÷ Cort per sample), then averaged across included samples. This preserves per-sample accuracy and is consistent with published multi-sample AVS methodology. Excluded samples are omitted from all averages.</p>
+      <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Advanced Report — Method 2: Highest Value</h3>
+      <p style="margin-bottom:20px;font-size:12px;color:rgba(255,255,255,0.55)">The Advanced Report shows a sensitivity-analysis comparison of two methods side-by-side. Method 1 is the standard averaging approach described above. Method 2 selects the single sample with the highest A/C ratio from each adrenal vein (its cortisol also feeds that side's SI calculation, so both indices use the same sample). IVC cortisol is still averaged across all included IVC samples — as the peripheral reference, IVC lacks a biological "highest A/C" criterion. Comparing the two methods can help identify whether a single outlier sample is driving a lateralization result.</p>
       <h3 style="font-size:13px;font-weight:600;color:#fff;margin:0 0 8px;letter-spacing:0.04em;text-transform:uppercase">Guideline References</h3>
       <p style="font-size:12px;color:rgba(255,255,255,0.55);margin:0">Adler GK et al. J Clin Endocrinol Metab. 2025;110(9):2453–2495.<br>Rossi GP et al. Hypertension. 2014;63(1):151–160.</p>
     </div>
@@ -4582,13 +4658,13 @@ function loadTestData(num) {
     <div style="padding:24px;color:rgba(255,255,255,0.85);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.8">
       <p style="margin-bottom:16px;color:rgba(255,255,255,0.6);font-size:12px">If you use AVS Calculator in a publication or clinical quality improvement project, please cite it using one of the formats below.</p>
       <h3 style="font-size:11px;font-weight:600;color:#C8901A;margin:0 0 8px;letter-spacing:0.06em;text-transform:uppercase">APA</h3>
-      <div id="cite-apa" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto, R. (2026). <em>AVS Calculator: Adrenal vein sampling interpretation tool</em> (Version 1.8) [Web application]. https://avsresults.com</div>
+      <div id="cite-apa" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto, R. (2026). <em>AVS Calculator: Adrenal vein sampling interpretation tool</em> (Version 1.9) [Web application]. https://avsresults.com</div>
       <button onclick="copyText('cite-apa','copy-apa')" id="copy-apa" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);padding:5px 12px;border-radius:3px;font-size:11px;cursor:pointer;margin-bottom:20px;font-family:var(--mono)">Copy APA</button>
       <h3 style="font-size:11px;font-weight:600;color:#C8901A;margin:0 0 8px;letter-spacing:0.06em;text-transform:uppercase">AMA</h3>
-      <div id="cite-ama" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto R. AVS Calculator: Adrenal Vein Sampling Interpretation Tool. Version 1.8. Web application. Published 2026. Accessed [date]. https://avsresults.com</div>
+      <div id="cite-ama" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto R. AVS Calculator: Adrenal Vein Sampling Interpretation Tool. Version 1.9. Web application. Published 2026. Accessed [date]. https://avsresults.com</div>
       <button onclick="copyText('cite-ama','copy-ama')" id="copy-ama" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);padding:5px 12px;border-radius:3px;font-size:11px;cursor:pointer;margin-bottom:20px;font-family:var(--mono)">Copy AMA</button>
       <h3 style="font-size:11px;font-weight:600;color:#C8901A;margin:0 0 8px;letter-spacing:0.06em;text-transform:uppercase">Vancouver</h3>
-      <div id="cite-van" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto R. AVS Calculator [Internet]. Version 1.8. 2026 [cited [date]]. Available from: https://avsresults.com</div>
+      <div id="cite-van" style="background:rgba(255,255,255,0.06);border-radius:4px;padding:12px 14px;font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.85);line-height:1.7">Allegretto R. AVS Calculator [Internet]. Version 1.9. 2026 [cited [date]]. Available from: https://avsresults.com</div>
       <button onclick="copyText('cite-van','copy-van')" id="copy-van" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);padding:5px 12px;border-radius:3px;font-size:11px;cursor:pointer;font-family:var(--mono)">Copy Vancouver</button>
     </div>
   </div>
