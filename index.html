@@ -201,6 +201,7 @@
     font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; color: var(--text-3);
     text-transform: uppercase; border-bottom: 1px solid var(--border); font-weight: 500;
   }
+  .sample-table thead th .unit-literal { text-transform: none; letter-spacing: 0.04em; }
   .sample-table thead th:nth-child(1) { width: 28%; }
   .sample-table thead th:nth-child(2) { width: 22%; text-align: right; }
   .sample-table thead th:nth-child(3) { width: 22%; text-align: right; }
@@ -701,8 +702,8 @@
       <table class="sample-table">
         <thead><tr>
           <th>Sample</th>
-          <th style="text-align:right" class="th-aldo">Aldo (ng/dL)</th>
-          <th style="text-align:right" class="th-cort">Cortisol (µg/dL)</th>
+          <th style="text-align:right" class="th-aldo">Aldo <span class="unit-literal">(ng/dL)</span></th>
+          <th style="text-align:right" class="th-cort">Cortisol <span class="unit-literal">(µg/dL)</span></th>
           <th style="text-align:right">A/C Ratio</th>
           <th style="text-align:center">Incl.</th>
         </tr></thead>
@@ -735,8 +736,8 @@
       <table class="sample-table">
         <thead><tr>
           <th>Sample</th>
-          <th style="text-align:right" class="th-aldo">Aldo (ng/dL)</th>
-          <th style="text-align:right" class="th-cort">Cortisol (µg/dL)</th>
+          <th style="text-align:right" class="th-aldo">Aldo <span class="unit-literal">(ng/dL)</span></th>
+          <th style="text-align:right" class="th-cort">Cortisol <span class="unit-literal">(µg/dL)</span></th>
           <th style="text-align:right">A/C Ratio</th>
           <th style="text-align:center">Incl.</th>
         </tr></thead>
@@ -769,8 +770,8 @@
       <table class="sample-table">
         <thead><tr>
           <th>Sample</th>
-          <th style="text-align:right" class="th-aldo">Aldo (ng/dL)</th>
-          <th style="text-align:right" class="th-cort">Cortisol (µg/dL)</th>
+          <th style="text-align:right" class="th-aldo">Aldo <span class="unit-literal">(ng/dL)</span></th>
+          <th style="text-align:right" class="th-cort">Cortisol <span class="unit-literal">(µg/dL)</span></th>
           <th style="text-align:right">A/C Ratio</th>
           <th style="text-align:center">Incl.</th>
         </tr></thead>
@@ -1306,6 +1307,7 @@
           <li>Index Derivation tables now show intermediate values to 4 decimal places so the shown math reconciles with the shown result (previously 2 decimals meant hand-math wouldn't match due to rounding)</li>
           <li>Advanced Report print area corners blanked (<em>@page @bottom-left/right</em>) so the browser's auto URL footer no longer prints at the bottom-left (Clinical Report already had this; Advanced now matches)</li>
           <li>Reviewer sign-off placeholder planned for a future release (checkbox + initials on each printed page)</li>
+          <li>Data-entry Cortisol column header unit label fix — "µg/dL" was rendering as "MG/DL" in the uppercase table headers because CSS <em>text-transform:uppercase</em> converts the micro sign (µ) to Greek capital Mu (Μ), which is visually indistinguishable from Latin M. Clinically dangerous (mg/dL is 1000× µg/dL). Unit text now opts out of the uppercase transform. (The report generators were already safe — they use literal "CORTISOL" strings without CSS uppercase, so µ passed through unchanged.)</li>
         </ul>
       </div>
 
@@ -2044,7 +2046,7 @@ function setUnit(field, unit) {
   // Update all table column headers
   const cls = field === 'aldo' ? 'th-aldo' : 'th-cort';
   const label = field === 'aldo' ? 'Aldo' : 'Cortisol';
-  document.querySelectorAll('.' + cls).forEach(th => { th.textContent = `${label} (${unit})`; });
+  document.querySelectorAll('.' + cls).forEach(th => { th.innerHTML = `${label} <span class="unit-literal">(${unit})</span>`; });
   // Re-evaluate plausibility on all entered values with the new unit
   recheckAllPlausibility();
   // Update print report headers (stored as data)
